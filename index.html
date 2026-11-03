@@ -539,6 +539,21 @@ body.locked{overflow:hidden}
         <label class="f" style="grid-column:1/-1"><span class="lbl">Customer context <span style="font-weight:400;color:var(--muted)">(optional — anything useful from the discovery call)</span></span>
           <textarea id="custContext" rows="3" style="font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink);resize:vertical" placeholder="e.g. 4 branches in Riyadh, ~3,000 members, no app, reception handles everything by phone"></textarea>
         </label>
+        <div class="f" style="grid-column:1/-1;border:1px dashed #C2CFBC;border-radius:6px;padding:12px 14px;background:#FBFCF9">
+          <span class="lbl"><b>Customer wording</b> <span style="font-weight:400;color:var(--muted)">(shown to the customer. Use it when the standard industry words do not fit, for example an equipment supplier in the fitness industry)</span></span>
+          <label class="f" style="margin-top:8px"><span class="lbl">Business description (one line, shown on the first page)</span><input id="cwDesc" type="text" maxlength="160" placeholder="e.g. Lifetime Fitness supplies and services fitness equipment for gyms and homes."></label>
+          <div class="fields" style="margin-top:8px">
+            <label class="f"><span class="lbl">Who calls you (plural)</span><input id="cwNoun" type="text" placeholder="e.g. customers"></label>
+            <label class="f"><span class="lbl">One caller</span><input id="cwPerson" type="text" placeholder="e.g. customer"></label>
+            <label class="f"><span class="lbl">Person who serves them</span><input id="cwProvider" type="text" placeholder="e.g. technician"></label>
+            <label class="f"><span class="lbl">What they book or buy</span><input id="cwService" type="text" placeholder="e.g. installation visit"></label>
+            <label class="f"><span class="lbl">Place</span><input id="cwFacility" type="text" placeholder="e.g. showroom"></label>
+            <label class="f"><span class="lbl">Main system</span><input id="cwSystem" type="text" placeholder="e.g. service booking system"></label>
+          </div>
+          <div class="hint">Leave a box empty to use the standard words for the industry. To choose the Arabic word too, write it like this: technician / فني</div>
+          <div class="act-h" style="margin-top:12px">Rename flows for this customer (optional)</div>
+          <div class="fields" id="cwFlows"></div>
+        </div>
       </div>
     </section>
 
@@ -2251,7 +2266,15 @@ function getMultiCheckIds(wrap){
 })();
 
 /* ═══════════════════ EVENTS ═══════════════════ */
-function refresh(){ updateSuggest(); buildSystemQuestions(); render(); sendToCustView(); }
+var cwSig = "";
+function buildWording(){
+  var af = activeFlows(), sig = af.map(function(a){ return a.dir+a.idx+"|"+a.label; }).join(";");
+  if(sig===cwSig) return; cwSig = sig;
+  var box = $("cwFlows"); if(!box) return;
+  var old = {}; box.querySelectorAll("input").forEach(function(i){ old[i.id] = i.value; });
+  box.innerHTML = af.map(function(a){ var id = "cwf_"+a.dir+"_"+a.idx; return '<label class="f"><span class="lbl">'+(a.dir==="in"?"IN-":"OUT-")+(a.idx+1)+' '+esc(a.label)+'</span><input id="'+id+'" type="text" placeholder="Name shown to the customer" value="'+esc(old[id]||"")+'"></label>'; }).join("") || '<div class="hint">Add call flows first.</div>';
+}
+function refresh(){ updateSuggest(); buildSystemQuestions(); render(); buildWording(); sendToCustView(); }
 
 $("flowsIn").addEventListener("change", flowHandler);
 $("flowsIn").addEventListener("input", flowHandler);
@@ -4067,16 +4090,20 @@ var DL = (function(){
       var k = (a.job.sys && a.job.sys[0]) || "", sy = (k && SYS_DISP[k]) || "";
       var o = { id:a.job.id==="other" ? (a.dir==="in"?"other":"other_out") : a.job.id, code:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1),
         label:a.job.id==="other" ? (((a.f.name||"").trim()) || "Custom flow") : (SHORT[a.job.id] || a.job.label), sys:sy };
+      var ov = ((($("cwf_"+a.dir+"_"+a.idx)||{}).value)||"").trim(); if(ov) o.label = ov;
       (a.dir==="in" ? inb : out).push(o);
     });
-    var sysNames = [];
+    var sysNames = [], nativeNames = [];
     m.eps.forEach(function(ep){
       if(ep.key==="whatsapp") return;
       if(m.hOn && (m.hWhere==="external"||m.hWhere==="both") && ep.key==="other:"+humanExtName().toLowerCase()) return;
       var nm = SYS_DISP[ep.key] || ep.name; if(sysNames.indexOf(nm)<0) sysNames.push(nm);
+      if(!ep.charged && nativeNames.indexOf(nm)<0) nativeNames.push(nm);
     });
+    var wording = {};
+    [["noun","cwNoun"],["person","cwPerson"],["provider","cwProvider"],["service","cwService"],["facility","cwFacility"],["system","cwSystem"]].forEach(function(p){ var v = (($(p[1])||{}).value||"").trim(); if(v) wording[p[0]] = v; });
     return {
-      client:D.client, industry:ind, noun:IND.noun || "customers",
+      client:D.client, industry:ind, noun:wording.noun || IND.noun || "customers", desc:(($("cwDesc")||{}).value||"").trim(), wording:wording, native:nativeNames,
       goals:D.goalIds, goalOther:($("goalOtherText").value||"").trim(), pains:D.painIds,
       inbound:inb, outbound:out, systems:sysNames, whatsapp:D.whatsapp, human:!!(D.human && D.human.on), kb:!!D.kb,
       phone:{ type:D.phone.type },
