@@ -624,7 +624,7 @@ body.locked{overflow:hidden}
     <!-- STEP 4: Flows -->
     <section class="step">
       <div class="step-head"><div class="step-num">4</div><h2>What should the AI do?</h2></div>
-      <p class="hint">A flow is one type of call the AI handles. Add one flow for each type of call the customer needs, inbound and outbound. For each flow, pick the job and the systems it touches. This decides the endpoint connections in Step 7.</p>
+      <p class="hint">A flow is one type of call the AI handles. Add one flow for each type of call the customer needs, inbound and outbound. For each flow, pick the job and the systems it touches. This decides the endpoint connections in Step 6.</p>
       <div id="flowsInLabel" class="sub">Inbound flows</div>
       <div class="flows" id="flowsIn"></div>
       <div class="addrow" id="nInField"><button type="button" id="addIn">+ Add inbound flow</button></div>
@@ -710,33 +710,10 @@ body.locked{overflow:hidden}
     </section>
 
     <!-- STEP 6: Outbound contact charge -->
-    <section class="step" id="contactStep">
-      <div class="step-head"><div class="step-num">6</div><h2>Outbound contact charge</h2></div>
-      <p class="hint">Each contact loaded into the CRM for an outbound campaign is charged at 1 SAR per contact (billed once per contact loaded, not per call attempt). The attempts selector below is for volume cross-checking only — it does not multiply the cost. This charge can be waived as a sales concession.</p>
-      <div class="fields">
-        <label class="f"><span class="lbl">Contacts targeted per month</span>
-          <input type="number" id="contacts" min="0" step="100" value="500">
-        </label>
-        <label class="f"><span class="lbl">Average call attempts per contact (for volume cross-check)</span>
-          <select id="contactAttempts">
-            <option value="1" selected>1 attempt</option>
-            <option value="2">2 attempts</option>
-            <option value="3">3 attempts</option>
-          </select>
-        </label>
-        <label class="f"><span class="lbl">Charge or waive</span>
-          <select id="waiveContact">
-            <option value="0" selected>Charge — 1 SAR per contact loaded</option>
-            <option value="1">Waive — absorb the cost</option>
-          </select>
-        </label>
-      </div>
-      <div class="plan-out" id="contactOut"></div>
-    </section>
 
-    <!-- STEP 7: Systems / endpoints -->
+    <!-- STEP 6: Systems / endpoints -->
     <section class="step">
-      <div class="step-head"><div class="step-num">7</div><h2>Existing systems &amp; endpoint connections</h2></div>
+      <div class="step-head"><div class="step-num">6</div><h2>Existing systems &amp; endpoint connections</h2></div>
       <p class="hint">Built from the flows in Step 4. Each system appears once, however many flows use it. Each external system connection is 250 SAR/month — you pay per system connected, not per workflow. Unlimited workflows within each connection.</p>
       <div id="flowSummary"></div>
       <div id="confirmList"></div>
@@ -745,9 +722,9 @@ body.locked{overflow:hidden}
       <div class="cost-just" id="endpointCost"></div>
     </section>
 
-    <!-- STEP 8: Concurrent calls -->
+    <!-- STEP 7: Concurrent calls -->
     <section class="step" id="concurrentStep">
-      <div class="step-head"><div class="step-num">8</div><h2>Concurrent calls</h2></div>
+      <div class="step-head"><div class="step-num">7</div><h2>Concurrent calls</h2></div>
       <p class="hint">How many calls can happen at the same time. This is a telephony capacity charge. Each concurrent call costs 250 SAR a month. It applies to SIP and to a landline from us. It does not apply to the customer's own mobile numbers, which cannot carry concurrent calls.</p>
       <div class="fields">
         <label class="f"><span class="lbl">Concurrent calls</span>
@@ -757,10 +734,10 @@ body.locked{overflow:hidden}
       <div class="plan-out" id="peakOut"></div>
     </section>
 
-    <!-- STEP 9: WhatsApp -->
+    <!-- STEP 8: WhatsApp -->
     <section class="step">
-      <div class="step-head"><div class="step-num">9</div><h2>WhatsApp</h2></div>
-      <p class="hint">Three ways this lands, and they price very differently. WhatsApp is also an endpoint connection (250 SAR/month) in Step 7.</p>
+      <div class="step-head"><div class="step-num">8</div><h2>WhatsApp</h2></div>
+      <p class="hint">Three ways this lands, and they price very differently. WhatsApp is also an endpoint connection (250 SAR/month) in Step 6.</p>
       <div class="fields">
         <label class="f"><span class="lbl">How WhatsApp works</span>
           <select id="waMode">
@@ -798,26 +775,49 @@ body.locked{overflow:hidden}
       </div>
     </section>
 
-    <!-- STEP 10: Add-ons -->
+    <!-- STEP 9: Add-ons -->
     <section class="step">
-      <div class="step-head"><div class="step-num">10</div><h2>Add-ons</h2></div>
-      <p class="hint">Knowledge base: not included in any package. Each knowledge base is 38 SAR a month. One knowledge base holds up to 500 URLs, 50 text snippets and 25 files (50 MB each; spreadsheets up to 1,000 rows and 50 columns). One is enough for most clients.</p>
+      <div class="step-head"><div class="step-num">9</div><h2>Add-ons and usage charges</h2></div>
+      <div class="plan-out hide" id="pricingNotice"><span class="warn">Pricing rules changed for sentiment and outbound. The price may differ from your saved version.</span></div>
+      <p class="hint"><b>Knowledge base</b> (fixed monthly): not included in any package. Each knowledge base is 38 SAR a month. One knowledge base holds up to 500 URLs, 50 text snippets and 25 files (50 MB each; spreadsheets up to 1,000 rows and 50 columns). One is enough for most clients.</p>
       <div class="fields">
         <label class="f"><span class="lbl">Include a knowledge base?</span>
           <select id="kbOn"><option value="0">No</option><option value="1" selected>Yes — 38 SAR per month</option></select>
         </label>
       </div>
       <div class="plan-out" id="kbOut"></div>
-      <p class="hint" style="padding-top:14px"><b>Sentiment analysis</b> — analyses the tone and sentiment of inbound calls. 1 SAR per inbound call (each call is charged individually, regardless of whether it is the same or a different contact). Available only when inbound calls are in scope.</p>
+      <p class="hint" style="padding-top:14px"><b>Inbound sentiment analysis</b> (optional add-on, per call) — analyses the tone and sentiment of inbound calls. 1 SAR per call, counted only for calls the AI handles. Available only when inbound calls are in scope.</p>
       <div class="fields">
         <label class="f"><span class="lbl">Include sentiment analysis?</span>
-          <select id="sentimentOn"><option value="0" selected>No</option><option value="1">Yes — 1 SAR per inbound call</option></select>
+          <select id="sentimentOn"><option value="0" selected>No</option><option value="1">Yes — 1 SAR per AI-handled call</option></select>
         </label>
         <label class="f" id="sentimentWaiveField" style="display:none"><span class="lbl">Waive sentiment analysis?</span>
-          <select id="sentimentWaive"><option value="0" selected>Charge — 1 SAR per call</option><option value="1">Waive — absorb as concession</option></select>
+          <select id="sentimentWaive"><option value="0" selected>Charge — 1 SAR per AI-handled call</option><option value="1">Waive — absorb as concession</option></select>
         </label>
       </div>
       <div class="plan-out" id="sentimentOut"></div>
+      <div id="contactStep">
+      <p class="hint" style="padding-top:14px"><b>Outbound calls</b> (per call) — 1 SAR per outbound call. Sentiment analysis is included, with no separate sentiment charge. Counted from the outbound calls a day in Step 5. This charge can be waived as a sales concession.</p>
+      <div class="fields">
+        <label class="f"><span class="lbl">Contacts targeted per month (volume note only, does not change the price)</span>
+          <input type="number" id="contacts" min="0" step="100" value="500">
+        </label>
+        <label class="f"><span class="lbl">Average call attempts per contact (volume cross-check only)</span>
+          <select id="contactAttempts">
+            <option value="1" selected>1 attempt</option>
+            <option value="2">2 attempts</option>
+            <option value="3">3 attempts</option>
+          </select>
+        </label>
+        <label class="f"><span class="lbl">Charge or waive</span>
+          <select id="waiveContact">
+            <option value="0" selected>Charge — 1 SAR per outbound call (includes sentiment)</option>
+            <option value="1">Waive — absorb the cost</option>
+          </select>
+        </label>
+      </div>
+      <div class="plan-out" id="contactOut"></div>
+      </div>
       <p class="hint" style="padding-top:14px"><b>Dashboard / admin panel</b> is required in every deal. It costs 100 SAR per user per month, with a minimum of one user. A customised dashboard is a one-time 700 SAR charge. It delivers up to 7 custom KPI charts tailored to the customer's business goal and active flows — for example, calls by hour, no-show rate trend, or cost per AI-handled call.</p>
       <div class="fields">
         <label class="f"><span class="lbl">Dashboard users</span>
@@ -830,10 +830,10 @@ body.locked{overflow:hidden}
       <div class="plan-out" id="dashOut"></div>
     </section>
 
-    <!-- STEP 11: CRM upsell -->
+    <!-- STEP 10: CRM upsell -->
     <section class="step">
-      <div class="step-head"><div class="step-num">11</div><h2>700Apps CRM <span class="opt">optional upsell</span></h2></div>
-      <p class="hint">If they need a CRM and chose "Use 700Apps CRM" in Step 7, this is where the subscription is configured. Taking the 700Apps CRM drops the CRM endpoint connection to zero.</p>
+      <div class="step-head"><div class="step-num">10</div><h2>700Apps CRM <span class="opt">optional upsell</span></h2></div>
+      <p class="hint">If they need a CRM and chose "Use 700Apps CRM" in Step 6, this is where the subscription is configured. Taking the 700Apps CRM drops the CRM endpoint connection to zero.</p>
       <div class="fields">
         <label class="f"><span class="lbl">Include CRM?</span>
           <select id="crmOn">
@@ -880,9 +880,9 @@ body.locked{overflow:hidden}
       <div class="plan-out" id="crmOut"></div>
     </section>
 
-    <!-- STEP 12: Presentation -->
+    <!-- STEP 11: Presentation -->
     <section class="step">
-      <div class="step-head"><div class="step-num">12</div><h2>How to present it</h2></div>
+      <div class="step-head"><div class="step-num">11</div><h2>How to present it</h2></div>
       <p class="hint">Free months come off the recurring cost only. Setup and hardware are always billed in full.</p>
       <div class="fields">
         <label class="f"><span class="lbl">Show VAT</span>
@@ -1010,8 +1010,8 @@ var LANDLINE_DISC = 0.10;
 var DASH_USER = 100;       // SAR per user per month, minimum 1 user
 var DASH_CUSTOM = 700;     // SAR one-time, up to 7 charts
 var ENDPOINT_COST = 250;
-var CONTACT_CHARGE = 1;
-var SENTIMENT_COST = 1;    // SAR per inbound call for sentiment analysis
+var CONTACT_CHARGE = 1;   // SAR per outbound call (sentiment included)
+var SENTIMENT_COST = 1;    // SAR per AI-handled inbound call for sentiment analysis
 var EXTRA_LINE_COST = 250;
 var KB_COST = 38;
 var OVERAGE_RATE = 0.51;   // SAR per voice minute above the package — confirmed $0.1356 (51 halalas)
@@ -1074,8 +1074,8 @@ var CRM_FEATURES = [
 /* Generic systems a flow can touch. "native" = a 700Apps module exists (no endpoint charge). */
 var SYS = {
   booking:   { name:"Booking / calendar system", native:"Use 700Apps booking module (no charge)" },
-  crm:       { name:"CRM system",                native:"Use 700Apps CRM — see Step 11 (no charge)" },
-  ticketing: { name:"Ticketing system",          native:"Use 700Apps CRM ticketing — see Step 11 (no charge)" },
+  crm:       { name:"CRM system",                native:"Use 700Apps CRM — see Step 10 (no charge)" },
+  ticketing: { name:"Ticketing system",          native:"Use 700Apps CRM ticketing — see Step 10 (no charge)" },
   erp:       { name:"Order / ERP system" },
   billing:   { name:"Billing / collection system" },
   payment:   { name:"Payment gateway" },
@@ -1443,7 +1443,7 @@ function humanExternal(){ return humanOn() && (humanWhere()==="external" || huma
 function humanPlatform(){ return humanOn() && (humanWhere()==="platform" || humanWhere()==="both"); }
 function humanExtName(){ return ($("humanExtName").value||"").trim() || "Contact center system"; }
 
-/* ═══════════════════ ENDPOINT DETECTION (Step 7) ═══════════════════ */
+/* ═══════════════════ ENDPOINT DETECTION (Step 6) ═══════════════════ */
 var sysChoice = {};   // remembers the answer per system: own | none | native
 
 function getRequiredSystems(){
@@ -1456,7 +1456,7 @@ function getRequiredSystems(){
   activeFlows().forEach(function(a){
     flowSystems(a.f).forEach(function(x){ add(x.key, x.name, a.label, x.purpose); });
   });
-  if($("waMode").value !== "none") add("whatsapp", "WhatsApp", "WhatsApp messaging (Step 9)");
+  if($("waMode").value !== "none") add("whatsapp", "WhatsApp", "WhatsApp messaging (Step 8)");
   if(humanExternal()) add("other:"+humanExtName().toLowerCase(), humanExtName(), "Human escalation", "Human agents work in this system");
   // stable order: known systems first (in list order), then custom systems
   var sorted = [];
@@ -1531,9 +1531,9 @@ function buildSystemQuestions(){
       if(base.native) html += '<option value="native"'+(c==="native"?' selected':'')+'>'+esc(base.native)+'</option>';
       html += '</select>';
       if(c==="none") html += '<div class="prereq-flag">Prerequisite: the customer needs to acquire this system before go-live. The 250/month endpoint fee applies once connected.</div>';
-      if(c==="native" && (s.key==="crm"||s.key==="ticketing") && !crmIncluded) html += '<div class="prereq-flag">No cost line yet. Add the 700Apps CRM plan in Step 11.</div>';
+      if(c==="native" && (s.key==="crm"||s.key==="ticketing") && !crmIncluded) html += '<div class="prereq-flag">No cost line yet. Add the 700Apps CRM plan in Step 10.</div>';
     } else if(s.key==="whatsapp"){
-      html += '<div class="sys-fixed">WhatsApp connection, 250/mo. Message volume is priced separately in Step 9.</div>';
+      html += '<div class="sys-fixed">WhatsApp connection, 250/mo. Message volume is priced separately in Step 8.</div>';
     } else {
       html += '<div class="sys-fixed">Custom system, fixed 250/mo.'+(s.purposes.length?' Purpose: '+s.purposes.map(esc).join("; ")+'.':'')+'</div>';
       html += '<div class="prereq-flag">Confirm with 700Apps that this integration is possible before the quote is sent.</div>';
@@ -1544,7 +1544,7 @@ function buildSystemQuestions(){
   if(html !== lastSysHtml){ $("systemsBlock").innerHTML = html; lastSysHtml = html; }
 }
 
-/* ═══════════════════ WHATSAPP ESTIMATE (Step 9) ═══════════════════ */
+/* ═══════════════════ WHATSAPP ESTIMATE (Step 8) ═══════════════════ */
 function buildWaUses(){
   var h = "";
   WA_USES.forEach(function(u){
@@ -1639,10 +1639,10 @@ function buildRateCard(){
 
   h += '<div class="rc-h">Additional</div>';
   h += '<table class="rc"><tr><th>Item</th><th>Basis</th><th style="text-align:end">SAR</th></tr>';
-  h += '<tr id="rc-con"><td>Outbound contact charge</td><td>Per contact loaded into the CRM, monthly</td><td class="p">1</td></tr>';
+  h += '<tr id="rc-con"><td>Outbound calls</td><td>Per call, sentiment analysis included</td><td class="p">1</td></tr>';
   h += '<tr id="rc-line"><td>Concurrent call</td><td>Per concurrent call, monthly</td><td class="p">250</td></tr>';
   h += '<tr id="rc-kb"><td>Knowledge base</td><td>Per KB, monthly</td><td class="p">38</td></tr>';
-  h += '<tr id="rc-sent"><td>Sentiment analysis</td><td>Per inbound call</td><td class="p">1</td></tr>';
+  h += '<tr id="rc-sent"><td>Inbound sentiment analysis</td><td>Optional add-on, per AI-handled call</td><td class="p">1</td></tr>';
   h += '<tr id="rc-agent"><td>Human agent seat</td><td>Covered by extension charge — no separate seat fee</td><td class="p">—</td></tr>';
   h += '<tr id="rc-over"><td>Additional usage minutes</td><td>Per minute above the package</td><td class="p">0.51</td></tr>';
   h += '</table>';
@@ -1761,11 +1761,12 @@ function model(){
   // Sentiment analysis — 1 SAR per inbound call
   var sentimentOn = hasInbound && $("sentimentOn").value==="1";
   var sentimentWaived = sentimentOn && $("sentimentWaive").value==="1";
-  var sentimentCalls = hasInbound ? Math.round(num("inCallsDay",0) * workDays) : 0;
+  var sentimentCalls = hasInbound ? Math.round(num("inCallsDay",0) * aiShare * workDays) : 0;
+  var outCalls = hasOutbound ? Math.round(num("outCallsDay",0) * workDays) : 0;
   var sentimentCost = sentimentCalls * SENTIMENT_COST;
   if(sentimentOn && !sentimentWaived){
-    R.push(["Sentiment analysis", sentimentCost,
-      nfmt(sentimentCalls)+" inbound calls × "+SENTIMENT_COST+" SAR per call"]);
+    R.push(["Inbound sentiment analysis", sentimentCost,
+      nfmt(sentimentCalls)+" AI-handled inbound calls × "+SENTIMENT_COST+" SAR per call"]);
   }
   if(sentimentOn && sentimentWaived){
     W.push({label:"Sentiment analysis waived ("+nfmt(sentimentCalls)+" calls × "+SENTIMENT_COST+" SAR). Subject to 700Apps approval.", amount:sentimentCost, type:"recurring"});
@@ -1800,13 +1801,13 @@ function model(){
 
   /* Human agent seats are covered by the extension charge — no separate seat line item */
 
-  if(hasOutbound && contacts>0){
-    var contactTotal = contacts * CONTACT_CHARGE;
+  if(hasOutbound && outCalls>0){
+    var contactTotal = outCalls * CONTACT_CHARGE;
     if(!contactWaived){
-      R.push(["Outbound contact charge", contactTotal,
-        nfmt(contacts)+" contacts × "+CONTACT_CHARGE+" SAR per contact loaded"]);
+      R.push(["Outbound calls", contactTotal,
+        nfmt(outCalls)+" calls × "+CONTACT_CHARGE+" SAR per call, sentiment analysis included"]);
     } else {
-      W.push({label:"Contact charge waived ("+nfmt(contacts)+" contacts × "+CONTACT_CHARGE+" SAR). Subject to 700Apps approval.", amount:contactTotal, type:"recurring"});
+      W.push({label:"Outbound calls waived ("+nfmt(outCalls)+" calls × "+CONTACT_CHARGE+" SAR). Subject to 700Apps approval.", amount:contactTotal, type:"recurring"});
     }
   }
 
@@ -1852,13 +1853,13 @@ function model(){
   A.push("One Grandstream device per deployment ("+nfmt(DEVICE_COST)+" SAR one-time), required for all phone setups.");
   A.push("Extensions are human agent desktop seats (browser-based), charged at "+nfmt(EXT_COST)+" SAR each per month. They do not limit AI capacity.");
   if(isMobileOwn) A.push("Customer supplies their own mobile numbers. Own mobile numbers cannot have concurrent calls.");
-  if(sentimentOn && !sentimentWaived) A.push("Sentiment analysis is "+SENTIMENT_COST+" SAR per inbound call. Each call is charged individually regardless of contact. Estimated "+nfmt(sentimentCalls)+" calls a month.");
-  if(sentimentOn && sentimentWaived) A.push("Sentiment analysis has been waived as a sales concession (list price "+sar(sentimentCost)+"/month). Subject to 700Apps approval.");
+  if(sentimentOn && !sentimentWaived) A.push("Inbound sentiment analysis is an optional add-on at "+SENTIMENT_COST+" SAR per call, for calls the AI handles only. Estimated "+nfmt(sentimentCalls)+" AI-handled calls a month.");
+  if(sentimentOn && sentimentWaived) A.push("Inbound sentiment analysis has been waived as a sales concession (list price "+sar(sentimentCost)+"/month). Subject to 700Apps approval.");
   if(mobileOn) A.push("Mobile service is "+nfmt(MOBILE_PKG)+" SAR per month flat per deployment, any number of mobiles. Gives human agents mobile access to the platform software on top of their desktop extensions.");
   if(isOurLine) A.push("Landline number provided by us at "+nfmt(LANDLINE_YEAR)+" SAR per number per year excluding VAT"+(lineDisc?" (10% discount applied)":"")+". Renews yearly. Carrier charges for local numbers are not included.");
   if(isSip) A.push("Customer brings their own digital telephony (SIP). Concurrent calls apply at "+nfmt(EXTRA_LINE_COST)+" SAR each.");
   A.push("Dashboard / admin panel is mandatory. Minimum one user at "+nfmt(DASH_USER)+" SAR per user per month."+(dashCustom?" Custom dashboard (up to 7 charts) charged at "+nfmt(DASH_CUSTOM)+" SAR one-time.":""));
-  if(contactWaived && contacts>0) A.push("Contact charge of "+sar(contacts*CONTACT_CHARGE)+"/month ("+nfmt(contacts)+" contacts × "+CONTACT_CHARGE+" SAR per contact loaded) has been waived as a sales concession. Subject to 700Apps approval.");
+  if(contactWaived && outCalls>0) A.push("Outbound calls charge of "+sar(outCalls*CONTACT_CHARGE)+"/month ("+nfmt(outCalls)+" calls × "+CONTACT_CHARGE+" SAR per call) has been waived as a sales concession. Subject to 700Apps approval.");
   if(implWaived) A.push("Implementation fee of "+sar(IMPL_FEE)+" has been waived. Subject to 700Apps approval.");
   if(endpoints>0) A.push(endpoints+" external system"+(endpoints>1?"s":"")+" connected at "+nfmt(ENDPOINT_COST)+"/mo each. A system used by several flows is charged once. Unlimited workflows within each connection.");
   var customs = eps.filter(function(e){ return e.custom; });
@@ -1867,7 +1868,7 @@ function model(){
     var note = ($("humanNote").value||"").trim();
     A.push("Human agents work in two places: "+seats+" on the 700Apps platform and the external system "+humanExtName()+"."+(note?" "+note:""));
   }
-  if(hasOutbound && contacts>0) A.push("Outbound campaign contact charge is 1 SAR per contact loaded into the CRM (not per call attempt). The "+contactAttempts+" attempt"+(contactAttempts>1?"s":"")+" per contact setting is used only for estimating call volumes against the voice package. Implementation timeline is approximately 20 days from kick-off to go-live.");
+  if(hasOutbound && outCalls>0) A.push("Outbound calls are charged at "+CONTACT_CHARGE+" SAR per call, and sentiment analysis is included. The contacts and attempts settings are used only to estimate call volumes against the voice package. Implementation timeline is approximately 20 days from kick-off to go-live.");
   if(crmOn) A.push("CRM free trial is available for CRM plans. "+(crmAnnual?"Annual billing selected — 10% discount on the monthly rate.":"Monthly billing selected. Annual billing (10% discount) is available."));
   if(waMode==="own") A.push("Client keeps their own WhatsApp account. Confirm 700Apps does not meter their volume separately.");
 
@@ -1886,7 +1887,7 @@ function model(){
     crmOn:crmOn, crmIdx:crmIdx, crmUsers:crmUsers, crmPlan:crmPlan, crmAnnual:crmAnnual,
     crmFeatures: crmOn ? getMultiCheckIds($("crmFeaturesWrap")) : [],
     sentimentOn:sentimentOn, sentimentWaived:sentimentWaived, sentimentCalls:sentimentCalls, sentimentCost:sentimentCost,
-    contacts:contacts, contactAttempts:contactAttempts, contactWaived:contactWaived,
+    contacts:contacts, outCalls:outCalls, contactAttempts:contactAttempts, contactWaived:contactWaived,
     peak:peak, concurrentCalls:concurrentCalls, kbOn:kbOn, kbFlow:kbFlow,
     vatOn:vatOn, implWaived:implWaived,
     R:R, O:O, W:W, A:A,
@@ -1957,8 +1958,8 @@ function render(){
     $("sentimentWaiveField").style.display = m.sentimentOn ? "" : "none";
     if(m.sentimentOn){
       $("sentimentOut").innerHTML = m.sentimentWaived
-        ? "<b>Sentiment analysis:</b> waived (list price "+sar(m.sentimentCost)+"/mo for "+nfmt(m.sentimentCalls)+" calls). Subject to 700Apps approval."
-        : "<b>Sentiment analysis:</b> "+nfmt(m.sentimentCalls)+" inbound calls × "+SENTIMENT_COST+" SAR = "+sar(m.sentimentCost)+"/mo.";
+        ? "<b>Inbound sentiment analysis:</b> waived (list price "+sar(m.sentimentCost)+"/mo for "+nfmt(m.sentimentCalls)+" AI-handled calls). Subject to 700Apps approval."
+        : "<b>Inbound sentiment analysis:</b> "+nfmt(m.sentimentCalls)+" AI-handled inbound calls × "+SENTIMENT_COST+" SAR = "+sar(m.sentimentCost)+"/mo.";
     } else {
       $("sentimentOut").innerHTML = m.hasInbound ? "Sentiment analysis not selected." : "Not available — no inbound calls in scope.";
     }
@@ -1973,7 +1974,7 @@ function render(){
 
   // Flows summary
   var nf = activeFlows().length;
-  $("jobsOut2").innerHTML = "<b>"+nf+" flow"+(nf!==1?"s":"")+".</b> The systems they use decide the endpoint connections in Step 7. The number of flows does not change the price.";
+  $("jobsOut2").innerHTML = "<b>"+nf+" flow"+(nf!==1?"s":"")+".</b> The systems they use decide the endpoint connections in Step 6. The number of flows does not change the price.";
 
   // Human escalation
   $("humanFields").classList.toggle("hide", !m.hOn);
@@ -1984,7 +1985,7 @@ function render(){
   var ho = "";
   if(m.hOn){
     if(m.hWhere==="platform") ho = "<b>"+m.seats+" seat"+(m.seats!==1?"s":"")+"</b> on the 700Apps platform. Covered by extension charge. No endpoint charge.";
-    else if(m.hWhere==="external") ho = "<b>"+esc(humanExtName())+"</b> is added as an endpoint in Step 7 (250/month). No seat fee.";
+    else if(m.hWhere==="external") ho = "<b>"+esc(humanExtName())+"</b> is added as an endpoint in Step 6 (250/month). No seat fee.";
     else ho = "<b>"+m.seats+" seat"+(m.seats!==1?"s":"")+"</b> on 700Apps (covered by extension charge), plus <b>"+esc(humanExtName())+"</b> as an endpoint (250/month).";
   }
   if(humanAutoSet) ho = '<small style="color:#2E7D32">⬤ Auto-set: '+extCount+' extension'+(extCount>1?'s':'')+' → '+extCount+' human agent'+(extCount>1?'s':'')+' on 700Apps platform.</small><br>' + ho;
@@ -2039,14 +2040,14 @@ function render(){
 
   // Contact charge
   if(m.hasOutbound){
-    var cTotal = m.contacts * CONTACT_CHARGE;
-    var cWork = nfmt(m.contacts)+' contacts × '+CONTACT_CHARGE+' SAR per contact loaded';
+    var cTotal = m.outCalls * CONTACT_CHARGE;
+    var cWork = nfmt(m.outCalls)+' outbound calls × '+CONTACT_CHARGE+' SAR per call (sentiment analysis included)';
     if(m.contactWaived){
-      $("contactOut").innerHTML = '<b>Contact charge waived</b> — '+cWork+' = '+sar(cTotal)+'/month absorbed by the partner.';
-    } else if(m.contacts>0){
+      $("contactOut").innerHTML = '<b>Outbound calls waived</b> — '+cWork+' = '+sar(cTotal)+'/month absorbed by the partner.';
+    } else if(m.outCalls>0){
       $("contactOut").innerHTML = cWork+' = <b>'+sar(cTotal)+'/month</b>.';
     } else {
-      $("contactOut").innerHTML = 'No contacts entered.';
+      $("contactOut").innerHTML = 'No outbound calls entered in Step 5.';
     }
     // Cross-check: implied outbound calls vs Step 5 (uses attempts for volume estimate, not cost)
     if(m.contacts>0 && m.contactAttempts>=1){
@@ -2066,7 +2067,7 @@ function render(){
     ? ep+' external system'+(ep>1?'s':'')+' × '+nfmt(ENDPOINT_COST)+' = <b>'+sar(ep*ENDPOINT_COST)+'/month.</b> A system used by several flows is charged once. Unlimited workflows within each connection.'
     : 'No endpoint charges. Every system is a 700Apps native module, or no system is needed.';
   var waNeeded = activeFlows().some(function(a){ return a.f.sys.whatsapp; });
-  $("waFlowWarn").innerHTML = (waNeeded && m.waMode==="none") ? box("A flow uses WhatsApp, but Step 9 says WhatsApp is not needed. WhatsApp is still counted as an endpoint here. Set up WhatsApp in Step 9.") : "";
+  $("waFlowWarn").innerHTML = (waNeeded && m.waMode==="none") ? box("A flow uses WhatsApp, but Step 8 says WhatsApp is not needed. WhatsApp is still counted as an endpoint here. Set up WhatsApp in Step 8.") : "";
 
   // Concurrent calls — hide entire step for own mobile
   $("concurrentStep").classList.toggle("hide", m.isMobileOwn);
@@ -2089,7 +2090,7 @@ function render(){
     $("waEstOut").innerHTML = parts.length ? '<b>Estimate: '+nfmt(m.msgs)+' messages a month</b> ('+parts.join(' + ')+').' : 'Tick at least one use.';
   } else $("waEstOut").innerHTML = "";
   if(m.waMode==="none"){ $("waUsage").innerHTML = '<small>No WhatsApp scoped.</small>'; $("waRec").innerHTML = ""; }
-  else if(m.waMode==="own"){ $("waUsage").innerHTML = '<small>Client keeps their own account. The connection is the WhatsApp endpoint in Step 7 (250/mo). No message tier is charged.</small>'; $("waRec").innerHTML = ""; }
+  else if(m.waMode==="own"){ $("waUsage").innerHTML = '<small>Client keeps their own account. The connection is the WhatsApp endpoint in Step 6 (250/mo). No message tier is charged.</small>'; $("waRec").innerHTML = ""; }
   else {
     var wm = WMSGS[m.wIdx], wover = m.wOver>0;
     var wpct = Math.min(100, wm ? m.msgs/wm*100 : 0);
@@ -2098,7 +2099,7 @@ function render(){
       '<small>'+(wover ? '<span class="warn">'+nfmt(m.wOver)+' messages above the '+VOICE[m.wIdx].name+' tier.</span>' : Math.round(wpct)+'% used, '+nfmt(wm-m.msgs)+' messages spare.')+'</small>';
     var wr = VOICE[m.wRec];
     $("waRec").innerHTML = m.msgs>0
-      ? '<div class="recommend"><b>Recommended: '+wr.name+' tier</b> — '+nfmt(WMSGS[m.wRec])+' messages for '+sar(WA.sar[m.wRec])+'/month. The WhatsApp endpoint (250/month) is added in Step 7.'+
+      ? '<div class="recommend"><b>Recommended: '+wr.name+' tier</b> — '+nfmt(WMSGS[m.wRec])+' messages for '+sar(WA.sar[m.wRec])+'/month. The WhatsApp endpoint (250/month) is added in Step 6.'+
         (m.wIdx!==m.wRec ? ' <b>You selected '+VOICE[m.wIdx].name+'.</b>' : '')+'</div>'+
         packageAdvice({ need:m.msgs, idx:m.wIdx, rec:m.wRec, caps:WMSGS, prices:WA.sar, names:VOICE_NAMES, unit:"messages", one:"message", dec:3, rate:function(i){ return WA.sar[i]/WMSGS[i]; } })
       : "";
@@ -3144,7 +3145,7 @@ function openPoints(m){
   P.push({ pt:"Extra voice usage: if usage exceeds the package, what is the per-minute rate (quote assumes 0.51 SAR)? Or should we upgrade to a larger package? Two options: (a) stay on this package and pay per extra minute, or (b) move to the next package for a fixed monthly cost.", why:"Price. Estimated usage is "+vol+" minutes against the "+m.voicePkg.name+" package ("+nfmt(m.voicePkg.mins)+" min)"+(m.vOver>0?", so "+nfmt(m.vOver)+" extra minutes depend on this answer":"")+".", owner:"700Apps", cust:"Call logs or a volume estimate to confirm minutes." });
   if(m.waMode==="platform") P.push({ pt:"WhatsApp extra messages: if messages exceed the tier, what is the per-message rate? Or should we upgrade to a larger tier? Also confirm template approval and sender setup.", why:"Price. Estimated "+nfmt(m.msgs)+" messages against the "+VOICE[m.wIdx].name+" tier ("+nfmt(WMSGS[m.wIdx])+")"+(m.wOver>0?", so "+nfmt(m.wOver)+" extra messages depend on this answer":"")+".", owner:"700Apps", cust:"Business name, sender number and the message types (reminders, campaigns, chat)." });
   if(m.waMode==="own") P.push({ pt:"WhatsApp: client keeps their own account. Confirm the connection method and that no separate message metering applies.", why:"Price and scope.", owner:"700Apps", cust:"WhatsApp business account details and who administers it." });
-  if(m.hasOutbound && m.contacts>0) P.push({ pt:"Outbound campaign setup: confirm the CRM contact-loading charge of "+CONTACT_CHARGE+" SAR per contact and whether there is a separate one-time cost for campaign setup. Also confirm whether the rate changes at higher volumes (currently "+nfmt(m.contacts)+" contacts a month).", why:"Price. Currently quoted at "+sar(m.contacts*CONTACT_CHARGE)+"/month"+(m.contactWaived?" (waived)":"")+". Volume cross-check: "+m.contactAttempts+" attempt"+(m.contactAttempts>1?"s":"")+" per contact ≈ "+nfmt(m.contacts*m.contactAttempts)+" outbound calls a month.", owner:"700Apps", cust:"Expected contact volumes and campaign frequency." });
+  if(m.hasOutbound && m.outCalls>0) P.push({ pt:"Outbound calls: confirm the charge of "+CONTACT_CHARGE+" SAR per outbound call, with sentiment analysis included, and whether there is a separate one-time cost for campaign setup. Also confirm whether the rate changes at higher volumes (currently "+nfmt(m.outCalls)+" calls a month).", why:"Price. Currently quoted at "+sar(m.outCalls*CONTACT_CHARGE)+"/month"+(m.contactWaived?" (waived)":"")+".", owner:"700Apps", cust:"Expected outbound call volumes and campaign frequency." });
   if(m.isMobileOwn) P.push({ pt:"Own mobile numbers: confirm the "+m.mobileCount+" mobile number"+(m.mobileCount>1?"s":"")+" can be connected. No concurrent calls on mobile.", why:"Scope. Mobile numbers do not support concurrent calls.", owner:"700Apps", cust:"The mobile numbers, their provider and who holds the SIM cards." });
   if(m.isOurLine) P.push({ pt:"Landline number from us: "+m.landlines+" number"+(m.landlines>1?"s":"")+". Yearly charge of "+nfmt(m.lineDisc?Math.round(LANDLINE_YEAR*(1-LANDLINE_DISC)):LANDLINE_YEAR)+" SAR per number"+(m.lineDisc?" (10% discount applied)":"")+". Carrier charges excluded.", why:"Scope and billing. Landline renews yearly, carrier charges billed separately.", owner:"700Apps", cust:"Confirm number count and carrier requirements." });
   eps.forEach(function(ep){
@@ -3220,7 +3221,7 @@ function briefHtml(m){
     ["Dashboard", m.dashUsers+" user"+(m.dashUsers>1?"s":"")+" at "+nfmt(DASH_USER)+"/mo"+(m.dashCustom?". Custom dashboard (7 charts) "+nfmt(DASH_CUSTOM)+" one-time":"")],
     ["Concurrent calls", m.isMobileOwn ? "Not applicable (own mobile)" : m.concurrentCalls+" at "+nfmt(EXTRA_LINE_COST)+" SAR each ("+sar(m.concurrentCalls*EXTRA_LINE_COST)+"/mo)"],
     ["Inbound", m.hasInbound ? nfmt(num("inCallsDay",0))+" calls a day, "+num("inCallLen",0)+" min average, AI handles "+Math.round(m.aiShare*100)+"%" : "Not in scope"],
-    ["Outbound", m.hasOutbound ? nfmt(num("outCallsDay",0))+" calls a day, "+num("outCallLen",0)+" min average"+(m.contacts>0?"; about "+nfmt(m.contacts)+" contacts loaded a month ("+m.contactAttempts+" attempt"+(m.contactAttempts>1?"s":"")+" each for volume estimate)":"") : "Not in scope"],
+    ["Outbound", m.hasOutbound ? nfmt(num("outCallsDay",0))+" calls a day, "+num("outCallLen",0)+" min average"+(m.contacts>0?"; about "+nfmt(m.contacts)+" contacts a month ("+m.contactAttempts+" attempt"+(m.contactAttempts>1?"s":"")+" each, volume estimate only)":"") : "Not in scope"],
     ["Working days a month", String(m.workDays)],
     ["Estimated voice minutes", nfmt(m.totalMinsMonth)+" a month ("+nfmt(m.inMinsDay*m.workDays)+" inbound, "+nfmt(m.outMinsDay*m.workDays)+" outbound)"],
     ["Recommended package", m.voicePkg.name+" ("+nfmt(m.voicePkg.mins)+" min)"+(m.vOver>0?"; additional usage "+nfmt(m.vOver)+" min":"")]
@@ -3251,7 +3252,8 @@ function briefHtml(m){
     sv.push(["WhatsApp","Platform provides it. About "+nfmt(m.msgs)+" messages a month. Recommended tier: "+VOICE[m.wRec].name+(m.wIdx!==m.wRec?"; selected: "+VOICE[m.wIdx].name:"")+"."+(wl.length && $("waEst").value!=="direct" ? "<br>"+wl.join("<br>") : "")]);
   }
   sv.push(["Human escalation", !m.hOn ? "Not needed" : m.hWhere==="platform" ? m.agents+" agents on the 700Apps platform ("+m.seats+" seat"+(m.seats!==1?"s":"")+", covered by extensions)" : m.hWhere==="external" ? m.agents+" agents in "+esc(humanExtName())+" (endpoint)" : m.agents+" agents: "+m.seats+" on 700Apps (covered by extensions) and the rest in "+esc(humanExtName())]);
-  sv.push(["Sentiment analysis", m.sentimentOn ? (m.sentimentWaived ? "Waived (list: "+sar(m.sentimentCost)+"/mo for "+nfmt(m.sentimentCalls)+" calls). Subject to 700Apps approval." : nfmt(m.sentimentCalls)+" calls × "+SENTIMENT_COST+" SAR = "+sar(m.sentimentCost)+"/mo") : "Not included"]);
+  sv.push(["Inbound sentiment analysis", m.sentimentOn ? (m.sentimentWaived ? "Waived (list: "+sar(m.sentimentCost)+"/mo for "+nfmt(m.sentimentCalls)+" AI-handled calls). Subject to 700Apps approval." : "Optional add-on: "+nfmt(m.sentimentCalls)+" AI-handled calls × "+SENTIMENT_COST+" SAR = "+sar(m.sentimentCost)+"/mo") : "Not included"]);
+  if(m.hasOutbound) sv.push(["Outbound calls", m.outCalls>0 ? (m.contactWaived ? "Waived (list: "+sar(m.outCalls*CONTACT_CHARGE)+"/mo for "+nfmt(m.outCalls)+" calls). Subject to 700Apps approval." : nfmt(m.outCalls)+" calls × "+CONTACT_CHARGE+" SAR = "+sar(m.outCalls*CONTACT_CHARGE)+"/mo. Includes sentiment analysis") : "No outbound calls entered"]);
   var crmDesc = "Not included";
   if(m.crmOn){
     crmDesc = m.crmPlan.name+" plan, "+m.crmUsers+" user"+(m.crmUsers>1?"s":"")+(m.crmAnnual?", annual billing (10% discount)":"");
@@ -3565,20 +3567,6 @@ function generateExcel(){
     }
     if(m.endpoints>0)
       priceLine("Endpoint connections", m.endpoints, "Per system, monthly", ENDPOINT_COST, m.chargedEps.map(function(e){return e.name}).join(", "), false);
-    if(m.kbOn)
-      priceLine("Knowledge base", 1, "Monthly", KB_COST, "", false);
-
-    /* ── Sentiment ── */
-    if(m.sentimentOn){
-      if(m.sentimentWaived){
-        var sr = addRow(["Sentiment analysis", m.sentimentCalls, "WAIVED", 0, "", 0, 0, "Subject to 700Apps approval."]);
-        styleDataRow(ws, sr, 8, false);
-        ws.getRow(sr).getCell(3).font = {name:"Calibri", size:11, bold:true, color:{argb:"FFFF6F00"}};
-        lineRows.push({row:sr, oneTime:false});
-      } else {
-        priceLine("Sentiment analysis", m.sentimentCalls, "Per call, monthly", SENTIMENT_COST, "Per inbound call.", false);
-      }
-    }
 
     /* ── WhatsApp ── */
     if(m.waMode==="platform" && m.msgs>0){
@@ -3588,15 +3576,25 @@ function generateExcel(){
       priceLine(VOICE[m.wIdx].name+" ("+nfmt(WMSGS[m.wIdx])+" msgs)", 1, "Monthly", WA.sar[m.wIdx], "", false);
     }
 
-    /* ── Outbound contacts ── */
-    if(m.hasOutbound && m.contacts>0){
-      if(m.contactWaived){
-        var cr = addRow(["Contact charge", m.contacts, "WAIVED", 0, "", 0, 0, "Subject to 700Apps approval."]);
-        styleDataRow(ws, cr, 8, false);
-        ws.getRow(cr).getCell(3).font = {name:"Calibri", size:11, bold:true, color:{argb:"FFFF6F00"}};
-        lineRows.push({row:cr, oneTime:false});
-      } else {
-        priceLine("Contact charge", m.contacts, "Per contact, monthly", CONTACT_CHARGE, "Per contact loaded.", false);
+    /* ── Add-ons and usage charges ── */
+    if(m.kbOn || m.sentimentOn || (m.hasOutbound && m.outCalls>0)){
+      secR = addRow(["ADD-ONS AND USAGE CHARGES","","","","","","",""]);
+      styleSectionRow(ws, secR, 8);
+      altToggle = false;
+      var waivedLine = function(label, qty){
+        var wr2 = addRow([label, qty, "WAIVED", 0, "", 0, 0, "Subject to 700Apps approval."]);
+        styleDataRow(ws, wr2, 8, false);
+        ws.getRow(wr2).getCell(3).font = {name:"Calibri", size:11, bold:true, color:{argb:"FFFF6F00"}};
+        lineRows.push({row:wr2, oneTime:false});
+      };
+      if(m.kbOn) priceLine("Knowledge base", 1, "Monthly", KB_COST, "", false);
+      if(m.sentimentOn){
+        if(m.sentimentWaived) waivedLine("Inbound sentiment analysis", m.sentimentCalls);
+        else priceLine("Inbound sentiment analysis", m.sentimentCalls, "Per call, monthly", SENTIMENT_COST, "Optional add-on, AI-handled calls only", false);
+      }
+      if(m.hasOutbound && m.outCalls>0){
+        if(m.contactWaived) waivedLine("Outbound calls", m.outCalls);
+        else priceLine("Outbound calls", m.outCalls, "Per call, monthly", CONTACT_CHARGE, "Includes sentiment analysis", false);
       }
     }
 
@@ -3718,7 +3716,7 @@ function generateExcel(){
     archLine(["Dashboard",m.dashUsers+" user"+(m.dashUsers>1?"s":""),m.dashUsers,"Monthly"]);
     if(m.dashCustom) archLine(["Dashboard customisation","Up to 7 KPI charts",1,"One-time"]);
     if(m.kbOn) archLine(["Knowledge base","FAQ and reference for AI",1,"Monthly"]);
-    if(m.sentimentOn) archLine(["Sentiment analysis",nfmt(m.sentimentCalls)+" calls/mo",m.sentimentWaived?"Waived":"Yes","Per call"]);
+    if(m.sentimentOn) archLine(["Inbound sentiment analysis",nfmt(m.sentimentCalls)+" AI-handled calls/mo",m.sentimentWaived?"Waived":"Yes","Per call"]);
     archLine(["Implementation","Setup and configuration",1,"One-time"]);
 
     archSection("INTEGRATIONS");
@@ -4017,7 +4015,8 @@ var DL = (function(){
     document.querySelectorAll("#waCustom .wa-cu").forEach(function(r){
       cu.push({ on:r.querySelector(".cu-on").checked, name:r.querySelector(".cu-name").value, n:r.querySelector(".cu-n").value, m:r.querySelector(".cu-m").value });
     });
-    return JSON.parse(JSON.stringify({ v:1, fields:f, multi:mc, waCustom:cu, flows:flows, flowN:flowN, sysChoice:sysChoice, monthsFree:monthsFree }));
+    var pn=document.getElementById("pricingNotice"); if(pn) pn.classList.add("hide");
+    return JSON.parse(JSON.stringify({ v:1, pricingRev:2, fields:f, multi:mc, waCustom:cu, flows:flows, flowN:flowN, sysChoice:sysChoice, monthsFree:monthsFree }));
   }
   function setFields(f){
     Object.keys(f).forEach(function(id){
@@ -4052,6 +4051,8 @@ var DL = (function(){
     });
     lastSysHtml = null;
     refresh(); setFields(st.fields); refresh();
+    var pn=document.getElementById("pricingNotice");
+    if(pn){ var mm=model(); pn.classList.toggle("hide", !(st.pricingRev!==2 && (mm.sentimentOn || mm.hasOutbound))); }
   }
 
   /* ---------- customer logo ---------- */
