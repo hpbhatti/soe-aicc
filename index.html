@@ -281,9 +281,215 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
 .field-s input[type=file]{width:170px;font-size:11px;padding:3px 6px}
 @media(max-width:820px){.dl-row{grid-template-columns:1fr}.dl-acts{justify-content:flex-start}.dl-bar input{margin-left:0;width:100%}}
 @media print{.dl{display:none!important}}
+
+/* ═══ LOGIN GATE ═══ */
+#gate{--deep:#1B5E20;--dark:#0D3B13;--lime:#7CB342;--soft:#E8F5E9;--ink:#1A1A1A;--mute:#5F6F62;--rule:#D7E1D4;--card:#fff;--bg:#F7F9F7}
+#gate *{margin:0;padding:0;box-sizing:border-box}
+#gate{font-family:'Cairo',sans-serif;color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;background:#0A0F0A}
+#gate svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#gate .g_backdrop{position:fixed;inset:0;z-index:0;overflow:hidden}
+#gate .g_backdrop .g_gradient{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 30% 40%,#163D18 0%,#0A1A0B 60%,#060D06 100%)}
+#gate .g_backdrop .g_grid{position:absolute;inset:0;background-image:linear-gradient(rgba(124,179,66,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,179,66,.06) 1px,transparent 1px);background-size:48px 48px}
+#gate .g_orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3}
+#gate .g_orb-1{width:500px;height:500px;background:#1B5E20;top:-100px;left:-100px}
+#gate .g_orb-2{width:400px;height:400px;background:#7CB342;bottom:-100px;right:-80px}
+#gate .g_page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+#gate .g_container{display:flex;width:100%;max-width:1180px;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 0 1px rgba(124,179,66,.1)}
+#gate .g_info{flex:1;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:40px 40px 36px;display:flex;flex-direction:column}
+#gate .g_top-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+#gate .g_logo-mark{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,var(--deep),var(--lime));display:flex;align-items:center;justify-content:center}
+#gate .g_logo-mark svg{width:24px;height:24px}
+#gate .g_top-bar .g_co{font-size:.9rem;font-weight:700;color:#fff;letter-spacing:.03em}
+#gate .g_top-bar .g_co span{display:block;font-size:.6rem;font-weight:400;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+#gate .g_hero h1{font-size:2.1rem;font-weight:800;color:#fff;line-height:1.15;letter-spacing:-.02em}
+#gate .g_hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--lime),#A5D6A7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#gate .g_hero p{font-size:.92rem;color:rgba(255,255,255,.6);line-height:1.6;margin-top:10px;max-width:520px}
+#gate /* 3-step strip */
+.g_steps{display:flex;align-items:stretch;gap:0;margin:26px 0 24px}
+#gate .g_step{flex:1;background:rgba(124,179,66,.09);border:1px solid rgba(124,179,66,.2);padding:14px 14px;display:flex;gap:11px;align-items:center;position:relative}
+#gate .g_step:first-child{border-radius:12px 0 0 12px}
+#gate .g_step:last-child{border-radius:0 12px 12px 0}
+#gate .g_step + .g_step{border-left:none}
+#gate .g_step .g_ic{width:38px;height:38px;border-radius:10px;background:rgba(124,179,66,.18);color:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#gate .g_step .g_n{font-size:.58rem;color:var(--lime);letter-spacing:.1em;font-weight:700}
+#gate .g_step .g_t{font-size:.88rem;font-weight:700;color:#fff;line-height:1.2}
+#gate .g_step .g_d{font-size:.68rem;color:rgba(255,255,255,.5);line-height:1.35;margin-top:2px}
+#gate .g_groups{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#gate .g_gtitle{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lime);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+#gate .g_gtitle::after{content:'';flex:1;height:1px;background:rgba(124,179,66,.2)}
+#gate .g_tile{display:flex;gap:11px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);margin-bottom:8px;transition:border-color .25s,background .25s}
+#gate .g_tile:hover{border-color:rgba(124,179,66,.35);background:rgba(124,179,66,.08)}
+#gate .g_tile .g_ic{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.08);color:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#gate .g_tile .g_ic svg{width:19px;height:19px}
+#gate .g_tile .g_t{font-size:.8rem;font-weight:700;color:#fff;line-height:1.25}
+#gate .g_tile .g_d{font-size:.68rem;color:rgba(255,255,255,.5);line-height:1.4;margin-top:1px}
+#gate .g_login{width:380px;background:var(--card);padding:44px 38px;display:flex;flex-direction:column;justify-content:center;flex-shrink:0}
+#gate .g_badge{display:inline-flex;align-items:center;gap:6px;background:var(--soft);color:var(--deep);font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:18px;width:fit-content}
+#gate .g_badge .g_pulse{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:gpulse 2s ease-in-out infinite}
+@keyframes gpulse{0%,100%{opacity:1}50%{opacity:.3}}
+#gate .g_login h2{font-size:1.35rem;font-weight:700;margin-bottom:4px}
+#gate .g_login .g_sub{font-size:.82rem;color:var(--mute);margin-bottom:26px;line-height:1.5}
+#gate .g_field{margin-bottom:16px}
+#gate .g_field label{display:block;font-size:.7rem;font-weight:600;color:var(--mute);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+#gate .g_field input{width:100%;padding:13px 16px;border:1.5px solid var(--rule);border-radius:10px;font-family:'Cairo',sans-serif;font-size:.88rem;background:var(--bg);transition:all .2s}
+#gate .g_field input:focus{outline:none;border-color:var(--deep);background:#fff;box-shadow:0 0 0 3px rgba(27,94,32,.1)}
+#gate .g_field input::placeholder{color:#B0BDB2}
+#gate .g_btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;margin-top:6px;background:linear-gradient(135deg,var(--deep),#2E7D32);color:#fff;box-shadow:0 4px 16px rgba(27,94,32,.3);transition:all .25s}
+#gate .g_btn:hover{box-shadow:0 6px 24px rgba(27,94,32,.4);transform:translateY(-1px)}
+#gate .g_foot{margin-top:28px;padding-top:18px;border-top:1px solid var(--rule);text-align:center}
+#gate .g_pb{font-size:.78rem;font-weight:700;color:var(--deep);margin-bottom:6px}
+#gate .g_pb span{color:var(--rule);margin:0 8px;font-weight:400}
+#gate .g_foot .g_note{font-size:.68rem;color:var(--mute);display:flex;align-items:center;justify-content:center;gap:6px}
+#gate .g_foot .g_note svg{width:13px;height:13px;stroke-width:1.8}
+@media(max-width:1020px){#gate .g_container{flex-direction:column;max-width:560px}
+#gate .g_login{width:100%;padding:32px 24px}
+#gate .g_info{padding:28px 22px}
+#gate .g_groups{grid-template-columns:1fr}
+#gate .g_steps{flex-direction:column}
+#gate .g_step,#gate .g_step:first-child,#gate .g_step:last-child{border-radius:0;border-left:1px solid rgba(124,179,66,.2)}
+#gate .g_step + .g_step{border-top:none}
+#gate .g_step:first-child{border-radius:12px 12px 0 0}
+#gate .g_step:last-child{border-radius:0 0 12px 12px}
+#gate .g_hero h1{font-size:1.6rem}}
+#gate{position:fixed;inset:0;z-index:99999;overflow:auto;background:#0A0F0A;font-family:'Cairo',sans-serif;color:#1A1A1A;--deep:#1B5E20;--dark:#0D3B13;--lime:#7CB342;--soft:#E8F5E9;--ink:#1A1A1A;--mute:#5F6F62;--rule:#D7E1D4;--card:#fff;--bg:#F7F9F7;min-height:100vh}
+#gate .g_backdrop{position:fixed}
+#gate .g-err{display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:8px;padding:10px 14px;font-size:.78rem;margin-bottom:14px}
+#gate .g_btn:disabled{opacity:.7;cursor:wait;transform:none}
+#gate .g-logo{height:40px;width:auto;display:block}
+body.locked > *:not(#gate):not(script):not(style){display:none!important}
+body.locked{overflow:hidden}
+@media(max-width:1020px){#gate .g_login{order:-1}}
+.act-ld{font-size:10.5px;font-weight:800;background:#EEF3EC;color:#4B5E4E;padding:2px 8px;border-radius:20px;margin-left:6px}
+.act-mini{display:flex;gap:3px;align-items:center;margin-top:5px}.act-mini i{width:20px;height:5px;border-radius:3px;background:#DDE5DA}.act-mini i.on{background:var(--lime)}.act-mini span{font-size:11px;font-weight:700;color:var(--deep);margin-left:6px}
+.act-fl select{font:inherit;font-size:12px;border:1px solid var(--rule);border-radius:6px;padding:4px 8px}
+.act-stg{padding:14px 18px;border-bottom:1px solid var(--rule);background:#fff}
+.act-sb{display:flex;gap:4px;overflow:auto}.act-sb button{flex:1;min-width:104px;border:none;background:#EEF2EC;border-radius:8px;padding:8px 6px;font-size:11.5px;font-weight:700;color:#5F6F62;cursor:pointer;text-align:center;line-height:1.25}
+.act-sb button span{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#fff;align-items:center;justify-content:center;font-size:11px;margin-bottom:3px}
+.act-sb button small{display:block;font-size:10px;font-weight:600;opacity:.75;min-height:12px}
+.act-sb button.on{background:#DCEFD2;color:var(--deep)}.act-sb button.on span{background:var(--lime);color:#0D3B13}.act-sb button.cur{background:var(--deep);color:#fff}.act-sb button.cur span{background:#fff;color:var(--deep)}
+.act-sd{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}.act-sd button{border:1px solid var(--rule);background:#fff;border-radius:20px;padding:3px 12px;font-size:11.5px;font-weight:700;color:#5F6F62;cursor:pointer}.act-sd button.on{background:#FEE2E2;color:#B91C1C;border-color:#FCA5A5}
+.act-sug{background:#FFF7E0;border:1px solid #F5DD9A;border-radius:8px;padding:9px 12px;font-size:12.5px;margin-top:10px}
+.act-k em{display:block;font-style:normal;font-size:11px;color:#5F6F62}
+.act-lock{background:#FEF3C7;border:1px solid #F5DD9A;border-radius:8px;padding:9px 12px;font-size:12.5px}
+.act-diff{background:#F3F7F1;border:1px solid var(--rule);border-radius:8px;padding:9px 12px;font-size:12.5px;margin-top:10px}
+#act_pvw{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9998;overflow:auto;padding:24px 12px}
+.act-pv{max-width:760px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden}
+.act-pvh{background:linear-gradient(135deg,#0D3B13,#1B5E20);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}.act-pvh button{border:1px solid rgba(255,255,255,.4);background:none;color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px}
+.act-pvb{padding:18px 22px 26px}.act-pvn{background:#FFF7E0;border:1px solid #F5DD9A;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:12px}.act-pvb h2{margin:0 0 2px}
+.act-pvi{display:flex;gap:8px;margin:12px 0}.act-pvi input,.act-pc{font:inherit;font-size:13px;border:1px solid var(--rule);border-radius:6px;padding:7px 9px;flex:1;width:100%}
+.act-pvs{border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin-bottom:10px}.act-pvt{display:flex;justify-content:space-between;align-items:center}.act-pvs p{margin:4px 0 8px;font-size:13px;color:#333}.act-pc{margin-top:8px}
+.act-warn{color:#B45309;font-weight:700}
+.act-eb{position:sticky;top:34px;z-index:9990;background:#E8F5E9;border-bottom:2px solid var(--lime);padding:9px 18px;font-size:13px;display:none;align-items:center;gap:12px;flex-wrap:wrap}
+.act-eb.new{background:#EAF2FF;border-color:#60A5FA}.act-eb small{opacity:.75}
+.act-eb button{border:1px solid var(--rule);background:#fff;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;margin-left:6px}.act-eb button.pri{background:var(--deep);color:#fff;border-color:var(--deep)}
+.act-eb[style*="block"]{display:block!important}.act-ebb{float:right}
+.act-chk{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:12.5px}.act-chk label{display:flex;gap:6px;align-items:center}
+.act-cv{border:1px solid var(--rule);border-radius:12px;padding:22px;text-align:center;background:linear-gradient(135deg,#0D3B13,#1B5E20);color:#fff}.act-cv h2{margin:6px 0}.act-cvk{font-size:11px;letter-spacing:.12em;color:#B6DB8A;font-weight:800}.act-cvt{font-weight:700;color:#B6DB8A;margin-bottom:8px}.act-cv .dl-meta{color:#D4E6CF}
+.act-cv.off{background:#fff;color:#1A1A1A}.act-cv.off .act-cvk{color:#B91C1C}.act-cv.off p{margin:6px 0 12px}
+
+.act-fl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:12px 18px;border-bottom:1px solid var(--rule)}
+.act-fl button{border:1px solid var(--rule);background:#fff;border-radius:20px;padding:5px 13px;font-size:12px;font-weight:700;color:#5F6F62;cursor:pointer}.act-fl button b{margin-left:4px}.act-fl button.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+.act-r{cursor:pointer}.act-r:hover{background:var(--lime-soft)}
+.act-top{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--rule);background:#F6FAF4}
+.act-nm{font-size:18px;font-weight:800;color:var(--deep)}
+.act-tabs{display:flex;gap:2px;padding:0 18px;border-bottom:1px solid var(--rule);overflow:auto}
+.act-tabs button{border:none;background:none;padding:12px 16px;font-size:13px;font-weight:700;color:#5F6F62;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}.act-tabs button.on{color:var(--deep);border-bottom-color:var(--lime)}
+.act-body{padding:16px 18px 22px;background:#FAFCF8}
+.act-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.act-k{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:12px 14px}.act-k small{display:block;font-size:11px;color:#5F6F62}.act-k b{font-size:20px;color:var(--deep)}
+.act-link{font-family:monospace;font-size:12.5px;background:var(--lime-soft);border-radius:6px;padding:8px 10px}
+.act-g{display:grid;grid-template-columns:1fr 1fr;gap:14px}.act-box .act-g{grid-template-columns:1fr}
+.act-box td:first-child{color:#5F6F62;width:42%}
+.act-toast{display:none;position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#0D3B13;color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 28px rgba(0,0,0,.3)}
+
+@media(max-width:820px){.act-cards{grid-template-columns:1fr 1fr}.act-g{grid-template-columns:1fr}}
+
+/* Deal workspace */
+.bdg{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:20px;white-space:nowrap;margin-left:8px}
+.bdg.new{background:#DC2626;color:#fff}.bdg.prog{background:#FEF3C7;color:#B45309}.bdg.done{background:#DCFCE7;color:#15803D}.bdg.none{background:#EEF1EC;color:#5F6F62}
+.act-pan{display:none;background:#FAFCF8;border-bottom:1px solid var(--rule);padding:16px 18px}.act-pan.on{display:block}
+.act-g{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+.act-h{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--deep);font-weight:800;margin:0 0 8px}
+.act-tl{position:relative;padding-left:24px}.act-tl::before{content:'';position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--rule)}
+.act-ev{position:relative;padding:4px 0 12px;font-size:13px}.act-ev::before{content:'';position:absolute;left:-22px;top:8px;width:11px;height:11px;border-radius:50%;background:var(--lime);border:2px solid #fff;box-shadow:0 0 0 2px var(--lime)}
+.act-ev.hot::before{background:#DC2626;box-shadow:0 0 0 2px #DC2626}.act-ev b{font-size:13px}.act-ev i{float:right;font-style:normal;font-size:11px;color:var(--muted)}
+.act-ev p{margin:2px 0 0;color:#333}.act-who{display:inline-block;margin-top:5px;font-size:12px;background:#fff;border:1px solid var(--rule);border-radius:6px;padding:4px 9px}
+.act-box{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin-bottom:12px}
+.act-box textarea{width:100%;min-height:62px;font:inherit;font-size:12.5px;border:1px solid var(--rule);border-radius:6px;padding:7px}
+.act-seg{display:inline-flex;background:#E8EEE6;border-radius:7px;padding:2px;gap:2px;flex-wrap:wrap}.act-seg button{border:none;background:none;padding:5px 10px;border-radius:5px;font-size:12px;font-weight:700;color:#5F6F62;cursor:pointer}.act-seg button.on{background:#fff;color:var(--deep);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.act-t{width:100%;border-collapse:collapse;font-size:12.5px}.act-t th{text-align:left;font-size:10.5px;text-transform:uppercase;color:#5F6F62;padding:5px;border-bottom:1.5px solid var(--rule)}.act-t td{padding:6px 5px;border-bottom:1px solid var(--rule)}
+.act-chg{background:#FEF3C7;color:#B45309;font-weight:800;border-radius:5px;padding:1px 7px}.act-ok{color:#15803D;font-weight:700}
+.act-wa{background:#25D366!important;color:#073B1B!important;border-color:#25D366!important}
+@media(max-width:820px){.act-g{grid-template-columns:1fr}}
+
+.field-s select{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:5px 10px;color:#fff;font:inherit;font-size:13px;width:170px}.field-s select option{color:#1A1A1A}.field-s input[type=date]{color-scheme:dark}
+.act-eb{top:0!important}.act-t input[type=date],.act-t input[type=text],.act-t select{font:inherit;font-size:12.5px;border:1px solid var(--rule);border-radius:6px;padding:4px 7px}
+.dl-bar{flex-wrap:wrap}
 </style>
 </head>
-<body>
+<body class="locked">
+<div id="gate"><div class="g_backdrop"><div class="g_gradient"></div><div class="g_grid"></div><div class="g_orb g_orb-1"></div><div class="g_orb g_orb-2"></div></div>
+
+<div class="g_page"><div class="g_container">
+
+<div class="g_info">
+  <div class="g_top-bar">
+    <img class="g-logo" id="gateLogo" alt="SOE">
+  </div>
+
+  <div class="g_hero">
+    <h1>AI Contact Center <em>Pricing Hub</em></h1>
+    <p>From customer requirement to quote and proposal in one meeting.</p>
+  </div>
+
+  <div class="g_steps">
+    <div class="g_step">
+      <div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="16" r="3"/><path d="M20.2 18.2L22 20"/></svg></div>
+      <div><div class="g_n">STEP 1</div><div class="g_t">Scope</div><div class="g_d">Pick flows, volumes and systems</div></div>
+    </div>
+    <div class="g_step">
+      <div class="g_ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div>
+      <div><div class="g_n">STEP 2</div><div class="g_t">Quote</div><div class="g_d">Instant SAR price</div></div>
+    </div>
+    <div class="g_step">
+      <div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg></div>
+      <div><div class="g_n">STEP 3</div><div class="g_t">Share</div><div class="g_d">Branded view, no pricing shown</div></div>
+    </div>
+  </div>
+
+  <div class="g_groups">
+    <div>
+      <div class="g_gtitle">Value for Presales</div>
+      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><div><div class="g_t">Quote in minutes</div><div class="g_d">Scope a deal live in the customer meeting, not days later</div></div></div>
+      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div><div><div class="g_t">One approved price book</div><div class="g_d">No spreadsheet errors, discounts stay controlled</div></div></div>
+      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M12 11v3l2 1"/></svg></div><div><div class="g_t">Every deal saved</div><div class="g_d">Reload, adjust and compare deals at any time</div></div></div>
+      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg></div><div><div class="g_t">Proposal in one click</div><div class="g_d">A short link with the customer's company name</div></div></div>
+    </div>
+    <div>
+      <div class="g_gtitle">Value for the Customer</div>
+      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5M3 17.5l9 5 9-5"/></svg></div><div><div class="g_t">Solution architecture</div><div class="g_d">How the AI Contact Center connects to their systems</div></div></div>
+      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="5" rx="1"/><rect x="15" y="4" width="6" height="5" rx="1"/><rect x="9" y="15" width="6" height="5" rx="1"/><path d="M6 9v3h12V9M12 12v3"/></svg></div><div><div class="g_t">Call flow simulation</div><div class="g_d">Their own inbound and outbound flows, step by step</div></div></div>
+      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><div><div class="g_t">Operations dashboard</div><div class="g_d">What management will see after go-live</div></div></div>
+      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></div><div><div class="g_t">Built around their goals</div><div class="g_d">The view adapts to each customer's business goals</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="g_login">
+  <div class="g_badge"><span class="g_pulse"></span> Secure Access</div>
+  <h2>Welcome back</h2>
+  <div class="g_sub">Sign in with your SOE credentials to open the pricing calculator and your saved deals.</div>
+  <div class="g-err" id="gErr"></div>
+  <div class="g_field"><label for="gEmail">Email</label><input type="email" id="gEmail" placeholder="name@soe.com.sa" autocomplete="username"></div>
+  <div class="g_field"><label for="gPass">Password</label><input type="password" id="gPass" placeholder="Enter your password" autocomplete="current-password"></div>
+  <button class="g_btn" id="gBtn" type="button">Sign In</button>
+  <div class="g_foot">
+    <div class="g_pb">SOE<span>×</span>700Apps</div>
+    <div class="g_note"><svg class="i" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>Authorized SOE team only</div>
+  </div>
+</div>
+
+</div></div></div>
 
 <header class="top">
   <div class="top-inner">
@@ -297,8 +503,8 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
     </div>
     <div class="client-fields">
       <div class="field-s"><label for="clientName">Client</label><input id="clientName" type="text" placeholder="Company name"></div>
-      <div class="field-s"><label for="quoteDate">Date</label><input id="quoteDate" type="text"></div>
-      <div class="field-s"><label for="presalesLead">Presales Lead</label><input id="presalesLead" type="text" placeholder="Your name"></div>
+      <div class="field-s"><label for="dealDate">Deal date</label><input id="dealDate" type="date" title="The date this deal really started. Change it if you are logging a deal late."><input id="quoteDate" type="hidden"></div>
+      <div class="field-s"><label for="presalesLead">Presales Lead</label><select id="presalesLead"><option value="Hassan Pervaiz (HP) Bhatty">Hassan Pervaiz (HP) Bhatty</option><option value="Hany Enam">Hany Enam</option></select></div>
       <div class="field-s"><label for="responseBy">Response by</label><input id="responseBy" type="text" placeholder="e.g. 5 Nov 2026"></div>
       <div class="field-s"><label for="logoFile">Customer logo (optional)</label><input id="logoFile" type="file" accept="image/*"><div class="logo-prev" id="logoPrev"></div></div>
     </div>
@@ -739,13 +945,13 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
 <div class="dl" id="dl_panel">
   <div class="dl-in">
     <div class="dl-head">
-      <div><b>Deal library</b><span class="dl-mode" id="dl_mode"></span></div>
+      <div><b>Deal workspace</b><span class="dl-mode" id="dl_mode"></span></div>
       <div class="dl-auth" id="dl_auth"></div>
     </div>
     <div class="dl-bar">
-      <button type="button" class="pri" id="dl_save">Save deal</button>
+      <button type="button" class="pri" id="dl_new">New deal</button>
+      <button type="button" id="dl_save">Save deal</button>
       <button type="button" id="dl_savenew" style="display:none">Save as new copy</button>
-      <button type="button" id="dl_new">New deal</button>
       <span class="dl-status" id="dl_status"></span>
       <input type="search" id="dl_search" placeholder="Search by client name">
     </div>
@@ -757,7 +963,7 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
   <div style="background:#0D3B13;border:2px solid #7CB342;border-radius:8px;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
     <div>
       <div style="font-size:15px;font-weight:700;color:#fff">Customer Demo View</div>
-      <div style="font-size:12px;color:#C6E2CB;margin-top:2px">Opens a separate window with no pricing — safe for screen-sharing during demos</div>
+      <div style="font-size:12px;color:#C6E2CB;margin-top:2px">Opens the live customer page in a separate window with no pricing — safe for screen-sharing during demos</div>
     </div>
     <button id="btnCustView" style="background:#7CB342;color:#fff;border:none;border-radius:6px;padding:12px 28px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap">▶ &nbsp;Open customer view</button>
   </div>
@@ -3142,15 +3348,6 @@ function sendToCustView(){
 window.addEventListener("message", function(ev){
   if(ev.data && ev.data.type === "AICC_READY") sendToCustView();
 });
-$("btnCustView").addEventListener("click", function(){
-  if(custViewWin && !custViewWin.closed){
-    custViewWin.focus();
-    sendToCustView();
-    return;
-  }
-  custViewWin = window.open("customer-view.html", "aicc_customer_view", "width=1280,height=800");
-});
-
 /* ═══════════════════ EXCEL RATE SHEET ═══════════════════ */
 function loadExcelJS(cb){
   if(window.ExcelJS) return cb();
@@ -3651,6 +3848,15 @@ var FIREBASE_CONFIG = {
 };
 var CUST_LOGO = "";
 
+function slugify(name){
+  var s = name.toLowerCase().trim()
+    .replace(/[؀-ۿ]+/g,"")          /* drop Arabic chars */
+    .replace(/[^a-z0-9]+/g,"-")               /* non-alnum → dash  */
+    .replace(/^-+|-+$/g,"")                    /* trim dashes       */
+    .replace(/-{2,}/g,"-");                    /* collapse doubles   */
+  return s || "customer";
+}
+
 var DL = (function(){
   var live = false, db = null, auth = null, user = null, currentId = null, cache = [];
   try{
@@ -3660,44 +3866,118 @@ var DL = (function(){
     }
   }catch(e){ console.warn("Firebase start failed", e); live = false; }
 
+  /* ---------- helpers ---------- */
+  var LEADS = { hp:{n:"Hassan Pervaiz (HP) Bhatty", s:"Hassan", wa:"966591822663"}, hany:{n:"Hany Enam", s:"Hany", wa:"966568986308"} };
+  var STAGES = ["Draft","Link shared","Customer engaged","Quote requested","Quote sent","Pilot or Go live","Won"];
+  var SIDE = { lost:"Lost", hold:"On hold" };
+  var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var DAY = 864e5;
+  function leadKey(name){ return /hany/i.test(name||"") ? "hany" : "hp"; }
+  function pad(n){ return ("0"+n).slice(-2); }
+  function isoOf(ms){ var d = new Date(ms); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function todayISO(){ return isoOf(Date.now()); }
+  function fdate(iso){ if(!iso) return ""; var p = String(iso).split("-"); return (+p[2])+" "+MON[(+p[1])-1]+" "+p[0]; }
+  function fshort(iso){ if(!iso) return ""; var p = String(iso).split("-"); return (+p[2])+" "+MON[(+p[1])-1]; }
+  function fms(ms){ return ms ? fdate(isoOf(ms)) : ""; }
+  function ago(ms){
+    if(!ms) return "not opened";
+    var s = Math.max(0,(Date.now()-ms)/1000);
+    if(s<90) return "just now"; if(s<3600) return Math.round(s/60)+" minutes ago";
+    if(s<86400) return Math.round(s/3600)+" hours ago"; if(s<172800) return "yesterday";
+    return Math.round(s/86400)+" days ago";
+  }
+  function rcode(n){ var c = "abcdefghjkmnpqrstuvwxyz23456789", s = ""; for(var i=0;i<n;i++) s += c[Math.floor(Math.random()*c.length)]; return s; }
+  function leftDays(ms){ return Math.ceil((ms-Date.now())/DAY); }
+  function xesc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+
   /* ---------- storage: Firebase, or this browser only ---------- */
-  var LS_KEY = "aicc_deals_v1";
+  var LS_KEY = "aicc_deals_v2";
   function lsAll(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"{}"); }catch(e){ return {}; } }
   function lsPut(o){ try{ localStorage.setItem(LS_KEY, JSON.stringify(o)); }catch(e){ throw new Error("This browser blocked saving."); } }
+  function setPath(o, path, v){ var p = path.split("."), c = o; for(var i=0;i<p.length-1;i++){ c[p[i]] = c[p[i]] || {}; c = c[p[i]]; } c[p[p.length-1]] = v; }
+  var TS = function(){ return firebase.firestore.FieldValue.serverTimestamp(); };
+
   var store = {
-    save: function(id, deal, share){
-      if(live){
-        var ts = firebase.firestore.FieldValue.serverTimestamp();
-        var ref = id ? db.collection("deals").doc(id) : db.collection("deals").doc();
-        var d = Object.assign({}, deal, {updatedAt: ts}); if(!id) d.createdAt = ts;
-        var b = db.batch();
-        b.set(ref, d, {merge:true});
-        b.set(db.collection("shares").doc(ref.id), Object.assign({}, share, {updatedAt: ts}));
-        return b.commit().then(function(){ return ref.id; });
-      }
-      return new Promise(function(res){
-        var all = lsAll(); id = id || ("local" + Date.now().toString(36));
-        var old = all[id] || {};
-        all[id] = Object.assign({}, deal, {createdMs: old.createdMs || Date.now(), ms: Date.now()});
-        lsPut(all); res(id);
-      });
-    },
     list: function(){
-      if(live) return db.collection("deals").orderBy("updatedAt","desc").limit(200).get().then(function(s){
+      if(live) return db.collection("deals").orderBy("updatedAt","desc").limit(300).get().then(function(s){
         return s.docs.map(function(x){ var o = x.data(); o.id = x.id; o.ms = (o.updatedAt && o.updatedAt.toMillis) ? o.updatedAt.toMillis() : Date.now(); return o; });
       });
-      return new Promise(function(res){
-        var all = lsAll(), a = Object.keys(all).map(function(k){ var o = all[k]; o.id = k; return o; });
-        a.sort(function(x,y){ return y.ms - x.ms; }); res(a);
-      });
+      var all = lsAll(); return Promise.resolve(Object.keys(all).map(function(k){ var o = Object.assign({}, all[k]); o.id = k; delete o._vers; return o; }).sort(function(a,b){ return b.ms-a.ms; }));
     },
     get: function(id){
-      if(live) return db.collection("deals").doc(id).get().then(function(x){ if(!x.exists) throw new Error("Deal not found"); return x.data(); });
-      return new Promise(function(res,rej){ var o = lsAll()[id]; if(o) res(o); else rej(new Error("Deal not found")); });
+      if(live) return db.collection("deals").doc(id).get().then(function(x){ if(!x.exists) throw new Error("Deal not found"); var o = x.data(); o.id = id; return o; });
+      var o = lsAll()[id]; if(!o) return Promise.reject(new Error("Deal not found")); o = Object.assign({}, o); o.id = id; delete o._vers; return Promise.resolve(o);
     },
-    remove: function(id){
-      if(live){ var b = db.batch(); b.delete(db.collection("deals").doc(id)); b.delete(db.collection("shares").doc(id)); return b.commit(); }
-      return new Promise(function(res){ var all = lsAll(); delete all[id]; lsPut(all); res(); });
+    versions: function(id){
+      if(live) return db.collection("deals").doc(id).collection("versions").orderBy("n","desc").get().then(function(s){ return s.docs.map(function(x){ return x.data(); }); });
+      var o = lsAll()[id]; return Promise.resolve(((o && o._vers) || []).slice().sort(function(a,b){ return b.n-a.n; }));
+    },
+    /* create a deal with its first version and its (inactive) customer link */
+    create: function(deal, ver, share, slug){
+      if(live){
+        var ref = db.collection("deals").doc(), t = TS(), b = db.batch();
+        b.set(ref, Object.assign({}, deal, {createdAt:t, updatedAt:t}));
+        b.set(ref.collection("versions").doc(String(ver.n)), ver);
+        b.set(db.collection("shares").doc(slug), Object.assign({}, share, {dealId:ref.id, updatedAt:t}));
+        return b.commit().then(function(){ return ref.id; });
+      }
+      var all = lsAll(), id = "local"+Date.now().toString(36);
+      all[id] = Object.assign({}, deal, {ms:Date.now(), _vers:[ver]}); lsPut(all); return Promise.resolve(id);
+    },
+    /* save a new version of an existing deal; sharePatch updates the customer link data */
+    addVersion: function(id, patch, ver, sharePatch, slug){
+      if(live){
+        var ref = db.collection("deals").doc(id), b = db.batch();
+        b.update(ref, Object.assign({}, patch, {updatedAt:TS()}));
+        b.set(ref.collection("versions").doc(String(ver.n)), ver);
+        if(slug) b.set(db.collection("shares").doc(slug), Object.assign({}, sharePatch, {updatedAt:TS()}), {merge:true});
+        return b.commit();
+      }
+      var all = lsAll(), o = all[id]; if(!o) return Promise.reject(new Error("Deal not found"));
+      Object.keys(patch).forEach(function(k){ setPath(o, k, patch[k]); }); o._vers = (o._vers||[]).concat([ver]); o.ms = Date.now(); lsPut(all); return Promise.resolve();
+    },
+    patch: function(id, patch, sharePatch, slug, verPatch){
+      if(live){
+        var ref = db.collection("deals").doc(id), b = db.batch();
+        b.update(ref, Object.assign({}, patch, {updatedAt:TS()}));
+        if(sharePatch && slug) b.set(db.collection("shares").doc(slug), Object.assign({}, sharePatch, {updatedAt:TS()}), {merge:true});
+        if(verPatch) b.update(ref.collection("versions").doc(String(verPatch.n)), verPatch.data);
+        return b.commit();
+      }
+      var all = lsAll(), o = all[id]; if(!o) return Promise.reject(new Error("Deal not found"));
+      Object.keys(patch).forEach(function(k){ setPath(o, k, patch[k]); });
+      if(verPatch){ (o._vers||[]).forEach(function(v){ if(v.n===verPatch.n) Object.assign(v, verPatch.data); }); }
+      o.ms = Date.now(); lsPut(all); return Promise.resolve();
+    },
+    /* new link code: move the customer link to a new address */
+    moveShare: function(id, oldSlug, newSlug, share, patch){
+      if(live){
+        var b = db.batch(), t = TS();
+        b.delete(db.collection("shares").doc(oldSlug));
+        b.set(db.collection("shares").doc(newSlug), Object.assign({}, share, {dealId:id, updatedAt:t}));
+        b.update(db.collection("deals").doc(id), Object.assign({}, patch, {updatedAt:t}));
+        return b.commit();
+      }
+      return store.patch(id, patch);
+    },
+    remove: function(id, slug){
+      if(live){
+        return db.collection("deals").doc(id).collection("versions").get().then(function(s){
+          var b = db.batch(); s.docs.forEach(function(x){ b.delete(x.ref); });
+          b.delete(db.collection("deals").doc(id)); if(slug) b.delete(db.collection("shares").doc(slug)); return b.commit();
+        });
+      }
+      var all = lsAll(); delete all[id]; lsPut(all); return Promise.resolve();
+    },
+    /* customer activity: the latest 300 events, matched to deals by link address */
+    responses: function(){
+      if(!live) return Promise.resolve([]);
+      return db.collection("responses").orderBy("createdAt","desc").limit(300).get().then(function(s){
+        return s.docs.map(function(x){
+          var o = x.data(), p = {}; try{ p = JSON.parse(o.payload||"{}"); }catch(e){}
+          return { slug:o.slug, dealId:o.dealId, type:o.type, p:p, sid:o.sid, ms:(o.createdAt && o.createdAt.toMillis) ? o.createdAt.toMillis() : Date.now() };
+        });
+      });
     }
   };
 
@@ -3706,7 +3986,7 @@ var DL = (function(){
   function captureState(){
     var f = {};
     document.querySelectorAll("input[id],select[id],textarea[id]").forEach(function(el){
-      if(el.type==="file" || el.id.indexOf("dl_")===0) return;
+      if(el.type==="file" || el.id.indexOf("dl_")===0 || el.id.indexOf("act_")===0) return;
       f[el.id] = (el.type==="checkbox"||el.type==="radio") ? el.checked : el.value;
     });
     var mc = {}; MULTI.forEach(function(w){ mc[w] = getMultiCheckIds($(w)); });
@@ -3778,118 +4058,515 @@ var DL = (function(){
     rd.readAsDataURL(file);
   });
 
+  /* ---------- data for the customer page (no prices, no margins, no private notes) ---------- */
+  var SYS_DISP = { booking:"Booking system", crm:"CRM", ticketing:"Ticketing system", erp:"ERP", billing:"Billing system", payment:"Payment gateway", core:"Core business system", sms:"SMS gateway", field:"Field service system", esign:"E-signature system", hr:"HR system" };
+  function custData(m){
+    var D = docData(m), ind = ($("industry").value || "other"), IND = (typeof INDUSTRY_DATA!=="undefined" && INDUSTRY_DATA[ind]) || {};
+    var inb = [], out = [];
+    activeFlows().forEach(function(a){
+      var k = (a.job.sys && a.job.sys[0]) || "", sy = (k && SYS_DISP[k]) || "";
+      var o = { id:a.job.id==="other" ? (a.dir==="in"?"other":"other_out") : a.job.id, code:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1),
+        label:a.job.id==="other" ? (((a.f.name||"").trim()) || "Custom flow") : (SHORT[a.job.id] || a.job.label), sys:sy };
+      (a.dir==="in" ? inb : out).push(o);
+    });
+    var sysNames = [];
+    m.eps.forEach(function(ep){
+      if(ep.key==="whatsapp") return;
+      if(m.hOn && (m.hWhere==="external"||m.hWhere==="both") && ep.key==="other:"+humanExtName().toLowerCase()) return;
+      var nm = SYS_DISP[ep.key] || ep.name; if(sysNames.indexOf(nm)<0) sysNames.push(nm);
+    });
+    return {
+      client:D.client, industry:ind, noun:IND.noun || "customers",
+      goals:D.goalIds, goalOther:($("goalOtherText").value||"").trim(), pains:D.painIds,
+      inbound:inb, outbound:out, systems:sysNames, whatsapp:D.whatsapp, human:!!(D.human && D.human.on), kb:!!D.kb,
+      phone:{ type:D.phone.type },
+      sz:{ "in":num("inCallsDay",0), share:Math.round(m.aiShare*100), inlen:num("inCallLen",0), out:num("outCallsDay",0), outlen:num("outCallLen",0), days:m.workDays,
+        contacts:num("contacts",0), attempts:2, peak:m.peak, lines:D.phone.lines||1, ext:m.extensions||1, wa:D.waMsgs||0, agents:(D.human&&D.human.agents)||0, dash:m.dashUsers||1 }
+    };
+  }
+  function marginSnap(m){
+    var refFee = num("refFee",0), marginYear = (m.recPrice-m.recList)*m.billed + (m.onePrice-m.oneList) - refFee;
+    return { mkRec:num("mkRec",0), mkOne:num("mkOne",0), vendorYear1:Math.round(m.recList*m.billed+m.oneList), soeMarginYear1:Math.round(marginYear) };
+  }
+  function quoteSnap(m){ return { onePrice:Math.round(m.onePrice), recPrice:Math.round(m.recPrice), yearTotal:Math.round(m.yearTotal||0), pkg:m.voicePkg.name, flows:activeFlows().length }; }
+
+  /* ---------- state ---------- */
+  var deals = [], events = [], view = "list", curId = null, tab = "ov", filt = "all", lf = "all", q = "";
+  var edit = null, verCache = {}, dismissed = {};
+  function find(id){ return deals.filter(function(d){ return d.id===id; })[0]; }
+  function evOf(d){ return events.filter(function(e){ return e.slug===d.slug; }); }
+  function unseenOf(d){
+    var seen = d.lastSeenMs||0, sids = {}, n = 0;
+    evOf(d).forEach(function(e){
+      if(e.ms<=seen) return;
+      if(e.type==="request"||e.type==="timeline"||e.type==="share") n++;
+      else if(e.type==="open" && !sids[e.sid]){ sids[e.sid] = 1; n++; }
+    });
+    return n;
+  }
+  function lastAct(d){ var e = evOf(d)[0]; return e ? e.ms : 0; }
+  function lstate(d){
+    var l = d.link || {}; if(l.state==="disabled") return "disabled"; if(l.state!=="active") return "draft";
+    return (l.expiresAt && l.expiresAt<Date.now()) ? "expired" : "active";
+  }
+  function lurl(d){ return new URL("c.html", location.href).href + "#" + d.slug; }
+  function lchip(d){
+    var s = lstate(d), l = d.link || {};
+    if(s==="draft") return "Link not shared yet"; if(s==="disabled") return "Link disabled"; if(s==="expired") return "Link expired";
+    return l.expiresAt ? "Link expires in "+Math.max(0,leftDays(l.expiresAt))+" days" : "Link has no expiry";
+  }
+  function cat(d){ return unseenOf(d) ? "attn" : d.side ? "closed" : d.stage>=6 ? "won" : "open"; }
+  function stName(d){ return d.side ? SIDE[d.side] : STAGES[d.stage]; }
+  function bdg(d){ var n = unseenOf(d); return n ? '<span class="bdg new">'+n+' NEW</span>' : ''; }
+  function sar2(n){ return Number(n||0).toLocaleString("en-US"); }
+  function lastVer(d){ return (verCache[d.id]||[])[0]; }
+
   /* ---------- UI ---------- */
   function status(msg, err){ var s = $("dl_status"); s.textContent = msg || ""; s.className = "dl-status" + (err ? " err" : ""); }
+  function toast(m){ var t = $("act_toast"); if(!t){ t = document.createElement("div"); t.id = "act_toast"; t.className = "act-toast"; document.body.appendChild(t); } t.textContent = m; t.style.display = "block"; clearTimeout(t._t); t._t = setTimeout(function(){ t.style.display = "none"; }, 5200); }
   function canUse(){ return !live || !!user; }
   function drawAuth(){
     var a = $("dl_auth"), mode = $("dl_mode");
-    if(!live){
-      mode.className = "dl-mode warn";
-      mode.textContent = "Test mode: deals are saved in this browser only. Add the Firebase config to share with the team.";
-      a.innerHTML = ""; return;
-    }
-    mode.className = "dl-mode"; mode.textContent = "Connected to Firebase";
-    if(user){
-      a.innerHTML = '<span>Signed in as '+esc(user.email||"")+'</span><button type="button" id="dl_out">Sign out</button>';
-      $("dl_out").addEventListener("click", function(){ auth.signOut(); });
-    } else {
-      a.innerHTML = '<input type="email" id="dl_email" placeholder="Team email" autocomplete="username"><input type="password" id="dl_pw" placeholder="Password" autocomplete="current-password"><button type="button" id="dl_in">Sign in</button>';
-      var go = function(){
-        auth.signInWithEmailAndPassword($("dl_email").value.trim(), $("dl_pw").value).catch(function(e){ status("Sign in failed: "+(e.message||e), true); });
-      };
-      $("dl_in").addEventListener("click", go);
-      $("dl_pw").addEventListener("keydown", function(e){ if(e.key==="Enter") go(); });
-    }
+    mode.textContent = live ? "  Shared with the team (Firebase)" : "  This browser only";
+    if(!live){ a.innerHTML = ""; return; }
+    if(user){ a.innerHTML = '<span>Signed in as '+xesc(user.email||"")+'</span><button type="button" id="dl_out">Sign out</button>'; $("dl_out").addEventListener("click", function(){ auth.signOut(); }); }
+    else a.innerHTML = '<span>Sign in to see saved deals.</span>';
   }
-  function fmtDate(ms){ return ms ? new Date(ms).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : ""; }
-  function drawList(){
-    var q = ($("dl_search").value||"").trim().toLowerCase(), box = $("dl_list");
-    if(!canUse()){ box.innerHTML = '<div class="dl-empty">Sign in with your team account to see saved deals.</div>'; return; }
-    var rows = cache.filter(function(d){ return !q || String(d.client||"").toLowerCase().indexOf(q) >= 0; });
-    if(!rows.length){ box.innerHTML = '<div class="dl-empty">'+(cache.length ? "No deal matches your search." : "No saved deals yet. Fill the form and press Save deal.")+'</div>'; return; }
-    box.innerHTML = rows.map(function(d){
-      var qt = d.quote || {};
-      return '<div class="dl-row'+(d.id===currentId?' cur':'')+'" data-id="'+esc(d.id)+'">'+
-        '<div><div class="dl-name">'+esc(d.client||"Client")+(d.id===currentId?' (open now)':'')+'</div>'+
-          '<div class="dl-meta">'+esc(String(qt.flows||0))+' flows · '+esc(qt.pkg||"")+' package'+(d.presalesLead?' · '+esc(d.presalesLead):'')+'</div></div>'+
-        '<div><div class="dl-q">'+sar(qt.recPrice||0)+' / month</div><div class="dl-meta">+ '+sar(qt.onePrice||0)+' one-time</div></div>'+
-        '<div class="dl-meta">Saved '+fmtDate(d.ms)+'</div>'+
-        '<div class="dl-acts">'+
-          '<button type="button" class="sm pri" data-act="load">Load</button>'+
-          '<button type="button" class="sm" data-act="brief">Internal brief</button>'+
-          '<button type="button" class="sm" data-act="view">Customer view</button>'+
-          '<button type="button" class="sm" data-act="share">Copy link</button>'+
-          '<button type="button" class="sm danger" data-act="del">Delete</button></div></div>';
-    }).join("");
-  }
-  function refreshList(){
-    if(!canUse()){ drawList(); return Promise.resolve(); }
-    return store.list().then(function(a){ cache = a; drawList(); }).catch(function(e){ status("Could not read deals: "+(e.message||e), true); });
-  }
-  function drawButtons(){ $("dl_savenew").style.display = currentId ? "" : "none"; $("dl_save").textContent = currentId ? "Save changes" : "Save deal"; }
 
-  function save(asNew){
-    if(!canUse()){ status("Please sign in first.", true); return; }
-    var name = ($("clientName").value||"").trim();
-    if(!name){ status("Enter the client name first.", true); $("clientName").focus(); return; }
-    var m = model(), D = docData(m);
-    var S = JSON.parse(JSON.stringify(D));            /* customer-safe copy: no names of our team, no discounts */
-    delete S.presalesLead; delete S.responseBy; if(S.phone) delete S.phone.lineDisc; delete S.logo;
-    var deal = {
-      client:name, date:D.date, presalesLead:D.presalesLead, logo:CUST_LOGO,
-      quote:{ onePrice:m.onePrice, recPrice:m.recPrice, yearTotal:m.yearTotal, pkg:m.voicePkg.name, flows:activeFlows().length },
-      stateJson: JSON.stringify(captureState())
-    };
-    var share = { client:name, date:D.date, logo:CUST_LOGO, customerJson: JSON.stringify(S) };
-    status("Saving...");
-    store.save(asNew ? null : currentId, deal, share).then(function(id){
-      currentId = id; status("Saved: "+name); drawButtons(); return refreshList();
-    }).catch(function(e){ status("Save failed: "+(e.message||e), true); });
+  function listV(){
+    var rows0 = deals.filter(function(d){ return (lf==="all"||leadKey(d.lead)===lf) && (!q || String(d.client||"").toLowerCase().indexOf(q)>-1); });
+    var cnt = {all:rows0.length, attn:0, open:0, won:0, closed:0}; rows0.forEach(function(d){ cnt[cat(d)]++; });
+    var h = '<div class="act-fl">';
+    [["all","All deals"],["attn","Needs attention"],["open","In progress"],["won","Won"],["closed","Lost or on hold"]].forEach(function(f){ h += '<button type="button" data-f="'+f[0]+'" class="'+(filt===f[0]?"on":"")+'">'+f[1]+' <b>'+cnt[f[0]]+'</b></button>'; });
+    h += '<span style="margin-left:auto" class="dl-meta">Presales lead: </span><select id="act_lf"><option value="all">All leads</option><option value="hp"'+(lf==="hp"?" selected":"")+'>Hassan</option><option value="hany"'+(lf==="hany"?" selected":"")+'>Hany</option></select></div>';
+    var rows = rows0.filter(function(d){ return filt==="all" || cat(d)===filt; });
+    if(!rows.length) h += '<div class="dl-empty">'+(deals.length ? "No deals match." : "No saved deals yet. Press New deal, fill the calculator, then Save deal.")+'</div>';
+    rows.forEach(function(d){
+      var qt = d.quote || {}, la = lastAct(d), warn = !(lstate(d)==="active" && (!d.link.expiresAt || leftDays(d.link.expiresAt)>7));
+      h += '<div class="dl-row act-r" data-open="'+d.id+'"><div><div class="dl-name">'+xesc(d.client)+bdg(d)+'</div>'+
+        '<div class="dl-meta">'+xesc(d.industryLabel||"")+' &middot; '+(qt.flows||0)+' flows &middot; lead: '+LEADS[leadKey(d.lead)].s+' &middot; last activity: '+ago(la)+' &middot; <span class="'+(warn?'act-warn':'')+'">'+lchip(d)+'</span></div>'+
+        '<div class="act-mini">'+STAGES.map(function(s,i){ return '<i class="'+(!d.side&&i<=d.stage?"on":"")+'"></i>'; }).join("")+'<span>'+stName(d)+'</span></div></div>'+
+        '<div><div class="dl-q">SAR '+sar2(qt.recPrice)+' / month</div><div class="dl-meta">+ SAR '+sar2(qt.onePrice)+' one-time &middot; v'+(d.version||1)+(d.sentVersion===d.version?" (sent)":"")+'</div></div>'+
+        '<div class="dl-meta">Deal date '+fdate(d.dealDate)+'</div>'+
+        '<div class="dl-acts"><button type="button" class="sm" data-edit="'+d.id+'">Edit in calculator</button><button type="button" class="sm pri" data-open="'+d.id+'">Open deal &rarr;</button></div></div>';
+    });
+    return h;
   }
-  function loadDeal(id, then){
+
+  function suggest(d){
+    if(d.side || dismissed[d.id+":"+d.stage]) return "";
+    var ev = evOf(d), want = -1, why = "", when = 0;
+    var req = ev.filter(function(e){ return e.type==="request"; }).sort(function(a,b){ return a.ms-b.ms; });
+    var opens = ev.filter(function(e){ return e.type==="open"; }).sort(function(a,b){ return a.ms-b.ms; });
+    var qr = req.filter(function(e){ return e.p.kind==="quote"; })[0], pg = req.filter(function(e){ return e.p.kind==="pilot"||e.p.kind==="golive"; })[0];
+    if(pg && d.stage<5){ want = 5; why = "The customer chose "+(pg.p.kind==="pilot"?"a pilot":"to go live")+"."; when = pg.ms; }
+    else if(qr && d.stage<3){ want = 3; why = "The customer asked for a quote."; when = qr.ms; }
+    else if(opens.length && d.stage<2 && lstate(d)!=="draft"){ want = 2; why = "The customer opened the link."; when = opens[0].ms; }
+    if(want<0) return "";
+    return '<div class="act-sug"><b>Suggested next stage: '+STAGES[want]+'.</b> '+why+' <button type="button" class="sm pri" data-sg="'+want+'" data-sd="'+isoOf(when)+'">Confirm</button> <button type="button" class="sm" data-dis="'+d.id+":"+d.stage+'">Not yet</button></div>';
+  }
+  function stageBar(d){
+    var sd = d.stageDates || {}, h = '<div class="act-stg"><div class="act-sb">';
+    STAGES.forEach(function(s,i){
+      var on = !d.side && i<=d.stage, c = !d.side && i===d.stage;
+      h += '<button type="button" data-sg="'+i+'" class="'+(on?"on ":"")+(c?"cur":"")+'"><span>'+(on&&!c?"&#10003;":i+1)+'</span>'+s+'<small>'+(sd[i]?fshort(sd[i]):"")+'</small></button>';
+    });
+    h += '</div><div class="act-sd"><button type="button" data-dates="1">Edit stage dates</button><button type="button" data-side="hold" class="'+(d.side==="hold"?"on":"")+'">On hold</button><button type="button" data-side="lost" class="'+(d.side==="lost"?"on":"")+'">Lost</button></div></div>';
+    if(dates){
+      h += '<div class="act-sug" style="background:#F3F7F1;border-color:var(--rule)"><b>Stage dates</b> (the date it really happened; today or earlier)<div class="act-chk" style="margin-top:6px">';
+      STAGES.forEach(function(s,i){ if(sd[i]) h += '<label>'+s+' <input type="date" data-sdate="'+i+'" value="'+sd[i]+'" max="'+todayISO()+'"></label>'; });
+      h += '</div></div>';
+    }
+    return h + suggest(d);
+  }
+  var dates = false;
+
+  function detV(d){
+    var vs = verCache[d.id] || [], cv = vs[0] || {}, qt = d.quote || {}, ln = LEADS[leadKey(d.lead)], un = unseenOf(d), ev = evOf(d);
+    var opens = {}; ev.forEach(function(e){ if(e.type==="open") opens[e.sid] = 1; });
+    var h = '<div class="act-top"><button type="button" class="sm" data-back="1">&larr; All deals</button><div style="flex:1"><div class="act-nm">'+xesc(d.client)+bdg(d)+'</div><div class="dl-meta">'+xesc(d.industryLabel||"")+' &middot; presales lead: <b>'+ln.n+'</b> &middot; deal date '+fdate(d.dealDate)+' &middot; customer opened '+Object.keys(opens).length+' times</div></div>'+
+      '<div class="dl-acts"><button type="button" class="sm pri" data-ld="1">Edit in calculator</button><button type="button" class="sm" data-brief="int">Internal brief</button><button type="button" class="sm" data-brief="req">Requirements brief</button><button type="button" class="sm" data-pvc="1">Customer view</button></div></div>'+stageBar(d);
+    h += '<div class="act-tabs">';
+    [["ov","Overview"],["act","Customer activity"+(un?" ("+un+" new)":"")],["sz","Sizing review"],["qt","Quote versions"],["lk","Links"]].forEach(function(t){ h += '<button type="button" data-t="'+t[0]+'" class="'+(tab===t[0]?"on":"")+'">'+t[1]+'</button>'; });
+    h += '</div><div class="act-body">';
+    var cust = {}; try{ cust = JSON.parse(d.cust||"{}"); }catch(e){}
+    if(tab==="ov"){
+      var rq = ev.filter(function(e){ return e.type==="request"; })[0], ct = rq ? (rq.p.name+", "+rq.p.dg+" - "+rq.p.mobile) : (d.contact||"Not given yet");
+      h += '<div class="act-cards"><div class="act-k"><small>Current quote (v'+(d.version||1)+')</small><b>SAR '+sar2(qt.recPrice)+'</b><em>per month</em></div><div class="act-k"><small>One-time</small><b>SAR '+sar2(qt.onePrice)+'</b></div><div class="act-k"><small>Presales lead</small><b style="font-size:16px">'+ln.s+'</b><em>main contact on customer page</em></div><div class="act-k"><small>SOE margin, year one (internal)</small><b style="font-size:18px">'+(cv.margin?'SAR '+sar2(cv.margin.soeMarginYear1):'-')+'</b><em>'+(cv.margin?cv.margin.mkRec+'% recurring / '+cv.margin.mkOne+'% one-time markup':'')+'</em></div></div>';
+      h += '<div class="act-g"><div class="act-box"><div class="act-h">Deal details</div><table class="act-t"><tr><td>Customer</td><td>'+xesc(d.client)+'</td></tr><tr><td>Industry</td><td>'+xesc(d.industryLabel||"")+'</td></tr><tr><td>Deal date</td><td>'+fdate(d.dealDate)+'</td></tr><tr><td>Package and flows</td><td>'+xesc(qt.pkg||"")+' &middot; '+(qt.flows||0)+' flows</td></tr><tr><td>Systems</td><td>'+xesc((cust.systems||[]).join(", ")||"None")+'</td></tr>'+
+        '<tr><td>Presales lead</td><td><select id="act_lead"><option value="hp"'+(leadKey(d.lead)==="hp"?" selected":"")+'>'+LEADS.hp.n+'</option><option value="hany"'+(leadKey(d.lead)==="hany"?" selected":"")+'>'+LEADS.hany.n+'</option></select></td></tr><tr><td>Customer contact</td><td>'+xesc(ct)+'</td></tr></table></div>'+
+        '<div class="act-box"><div class="act-h">Customer link</div><div class="act-link">'+xesc(lurl(d))+'</div><div class="dl-meta" style="margin:6px 0">'+lchip(d)+'. No prices on this page. The WhatsApp button goes to '+ln.s+'.</div><button type="button" class="sm pri" data-t2="lk">Manage links</button><div class="act-h" style="margin-top:14px">Your notes (private)</div><textarea id="act_note">'+xesc(d.notes||"")+'</textarea><button type="button" class="sm pri" data-sn="1" style="margin-top:6px">Save note</button> <span class="dl-meta" id="act_ok"></span></div></div>';
+      if(d.stage>=6) h += wonV(d, vs);
+      h += '<div style="margin-top:6px"><button type="button" class="sm danger" data-del="1">Delete this deal</button></div>';
+    }
+    if(tab==="act") h += actV(d, ev, un);
+    if(tab==="sz") h += szV(d, ev, cust);
+    if(tab==="qt") h += qtV(d, vs);
+    if(tab==="lk") h += lkV(d);
+    return h + '</div>';
+  }
+
+  function wonV(d, vs){
+    var w = d.won || {}, sv = vs.filter(function(v){ return v.n===d.sentVersion; })[0] || vs[0] || {};
+    var h = '<div class="act-box"><div class="act-h">Won details</div><div class="act-g">';
+    h += '<div><table class="act-t"><tr><td>Deal value (sent version v'+(sv.n||"")+')</td><td><b>SAR '+sar2(sv.rec)+' / month</b> + SAR '+sar2(sv.one)+' one-time</td></tr>'+
+      '<tr><td>Started as</td><td><select id="act_wtype"><option value="">Choose</option><option value="pilot"'+(w.type==="pilot"?" selected":"")+'>Pilot</option><option value="golive"'+(w.type==="golive"?" selected":"")+'>Go live</option></select></td></tr>'+
+      '<tr><td>Start date</td><td><input type="date" id="act_wstart" value="'+xesc(w.start||"")+'"></td></tr>'+
+      '<tr><td>Contract reference</td><td><input type="text" id="act_wref" value="'+xesc(w.ref||"")+'" placeholder="e.g. SOE-2026-114"></td></tr></table><button type="button" class="sm pri" data-wsave="1" style="margin-top:8px">Save won details</button></div>';
+    h += '<div><div class="dl-meta" style="margin-bottom:8px">Hand-over documents for the delivery team. Neither shows prices or margins.</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="sm pri" data-brief="hand">Handover brief</button><button type="button" class="sm" data-brief="req">Requirements brief</button></div></div>';
+    return h + '</div></div>';
+  }
+
+  var KIND = { ask:"Asked a question", call:"Requested a call back", meet:"Requested an online meeting", quote:"Requested a quote", pilot:"Chose a pilot", golive:"Chose to go live", discuss:"Asked to discuss" };
+  function actV(d, ev, un){
+    if(!ev.length) return '<div class="act-box">The customer has not opened the link yet. Share it by WhatsApp or email from the Links tab.'+(live?'':' Customer activity needs the shared Firebase mode.')+'</div>';
+    var seen = d.lastSeenMs||0, items = [], sess = {};
+    ev.slice().reverse().forEach(function(e){
+      var s = sess[e.sid] = sess[e.sid] || { maxStep:0, calls:[], first:e.ms };
+      if(e.type==="step") s.maxStep = Math.max(s.maxStep, e.p.step||0);
+      if(e.type==="call") s.calls.push(e.p.flow);
+    });
+    var done = {};
+    ev.forEach(function(e){
+      var hot = e.ms>seen, t = "", p = "", who = "";
+      if(e.type==="open"){ if(done[e.sid]) return; done[e.sid] = 1; var s = sess[e.sid]; t = "Opened the customer page"; p = s.maxStep ? "Viewed steps 1 to "+s.maxStep+"." : "Viewed the first page."; if(s.calls.length) p += " Watched "+s.calls.length+" sample call"+(s.calls.length>1?"s":"")+"."; }
+      else if(e.type==="request"){
+        var k = e.p.kind; t = KIND[k]||"Sent a request"; var bits = [];
+        if(e.p.when) bits.push(e.p.when); if(e.p.flows) bits.push("Scope: "+e.p.flows); if(e.p.chg) bits.push(e.p.chg); if(e.p.addF && e.p.addF.length) bits.push("Added: "+e.p.addF.join("; ")); if(e.p.off && e.p.off.length) bits.push("Removed "+e.p.off.length+" flow(s)"); if(e.p.addS && e.p.addS.length) bits.push("Systems to add: "+e.p.addS.join("; ")); if(e.p.note) bits.push("Note: "+e.p.note); if(e.p.msg) bits.push("Message: "+e.p.msg);
+        bits.push("Sizing: "+(e.p.sizing||"not reviewed")); p = bits.map(xesc).join("<br>"); who = e.p.name+" - "+e.p.dg+" - "+e.p.mobile;
+      }
+      else if(e.type==="timeline"){ t = "Said when they plan to decide"; p = e.p.tl; }
+      else if(e.type==="share"){ t = "Shared the link with a colleague"; }
+      else return;
+      items.push('<div class="act-ev '+(hot?"hot":"")+'"><i>'+ago(e.ms)+' &middot; '+fms(e.ms)+'</i><b>'+t+'</b><p>'+(e.type==="request"?p:xesc(p))+'</p>'+(who?'<span class="act-who">'+xesc(who)+'</span>':'')+'</div>');
+    });
+    return '<div class="act-box"><div class="act-tl">'+items.join("")+'</div>'+(un?'<button type="button" class="sm pri" data-seen="1">Mark all as seen</button>':'')+'</div>';
+  }
+
+  var SZL = { "in":"Inbound calls per day", share:"Calls the Voice Agent finishes alone (%)", inlen:"Minutes per inbound call", out:"Outbound calls per day", outlen:"Minutes per outbound call", days:"Working days per month", contacts:"Contacts loaded for outbound", peak:"Calls at the same time (busiest hour)", lines:"Phone lines or numbers", ext:"Extensions for handovers", wa:"WhatsApp messages per month", agents:"Staff who take handovers", dash:"Dashboard users" };
+  var SZMAP = { "in":"inCallsDay", inlen:"inCallLen", out:"outCallsDay", outlen:"outCallLen", peak:"peak", contacts:"contacts", days:"workDays" };
+  function szEvents(d){
+    var o = {}; evOf(d).filter(function(e){ return e.type==="sizing"; }).slice().reverse().forEach(function(e){ o[e.p.k] = e.p; }); return o;
+  }
+  function szV(d, ev, cust){
+    var s = szEvents(d), keys = Object.keys(s);
+    if(!keys.length) return '<div class="act-box">The customer has not reviewed the sizing numbers yet.</div>';
+    var chg = keys.filter(function(k){ return !s[k].ok && s[k].nv; }), z = cust.sz || {};
+    var h = '<div class="act-box"><table class="act-t"><thead><tr><th>Number</th><th>You proposed</th><th>Customer says</th><th>Status</th></tr></thead><tbody>';
+    keys.forEach(function(k){ var r = s[k]; h += '<tr><td>'+(SZL[k]||k)+'</td><td>'+xesc(z[k]!=null?z[k]:"")+'</td><td>'+(r.ok?xesc(z[k]):'<span class="act-chg">'+xesc(r.nv||"?")+'</span>')+'</td><td class="'+(r.ok?"act-ok":"")+'">'+(r.ok?"Correct":"Needs a change")+'</td></tr>'; });
+    h += '</tbody></table>';
+    if(chg.length) h += '<button type="button" class="sm pri" data-apply="1" style="margin-top:10px">Open in calculator with the customer\'s numbers</button><div class="dl-meta" style="margin-top:6px">Numbers that map to a calculator field are filled in. Review, then press Save as v'+((d.version||1)+1)+'.</div>';
+    return h + '</div>';
+  }
+
+  function qtV(d, vs){
+    var sent = vs.filter(function(v){ return v.sent; })[0], cv = vs[0];
+    var h = '<div class="act-box">'+(sent ? '<div class="act-lock"><b>Sent version (locked): v'+sent.n+'</b> &middot; SAR '+sar2(sent.rec)+' / month &middot; SAR '+sar2(sent.one)+' one-time &middot; sent '+fdate(sent.sentDate)+'. The customer was quoted this version.</div>' : '<div class="dl-meta">No version has been sent to the customer yet.</div>');
+    h += '<table class="act-t" style="margin-top:10px"><thead><tr><th>Version</th><th>Date</th><th>Monthly</th><th>One-time</th><th>Markup (internal)</th><th>SOE margin yr 1 (internal)</th><th>Note</th><th></th></tr></thead><tbody>';
+    vs.forEach(function(v,i){
+      var mg = v.margin || {}, zero = v.margin && !mg.mkRec && !mg.mkOne;
+      h += '<tr><td><b>v'+v.n+'</b> '+(i===0?'<span class="bdg done">CURRENT</span>':'')+(v.sent?' <span class="bdg prog">SENT &middot; LOCKED</span>':'')+'</td><td>'+fdate(v.date)+'</td><td>SAR '+sar2(v.rec)+'</td><td>SAR '+sar2(v.one)+'</td>'+
+        '<td'+(zero?' class="act-warn"':'')+'>'+(v.margin ? mg.mkRec+'% / '+mg.mkOne+'%' : '-')+'</td><td>'+(v.margin ? 'SAR '+sar2(mg.soeMarginYear1) : '-')+'</td><td>'+xesc(v.why||"")+'</td>'+
+        '<td><div style="display:flex;gap:4px;flex-wrap:wrap"><button type="button" class="sm" data-openv="'+v.n+'">Open v'+v.n+' in calculator to print</button>'+(!v.sent&&i===0?'<button type="button" class="sm pri" data-sent="'+v.n+'">Mark v'+v.n+' as sent</button>':'')+'</div></td></tr>';
+    });
+    h += '</tbody></table>';
+    if(cv && !sent) h += '<div class="dl-meta" style="margin-top:8px">Sent on: <input type="date" id="act_sentdate" value="'+todayISO()+'" max="'+todayISO()+'"> (change it if you sent the quote earlier)</div>';
+    if(sent && cv && cv.n!==sent.n) h += '<div class="act-diff"><b>Change since the sent version</b><br>Monthly price: SAR '+sar2(sent.rec)+' &rarr; SAR '+sar2(cv.rec)+' ('+(cv.rec>=sent.rec?"+":"")+sar2(cv.rec-sent.rec)+')</div>';
+    if(d.stage>=3 && d.stage<4) h += '<div style="margin-top:10px"><button type="button" class="sm" data-prep="1">Show "In preparation" on the customer page</button></div>';
+    h += '<div class="dl-meta" style="margin-top:10px">The final quote must carry an SOE margin. Pressing "Save" in the calculator creates the next version and never overwrites a sent version.</div></div>';
+    return h;
+  }
+
+  function expSel(id, cur){ return '<select id="'+id+'">'+[[14,"14 days"],[20,"20 days (default)"],[30,"30 days"],[60,"60 days"],[90,"90 days"],[0,"No expiry"]].map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===cur?" selected":"")+'>'+o[1]+'</option>'; }).join("")+'</select>'; }
+  function lkV(d){
+    var l = d.link || {}, s = lstate(d), ln = LEADS[leadKey(d.lead)];
+    var sc = { draft:["NOT SHARED","none"], active:["ACTIVE","done"], expired:["EXPIRED","new"], disabled:["DISABLED","new"] }[s];
+    var h = '<div class="act-box"><div class="act-h">Customer link</div><div class="act-link">'+xesc(lurl(d))+'</div>';
+    h += '<div class="dl-meta" style="margin:8px 0">Status: <span class="bdg '+sc[1]+'">'+sc[0]+'</span>'+(s==="active" ? ' &middot; expires '+(l.expiresAt ? fms(l.expiresAt)+' ('+Math.max(0,leftDays(l.expiresAt))+' days left)' : 'never') : '')+'</div>';
+    if(s==="draft") h += '<div class="act-sug" style="margin:0 0 8px">The link exists but does not open until you share it. Sharing starts the expiry clock (20 days by default) and moves the stage to Link shared.</div><div class="dl-meta" style="margin-bottom:8px">Expires after: '+expSel("act_cexp", l.days===undefined?20:l.days)+'</div><button type="button" class="sm pri" data-share="1">Share with customer</button>';
+    else {
+      h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><button type="button" class="sm pri" data-cp="c">Copy link</button><button type="button" class="sm act-wa" data-cp="w">Send on WhatsApp</button><button type="button" class="sm" data-pvc="1">Preview what the customer sees</button></div>';
+      h += '<div class="dl-meta">Expires after: '+expSel("act_cexp", l.days===undefined?20:l.days)+' <button type="button" class="sm" data-exp="1">Apply</button> <button type="button" class="sm" data-ext="1">Extend 30 days</button></div>';
+      h += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'+(s==="disabled" ? '<button type="button" class="sm pri" data-en="1">Enable link</button>' : '<button type="button" class="sm danger" data-dis2="1">Disable link now</button>')+'<button type="button" class="sm" data-regen="1">Create a new link (the old one stops working)</button></div>';
+    }
+    h += '<div class="dl-meta" style="margin-top:10px">Customers see no prices. The WhatsApp button on their page goes to '+ln.s+'. An expired or disabled link shows a friendly page with a WhatsApp button.</div></div>';
+    h += '<div class="act-box"><div class="act-h">Partner review link</div><div class="dl-meta">Coming in the next build. For now, use "Requirements brief" at the top of the deal to share the requirements with your partner as a PDF.</div></div>';
+    return h;
+  }
+
+  /* ---------- briefs: no prices, no margins ---------- */
+  function briefDoc(d, kind){
+    var cust = {}; try{ cust = JSON.parse(d.cust||"{}"); }catch(e){}
+    var w = d.won || {}, z = cust.sz || {}, ln = LEADS[leadKey(d.lead)], ev = evOf(d).filter(function(e){ return e.type==="request"; });
+    var title = kind==="hand" ? "Handover brief" : kind==="req" ? "Requirements brief" : "Deal brief";
+    function ul(a){ return a && a.length ? '<ul>'+a.map(function(x){ return '<li>'+xesc(x)+'</li>'; }).join("")+'</ul>' : '<p>None</p>'; }
+    var h = '<!doctype html><html><head><meta charset="utf-8"><title>'+title+' - '+xesc(d.client)+'</title><style>body{font:13px/1.55 Arial,sans-serif;color:#1A1A1A;max-width:820px;margin:24px auto;padding:0 20px}h1{color:#1B5E20;margin:0}h2{color:#1B5E20;border-bottom:2px solid #7CB342;padding-bottom:3px;margin:20px 0 6px;font-size:15px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #D7E1D4;padding:5px 8px;text-align:left;font-size:12.5px}th{background:#E8F5E9}.m{color:#5F6F62;font-size:12px}@media print{button{display:none}}</style></head><body>';
+    h += '<button onclick="window.print()" style="float:right;padding:8px 16px">Print or save as PDF</button><h1>'+title+'</h1><div class="m">'+xesc(d.client)+' &middot; prepared '+fdate(todayISO())+' &middot; presales lead: '+ln.n+' &middot; internal document, no prices</div>';
+    h += '<h2>Customer</h2><table><tr><th>Customer</th><td>'+xesc(d.client)+'</td><th>Industry</th><td>'+xesc(d.industryLabel||"")+'</td></tr>';
+    if(kind==="hand") h += '<tr><th>Started as</th><td>'+xesc(w.type==="pilot"?"Pilot":w.type==="golive"?"Go live":"To be confirmed")+'</td><th>Start date</th><td>'+xesc(w.start?fdate(w.start):"To be confirmed")+'</td></tr><tr><th>Contract reference</th><td colspan="3">'+xesc(w.ref||"To be confirmed")+'</td></tr>';
+    var rq = ev[0]; if(rq) h += '<tr><th>Customer contact</th><td colspan="3">'+xesc(rq.p.name+", "+rq.p.dg+", "+rq.p.mobile)+'</td></tr>';
+    h += '</table><h2>Call flows</h2><table><tr><th>Code</th><th>Flow</th><th>Connected system</th></tr>';
+    (cust.inbound||[]).concat(cust.outbound||[]).forEach(function(f){ h += '<tr><td>'+xesc(f.code)+'</td><td>'+xesc(f.label)+'</td><td>'+xesc(f.sys||"-")+'</td></tr>'; });
+    h += '</table><h2>Systems and channels</h2><p><b>Systems to connect:</b></p>'+ul(cust.systems)+'<p><b>Channels:</b> Voice'+(cust.whatsapp?', WhatsApp':'')+(cust.kb?', knowledge base answers':'')+(cust.human?', handover to staff':'')+'</p>';
+    h += '<h2>Sizing</h2><table>'+Object.keys(SZL).map(function(k){ return z[k]!=null ? '<tr><th>'+SZL[k]+'</th><td>'+xesc(z[k])+'</td></tr>' : ''; }).join("")+'</table>';
+    var sz = szEvents(d), ch = Object.keys(sz).filter(function(k){ return !sz[k].ok && sz[k].nv; });
+    if(ch.length) h += '<p class="m">Customer asked to change: '+ch.map(function(k){ return xesc(SZL[k])+' to '+xesc(sz[k].nv); }).join("; ")+'</p>';
+    h += '<h2>Customer goals and pain points</h2><p><b>Goals:</b></p>'+ul((cust.goals||[]).map(function(g){ return g==="other" ? (cust.goalOther||"Other goal") : g; }))+'<p><b>Pain points:</b></p>'+ul(cust.pains);
+    h += '<h2>Customer requests</h2>';
+    if(!ev.length) h += '<p>No requests recorded.</p>'; else ev.forEach(function(e){ h += '<p><b>'+xesc(KIND[e.p.kind]||"Request")+'</b> ('+fms(e.ms)+')'+(e.p.flows?': '+xesc(e.p.flows):'')+(e.p.chg?' - '+xesc(e.p.chg):'')+(e.p.addF&&e.p.addF.length?'<br>Flows added: '+xesc(e.p.addF.join("; ")):'')+(e.p.addS&&e.p.addS.length?'<br>Systems to add: '+xesc(e.p.addS.join("; ")):'')+(e.p.note?'<br>Note: '+xesc(e.p.note):'')+'</p>'; });
+    if(kind==="hand") h += '<h2>Delivery checklist</h2><ul><li>Kick-off call with the customer contact</li><li>Confirm system access and API credentials</li><li>Confirm phone numbers and call routing</li><li>Approve the knowledge base content</li><li>Agree the pilot or go-live date</li></ul>';
+    return h + '</body></html>';
+  }
+  function openBrief(d, kind){
+    if(kind==="int"){ editDeal(d.id, null, function(){ printDoc("brief"); }); return; }
+    var w = window.open("", "_blank"); if(!w){ toast("Please allow pop-ups to open the brief."); return; }
+    w.document.open(); w.document.write(briefDoc(d, kind)); w.document.close();
+  }
+
+  /* ---------- the edit banner and the calculator fields ---------- */
+  function syncDealDate(){
+    var v = $("dealDate").value; if(!v) return;
+    var p = v.split("-"); $("quoteDate").value = (+p[2])+" "+["January","February","March","April","May","June","July","August","September","October","November","December"][(+p[1])-1]+" "+p[0];
+    refresh();
+  }
+  function banner(){
+    var b = $("act_edit");
+    if(!b){ b = document.createElement("div"); b.id = "act_edit"; document.body.insertBefore(b, document.body.firstChild); }
+    var s2 = $("dl_save"), n2 = $("dl_savenew");
+    if(!edit){ b.style.display = "none"; s2.textContent = "Save deal"; n2.style.display = "none"; return; }
+    b.style.display = "block";
+    if(edit.mode==="new"){
+      b.className = "act-eb new";
+      b.innerHTML = '<b>New deal, not saved yet.</b> Fill in the calculator. The price panel on the right updates as you answer. Then press Save deal. The Deal date can be set to an earlier day if you are logging a deal late. <button type="button" data-ebd="1">Cancel</button>';
+      s2.textContent = "Save deal"; n2.style.display = "none"; return;
+    }
+    var d = find(edit.id) || {}, c = lastVer(d) || {}, nx = (d.version||1)+1;
+    b.className = "act-eb";
+    b.innerHTML = '<b>Editing '+xesc(d.client||"")+'</b> &middot; '+(edit.fromV ? 'opened from v'+edit.fromV+', ' : '')+'current version v'+(d.version||1)+(c.sent?' <span class="bdg prog">SENT TO CUSTOMER</span>':'')+
+      '<br><small>Saving creates v'+nx+'. Earlier versions are kept'+(d.sentVersion?'; the sent version v'+d.sentVersion+' is never changed':'')+'. Changes are saved only when you press Save.</small>'+
+      '<br><small>Version date <input type="date" id="act_vdate" value="'+todayISO()+'" max="'+todayISO()+'"> Note <input type="text" id="act_vwhy" placeholder="What changed? (optional)" style="width:240px"></small>'+
+      '<span class="act-ebb"><button type="button" class="pri" data-ebs="1">Save as v'+nx+'</button><button type="button" data-ebc="1">Save as new copy</button><button type="button" data-ebd="1">Discard changes</button></span>';
+    s2.textContent = "Save as v"+nx; n2.style.display = ""; n2.textContent = "Save as new copy";
+  }
+  function setv(id, v){ var e = $(id); if(!e) return; e.value = v; e.dispatchEvent(new Event("input",{bubbles:true})); e.dispatchEvent(new Event("change",{bubbles:true})); }
+
+  function editDeal(id, n, then, apply){
     status("Loading...");
-    store.get(id).then(function(d){
-      applyState(JSON.parse(d.stateJson));
-      CUST_LOGO = d.logo || ""; showLogo(); refresh();
-      currentId = id; drawButtons(); drawList();
-      status("Loaded: "+(d.client||"deal")+". Edit anything and press Save changes.");
-      if(then) setTimeout(then, 400); else window.scrollTo({top:0,behavior:"smooth"});
+    return Promise.all([store.get(id), store.versions(id)]).then(function(r){
+      var d = r[0], vs = r[1]; verCache[id] = vs;
+      var v = n ? vs.filter(function(x){ return x.n===n; })[0] : null, sj = (v && v.stateJson) || d.stateJson;
+      applyState(JSON.parse(sj)); CUST_LOGO = d.logo || ""; showLogo(); refresh();
+      if($("dealDate")) $("dealDate").value = d.dealDate || todayISO();
+      var i = deals.map(function(x){ return x.id; }).indexOf(id); if(i>-1) deals[i] = Object.assign(deals[i], d); else deals.push(d);
+      edit = { mode:"edit", id:id, fromV:n||0 }; banner();
+      if(apply) apply();
+      status(""); if(then) setTimeout(then, 400); else window.scrollTo({top:0, behavior:"smooth"});
+      toast("Editing "+d.client+(n?" (from v"+n+")":"")+". Changes are saved only when you press Save.");
     }).catch(function(e){ status("Could not load: "+(e.message||e), true); });
   }
-  function shareLink(id){ return new URL("customer-view.html", location.href).href + "?id=" + encodeURIComponent(id); }
 
-  $("dl_save").addEventListener("click", function(){ save(false); });
-  $("dl_savenew").addEventListener("click", function(){ save(true); });
-  $("dl_new").addEventListener("click", function(){ if(confirm("Clear the form and start a new deal? Unsaved changes will be lost.")) location.reload(); });
-  $("dl_search").addEventListener("input", drawList);
-  $("dl_list").addEventListener("click", function(e){
-    var b = e.target.closest("button[data-act]"); if(!b) return;
-    var id = b.closest(".dl-row").getAttribute("data-id"), act = b.getAttribute("data-act");
-    if(act==="load") loadDeal(id);
-    else if(act==="brief") loadDeal(id, function(){ printDoc("brief"); });
-    else if(act==="view") loadDeal(id, function(){ $("btnCustView").click(); });
-    else if(act==="share"){
-      if(!live){ status("Share links need Firebase. Add the config first.", true); return; }
-      var link = shareLink(id);
-      var ok = function(){ status("Link copied: "+link); };
-      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(ok, function(){ window.prompt("Copy this link:", link); });
-      else window.prompt("Copy this link:", link);
+  /* ---------- saving ---------- */
+  function collect(){
+    var m = model(), D = docData(m), ind = $("industry").value || "";
+    var lab = ""; INDUSTRIES.forEach(function(x){ if(x.id===ind) lab = x.label.split(" — ")[0]; });
+    return { m:m, D:D, ind:ind, indLabel:lab, lead:($("presalesLead").value||"").trim() || LEADS.hp.n, dealDate:$("dealDate").value || todayISO(),
+      state:JSON.stringify(captureState()), cust:custData(m), quote:quoteSnap(m), margin:marginSnap(m) };
+  }
+  function doSave(kind){
+    if(!canUse()){ status("Please sign in first.", true); return; }
+    var name = ($("clientName").value||"").trim();
+    if(!name){ toast("Enter the client name first."); $("clientName").focus(); return; }
+    var c = collect(), custJson = JSON.stringify(c.cust);
+    if(!c.ind){ toast("Choose the customer's industry first. The customer page uses it for its vocabulary."); $("industry").focus(); return; }
+    if(kind==="ver" && edit && edit.mode==="edit"){
+      var d = find(edit.id), n = (d.version||1)+1, vd = ($("act_vdate")&&$("act_vdate").value) || todayISO(), why = ($("act_vwhy")&&$("act_vwhy").value.trim()) || "Edited in calculator";
+      var ver = { n:n, date:vd, rec:c.quote.recPrice, one:c.quote.onePrice, why:why, sent:false, sentDate:"", stateJson:c.state, margin:c.margin };
+      var patch = { client:name, industry:c.ind, industryLabel:c.indLabel, lead:c.lead, dealDate:c.dealDate, version:n, quote:c.quote, stateJson:c.state, cust:custJson, logo:CUST_LOGO, "stageDates.0":c.dealDate };
+      var sp = { client:name, industry:c.ind, lead:leadKey(c.lead), logo:CUST_LOGO, customerJson:custJson };
+      status("Saving...");
+      store.addVersion(d.id, patch, ver, sp, d.slug).then(function(){ edit = null; banner(); return refresh2(d.id).then(function(){ view = "detail"; curId = d.id; tab = "qt"; draw(); $("dl_panel").scrollIntoView({behavior:"smooth"}); toast("Saved as v"+n+" of "+name+". Monthly SAR "+sar2(c.quote.recPrice)+". Earlier versions are kept."); status(""); }); })
+        .catch(function(e){ status("Save failed: "+(e.message||e), true); });
+      return;
     }
-    else if(act==="del"){
-      var nm = b.closest(".dl-row").querySelector(".dl-name").textContent;
-      if(!confirm("Delete the saved deal for "+nm+"? This also stops its share link working.")) return;
-      store.remove(id).then(function(){ if(id===currentId){ currentId = null; drawButtons(); } status("Deleted."); return refreshList(); })
-        .catch(function(e){ status("Delete failed: "+(e.message||e), true); });
+    /* new deal, or a new copy */
+    var slug = slugify(name)+"-"+rcode(4), dd = c.dealDate;
+    var deal = { client:name, industry:c.ind, industryLabel:c.indLabel, lead:c.lead, dealDate:dd, stage:0, side:"", stageDates:{0:dd}, link:{state:"draft", days:20, sharedAt:0, expiresAt:0}, slug:slug,
+      version:1, sentVersion:0, quoteStatus:"none", quote:c.quote, stateJson:c.state, cust:custJson, logo:CUST_LOGO, notes:"", contact:"", lastSeenMs:0, won:{type:"",start:"",ref:""} };
+    var ver = { n:1, date:dd, rec:c.quote.recPrice, one:c.quote.onePrice, why:kind==="copy" ? "Copy of "+((find(edit&&edit.id)||{}).client||"another deal") : "First draft", sent:false, sentDate:"", stateJson:c.state, margin:c.margin };
+    var share = { client:name, logo:CUST_LOGO, industry:c.ind, lead:leadKey(c.lead), active:false, expiresAt:0, quoteStatus:"none", customerJson:custJson, slug:slug };
+    status("Saving...");
+    store.create(deal, ver, share, slug).then(function(id){
+      edit = null; banner(); return refresh2(id).then(function(){ view = "detail"; curId = id; tab = "lk"; draw(); $("dl_panel").scrollIntoView({behavior:"smooth"}); status(""); toast("Saved: "+name+" as v1, stage Draft, monthly SAR "+sar2(c.quote.recPrice)+". The customer link is created but not shared yet."); });
+    }).catch(function(e){ status("Save failed: "+(e.message||e), true); });
+  }
+
+  /* ---------- loading and drawing ---------- */
+  function refresh2(openId){
+    if(!canUse()){ deals = []; draw(); return Promise.resolve(); }
+    return Promise.all([store.list(), store.responses().catch(function(){ return []; })]).then(function(r){
+      deals = r[0]; events = r[1];
+      var ids = openId ? [openId] : (curId && view==="detail" ? [curId] : []);
+      return Promise.all(ids.map(function(id){ return store.versions(id).then(function(v){ verCache[id] = v; }); }));
+    }).then(draw).catch(function(e){ status("Could not read deals: "+(e.message||e), true); });
+  }
+  function draw(){
+    var box = $("dl_list"), bar = document.querySelector(".dl-bar");
+    bar.style.display = view==="list" ? "" : "none";
+    if(!canUse()){ box.innerHTML = '<div class="dl-empty">Sign in with your team account to see saved deals.</div>'; return; }
+    var d = view==="detail" ? find(curId) : null;
+    if(view==="detail" && !d){ view = "list"; }
+    box.innerHTML = view==="list" ? listV() : detV(d);
+  }
+
+  /* ---------- actions on a deal ---------- */
+  function setStage(d, i, iso){
+    var p = { stage:i, side:"" }; p["stageDates."+i] = iso || todayISO();
+    var qs = i===3 ? "req" : i===4 ? "sent" : null, sp = null;
+    if(qs && d.quoteStatus!==qs){ p.quoteStatus = qs; sp = { quoteStatus:qs }; }
+    if(i<3 && d.quoteStatus!=="none"){ p.quoteStatus = "none"; sp = { quoteStatus:"none" }; }
+    return store.patch(d.id, p, sp, d.slug).then(function(){ return refresh2(); }).then(function(){ toast("Stage set to "+STAGES[i]+". Date recorded: "+fdate(p["stageDates."+i])+"."); });
+  }
+  function shareLinkNow(d){
+    var days = +($("act_cexp")?$("act_cexp").value:20); if(isNaN(days)) days = 20;
+    var exp = days ? Date.now()+days*DAY : 0, p = { "link.state":"active", "link.sharedAt":Date.now(), "link.expiresAt":exp, "link.days":days };
+    if(d.stage<1){ p.stage = 1; p["stageDates.1"] = todayISO(); }
+    return store.patch(d.id, p, { active:true, expiresAt:exp }, d.slug).then(function(){ return refresh2(); }).then(function(){ toast("Link shared. "+(exp ? "It expires on "+fms(exp)+" ("+days+" days)." : "It has no expiry.")+" Stage: Link shared."); });
+  }
+  function linkMsg(d){ return "Hello, here is your AI Contact Center proposal for "+d.client+": "+lurl(d); }
+
+  document.addEventListener("click", function(e){
+    var t = e.target, pv = $("act_pvw");
+    if(pv && pv.contains(t)){
+      if(t.closest("[data-pvx]")){ pv.remove(); }
+      return;
+    }
+    var panel = $("dl_panel");
+    var tt;
+    if((tt = t.closest("[data-edit]")) && panel.contains(tt)){ editDeal(tt.dataset.edit); return; }
+    if((tt = t.closest("[data-open]")) && panel.contains(tt)){
+      curId = tt.dataset.open; view = "detail"; var d0 = find(curId); tab = unseenOf(d0) ? "act" : "ov"; dates = false;
+      store.versions(curId).then(function(v){ verCache[curId] = v; draw(); panel.scrollIntoView({behavior:"smooth"}); }); return;
+    }
+    if(t.closest("[data-back]")){ view = "list"; draw(); return; }
+    if((tt = t.closest("[data-f]")) && panel.contains(tt)){ filt = tt.dataset.f; draw(); return; }
+    if((tt = t.closest("[data-t]")) && panel.contains(tt)){ tab = tt.dataset.t; draw(); return; }
+    if((tt = t.closest("[data-t2]"))){ tab = tt.dataset.t2; draw(); return; }
+    var d = curId ? find(curId) : null;
+    if(t.closest("[data-ebs]")){ doSave("ver"); return; }
+    if(t.closest("[data-ebc]")){ doSave("copy"); return; }
+    if(t.closest("[data-ebd]")){ edit = null; banner(); toast("Discarded. Nothing was saved. Press New deal to start again."); return; }
+    if(t.closest("#dl_new")){
+      if(edit && !confirm("Start a new deal? Anything not saved in the calculator will be lost.")) return;
+      try{ sessionStorage.setItem("aicc_newdeal","1"); }catch(x){} location.reload(); return;
+    }
+    if(t.closest("#dl_save")){ if(!edit) edit = { mode:"new" }; doSave(edit.mode==="edit" ? "ver" : "new"); return; }
+    if(t.closest("#dl_savenew")){ doSave("copy"); return; }
+    if(!d || !panel.contains(t)) return;
+    if(t.closest("[data-dates]")){ dates = !dates; draw(); return; }
+    if((tt = t.closest("[data-sg]")) && view==="detail"){ setStage(d, +tt.dataset.sg, tt.dataset.sd); return; }
+    if((tt = t.closest("[data-dis]"))){ dismissed[tt.dataset.dis] = 1; draw(); return; }
+    if((tt = t.closest("[data-side]"))){ var sv = d.side===tt.dataset.side ? "" : tt.dataset.side; store.patch(d.id, { side:sv }).then(function(){ return refresh2(); }); return; }
+    if(t.closest("[data-seen]")){ store.patch(d.id, { lastSeenMs:Date.now() }).then(function(){ return refresh2(); }).then(function(){ toast("Marked as seen."); }); return; }
+    if(t.closest("[data-sn]")){ store.patch(d.id, { notes:$("act_note").value }).then(function(){ d.notes = $("act_note").value; $("act_ok").textContent = "Note saved."; }); return; }
+    if(t.closest("[data-ld]")){ editDeal(d.id); return; }
+    if((tt = t.closest("[data-openv]"))){ editDeal(d.id, +tt.dataset.openv); return; }
+    if((tt = t.closest("[data-brief]"))){ openBrief(d, tt.dataset.brief); return; }
+    if(t.closest("[data-wsave]")){ store.patch(d.id, { won:{ type:$("act_wtype").value, start:$("act_wstart").value, ref:$("act_wref").value.trim() } }).then(function(){ return refresh2(); }).then(function(){ toast("Won details saved."); }); return; }
+    if(t.closest("[data-del]")){ if(!confirm("Delete the deal for "+d.client+"? This also stops its customer link working. This cannot be undone.")) return; store.remove(d.id, d.slug).then(function(){ view = "list"; curId = null; return refresh2(); }).then(function(){ toast("Deleted."); }); return; }
+    if(t.closest("[data-pvc]")){ window.open("c.html#"+d.slug+"~p", "_blank"); return; }
+    if((tt = t.closest("[data-cp]"))){
+      var u = lurl(d);
+      if(tt.dataset.cp==="w"){ window.open("https://wa.me/?text="+encodeURIComponent(linkMsg(d)), "_blank"); return; }
+      var ok = function(){ toast("Link copied: "+u); };
+      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u).then(ok, function(){ window.prompt("Copy this link:", u); }); else window.prompt("Copy this link:", u); return;
+    }
+    if(t.closest("[data-share]")){ shareLinkNow(d); return; }
+    if(t.closest("[data-exp]")){ var dy = +$("act_cexp").value, base = (d.link&&d.link.sharedAt)||Date.now(), ex = dy ? base+dy*DAY : 0; store.patch(d.id, { "link.days":dy, "link.expiresAt":ex }, { expiresAt:ex }, d.slug).then(function(){ return refresh2(); }).then(function(){ toast(ex ? "Expiry set to "+fms(ex)+"." : "Link now has no expiry."); }); return; }
+    if(t.closest("[data-ext]")){ var cur = (d.link&&d.link.expiresAt)||0, ex2 = Math.max(Date.now(), cur)+30*DAY; store.patch(d.id, { "link.expiresAt":ex2 }, { active:true, expiresAt:ex2 }, d.slug).then(function(){ return refresh2(); }).then(function(){ toast("Extended. New expiry: "+fms(ex2)+"."); }); return; }
+    if(t.closest("[data-dis2]")){ store.patch(d.id, { "link.state":"disabled" }, { active:false }, d.slug).then(function(){ return refresh2(); }).then(function(){ toast("Customer link disabled. It no longer opens."); }); return; }
+    if(t.closest("[data-en]")){ var ex3 = (d.link.expiresAt && d.link.expiresAt<Date.now()) ? Date.now()+20*DAY : (d.link.expiresAt||0); store.patch(d.id, { "link.state":"active", "link.expiresAt":ex3 }, { active:true, expiresAt:ex3 }, d.slug).then(function(){ return refresh2(); }).then(function(){ toast("Customer link enabled."); }); return; }
+    if(t.closest("[data-regen]")){
+      if(!confirm("Create a new link? The old link will stop working straight away.")) return;
+      var ns = slugify(d.client)+"-"+rcode(4), sh = { client:d.client, logo:d.logo||"", industry:d.industry, lead:leadKey(d.lead), active:(d.link.state==="active"), expiresAt:(d.link.expiresAt||0), quoteStatus:d.quoteStatus||"none", customerJson:d.cust, slug:ns };
+      store.moveShare(d.id, d.slug, ns, sh, { slug:ns }).then(function(){ return refresh2(); }).then(function(){ toast("New link created. The old link stopped working."); }); return;
+    }
+    if(t.closest("[data-prep]")){ store.patch(d.id, { quoteStatus:"prep" }, { quoteStatus:"prep" }, d.slug).then(function(){ return refresh2(); }).then(function(){ toast("The customer page now shows: Our team is preparing your quote."); }); return; }
+    if((tt = t.closest("[data-sent]"))){
+      var vn = +tt.dataset.sent, v = (verCache[d.id]||[]).filter(function(x){ return x.n===vn; })[0] || {}, mg = v.margin || {};
+      if(!mg.mkRec && !mg.mkOne && !confirm("Version v"+vn+" has a 0% markup, so this quote carries no SOE margin. Mark it as sent anyway?")) return;
+      var sd = ($("act_sentdate")&&$("act_sentdate").value) || todayISO();
+      var p = { sentVersion:vn, stage:Math.max(d.stage,4), quoteStatus:"sent" }; p["stageDates.4"] = sd;
+      store.patch(d.id, p, { quoteStatus:"sent" }, d.slug, { n:vn, data:{ sent:true, sentDate:sd } }).then(function(){ return refresh2(d.id); }).then(function(){ toast("v"+vn+" marked as sent and locked. The customer page now shows: Your quote has been sent."); }); return;
+    }
+    if(t.closest("[data-apply]")){
+      var s = szEvents(d);
+      editDeal(d.id, null, null, function(){ Object.keys(s).forEach(function(k){ if(!s[k].ok && s[k].nv && SZMAP[k]) setv(SZMAP[k], s[k].nv); }); toast("Customer's numbers applied. Review them, then press Save as v"+((d.version||1)+1)+"."); });
+      return;
+    }
+  });
+  document.addEventListener("change", function(e){
+    var d = curId ? find(curId) : null;
+    if(e.target.id==="act_lf"){ lf = e.target.value; draw(); return; }
+    if(!d) return;
+    if(e.target.id==="act_lead"){ var k = e.target.value; store.patch(d.id, { lead:LEADS[k].n }, { lead:k }, d.slug).then(function(){ return refresh2(); }).then(function(){ toast("Presales lead changed to "+LEADS[k].s+". The customer page and its WhatsApp button now use "+LEADS[k].s+"."); }); return; }
+    if(e.target.dataset && e.target.dataset.sdate!==undefined){
+      var i = +e.target.dataset.sdate, v = e.target.value; if(!v) return; if(v>todayISO()){ toast("A stage date cannot be in the future."); draw(); return; }
+      var p = {}; p["stageDates."+i] = v; if(i===0) p.dealDate = v; store.patch(d.id, p).then(function(){ return refresh2(); }).then(function(){ toast("Date updated."); });
+    }
+  });
+  $("dl_search").addEventListener("input", function(){ q = this.value.trim().toLowerCase(); if(view==="list") draw(); });
+
+  /* calculator header: deal date and presales lead */
+  $("dealDate").max = todayISO(); $("dealDate").value = todayISO(); syncDealDate();
+  $("dealDate").addEventListener("change", function(){ if(this.value>todayISO()) this.value = todayISO(); syncDealDate(); });
+
+  /* live demo of the customer page from the calculator (no saving, no prices) */
+  var custWin = null;
+  $("btnCustView").addEventListener("click", function(){ custWin = window.open("c.html#live~p", "aicc_customer_view", "width=1280,height=860"); });
+  window.addEventListener("message", function(ev){
+    if(ev.data && ev.data.type==="AICC_READY" && custWin && ev.source===custWin){
+      try{ custWin.postMessage({ type:"AICC_CUST", payload:custData(model()), lead:leadKey($("presalesLead").value), logo:CUST_LOGO }, "*"); }catch(x){}
     }
   });
 
-  drawAuth(); drawButtons(); showLogo();
-  if(live) auth.onAuthStateChanged(function(u){ user = u; drawAuth(); status(""); refreshList(); });
-  else refreshList();
-  return { captureState:captureState, applyState:applyState, store:store, isLive:function(){return live;} };
+  drawAuth(); showLogo(); banner();
+  try{ if(sessionStorage.getItem("aicc_newdeal")){ sessionStorage.removeItem("aicc_newdeal"); edit = { mode:"new" }; banner(); } }catch(x){}
+  if(live) auth.onAuthStateChanged(function(u){ user = u; drawAuth(); status(""); refresh2(); });
+  else refresh2();
+  return { captureState:captureState, applyState:applyState, store:store, isLive:function(){ return live; }, custData:custData };
 })();
 
 
+</script>
+
+<script>
+/* ═══ Login gate: hides the calculator until a team member signs in ═══ */
+(function(){
+  var gate=document.getElementById("gate");
+  function open(){ document.body.classList.remove("locked"); gate.style.display="none"; }
+  function lock(){ document.body.classList.add("locked"); gate.style.display="block"; }
+  var lg=document.querySelector("img.logo"), gl=document.getElementById("gateLogo");
+  if(lg&&gl) gl.src=lg.getAttribute("src");
+  var auth=null;
+  try{ if(window.firebase && firebase.apps.length) auth=firebase.auth(); }catch(e){}
+  if(!auth){ open(); return; }   /* test mode (no Firebase): no gate */
+  var em=document.getElementById("gEmail"), pw=document.getElementById("gPass"), bt=document.getElementById("gBtn"), er=document.getElementById("gErr");
+  function showErr(m){ er.textContent=m; er.style.display=m?"block":"none"; }
+  function go(){
+    var e=em.value.trim(), p=pw.value;
+    if(!e||!p){ showErr("Please enter your email and password."); return; }
+    showErr(""); bt.disabled=true; bt.textContent="Signing in...";
+    auth.signInWithEmailAndPassword(e,p).catch(function(x){
+      var c=x&&x.code||"";
+      showErr(c==="auth/network-request-failed" ? "Network problem. Check your connection and try again."
+        : c==="auth/too-many-requests" ? "Too many attempts. Please wait a few minutes and try again."
+        : "Incorrect email or password.");
+    }).then(function(){ bt.disabled=false; bt.textContent="Sign In"; });
+  }
+  bt.addEventListener("click",go);
+  [em,pw].forEach(function(i){ i.addEventListener("keydown",function(ev){ if(ev.key==="Enter") go(); }); });
+  auth.onAuthStateChanged(function(u){ if(u){ pw.value=""; open(); } else { lock(); } });
+})();
 </script>
 </body>
 </html>
