@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Pricing validation request</title>
+<style>
+:root{--g:#1B5E20;--gd:#0D3B13;--gl:#7CB342;--soft:#E8F5E9;--rule:#D7E1D4;--ink:#1A1A1A;--mut:#5F6F62;--bg:#F4F7F3;--red:#B91C1C}
+@media(prefers-color-scheme:dark){:root{--ink:#EEF3EC;--mut:#A8B8A6;--bg:#101810;--rule:#2F4030;--soft:#18301B}body{background:var(--bg)}.card{background:#172217!important}th{background:#1D3320!important}input,textarea{background:#101810!important;color:var(--ink)!important}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.55 "Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:var(--g);color:#fff;padding:16px 20px;border-bottom:4px solid var(--gl)}header b{font-size:18px}header small{display:block;opacity:.85}
+main{max-width:920px;margin:0 auto;padding:16px 16px 60px}
+.card{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:16px 18px;margin:14px 0}
+h1{font-size:21px;margin:6px 0 2px;color:var(--g)}h3{margin:0 0 8px;font-size:16px;color:var(--g)}p{margin:6px 0}.mut{color:var(--mut);font-size:13px}
+table{width:100%;border-collapse:collapse}th{background:var(--soft);text-align:left;font-size:12px;text-transform:uppercase;padding:8px 10px}td{padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}.r{text-align:right;white-space:nowrap}
+.seg button{font:inherit;font-size:13.5px;padding:6px 12px;border-radius:8px;border:1px solid var(--rule);background:transparent;color:var(--ink);cursor:pointer;margin:0 4px 4px 0}.seg button.on{background:var(--g);color:#fff;border-color:var(--g)}
+input,textarea{font:inherit;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;width:100%}input[type=number]{width:140px}
+.go{background:var(--g);color:#fff;border:0;border-radius:10px;padding:12px 22px;font:inherit;font-weight:700;cursor:pointer}.go[disabled]{opacity:.5}
+.lnk{border:0;background:none;color:var(--g);text-decoration:underline;cursor:pointer;font:inherit;padding:0;margin-top:6px}
+.err{color:var(--red);font-weight:600;min-height:20px}.ok{background:var(--soft);border:1px solid var(--rule);border-radius:12px;padding:20px;text-align:center}
+.chips span{display:inline-block;background:var(--soft);border:1px solid var(--rule);border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;font-size:13px}
+@media(max-width:640px){th:nth-child(2),td:nth-child(2){display:none}.r{white-space:normal}}
+</style>
+</head>
+<body>
+<header><b>SOE</b> &middot; Pricing validation request<small>Smart Orientation for Communications and IT, Riyadh</small></header>
+<main id="app"><div class="card">Loading...</div></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+ var KEY=decodeURIComponent((location.hash||"").replace(/^#/,"")).trim(), app=document.getElementById("app"), db, SH, ans={};
+ function esc(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+ function n2(x){return Number(x||0).toLocaleString("en-US")}
+ function state(t,m){app.innerHTML='<div class="card"><h3>'+esc(t)+'</h3><p>'+esc(m)+'</p></div>'}
+ if(!KEY||KEY.length<6)return state("Link not available","This link is incomplete. Please ask SOE to send it again.");
+ try{
+  firebase.initializeApp({apiKey:"AIzaSyAA6Q56Lko-g_8LkYsf0NZH0eIXjAc6lEc",authDomain:"soe-aicc.firebaseapp.com",projectId:"soe-aicc",storageBucket:"soe-aicc.firebasestorage.app",messagingSenderId:"161535317861",appId:"1:161535317861:web:d3b5eb7a0860dee6d6738c"});
+  db=firebase.firestore();
+ }catch(e){return state("Connection problem","We could not open this page. Please check your internet connection and try again.")}
+ db.collection("partnerShares").doc(KEY).get().then(function(d){
+  if(!d.exists||d.data().active===false)return state("Link not available","This link has expired or was already used. Please ask SOE to send a new one.");
+  SH=d.data(); SH.lines=(SH.lines||[]).map(function(l){return Array.isArray(l)?{n:l[0],v:l[1],k:"m"}:l});
+  try{SH.scopeO=JSON.parse(SH.scope||"{}")}catch(e){SH.scopeO={}}
+  paint();
+ }).catch(function(){state("Link not available","This link has expired or was already used. Please ask SOE to send a new one.")});
+ var msg="",by="",note="",valid=(function(){var d=new Date(Date.now()+30*864e5);return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)})();
+ function kind(l){return l.k==="o"?"One-time":l.k==="u"?"Usage":"Monthly"}
+ function chips(a){return (a&&a.length)?'<span class="chips">'+a.map(function(x){return'<span>'+esc(x)+'</span>'}).join("")+'</span>':'<span class="mut">None</span>'}
+ function paint(){
+  var sc=SH.scopeO;
+  var h='<h1>'+esc(SH.client)+'</h1><p class="mut">Review round R'+esc(SH.round)+'. Requested by '+esc(SH.lead||"SOE")+'. Please check the scope and your rates, then send your answer at the bottom.</p>'+
+  '<div class="card"><h3>1. What the customer wants</h3><p><b>Call flows:</b></p>'+chips(sc.flows)+'<p><b>Systems to connect:</b></p>'+chips(sc.systems)+'<p><b>Channels:</b></p>'+chips(sc.channels)+'<p><b>Sizing:</b></p>'+chips(sc.sizing)+'</div>'+
+  '<div class="card"><h3>2. Your rates</h3><p class="mut">Please confirm each rate, or propose a change with a reason. This page does not show SOE margin or customer prices.</p><table><thead><tr><th>Line</th><th>Type</th><th class="r">Your rate, SAR</th><th>Your answer</th></tr></thead><tbody>'+
+  SH.lines.map(function(l,i){var a=ans[i]||{};return'<tr><td>'+esc(l.n)+'</td><td>'+kind(l)+'</td><td class="r">'+n2(l.v)+'</td><td class="seg"><button type="button" data-a="ok" data-i="'+i+'" class="'+(a.v==="ok"?"on":"")+'">Confirm</button><button type="button" data-a="chg" data-i="'+i+'" class="'+(a.v==="chg"?"on":"")+'">Propose a change</button>'+(a.v==="chg"?'<div style="margin-top:6px"><input type="number" min="0" data-f="to" data-i="'+i+'" placeholder="New rate, SAR" value="'+esc(a.to||"")+'"> <input type="text" maxlength="120" data-f="why" data-i="'+i+'" placeholder="Reason" value="'+esc(a.why||"")+'" style="margin-top:6px"></div>':'')+'</td></tr>'}).join("")+
+  '</tbody></table><button type="button" class="lnk" data-all="1">Confirm every line as shown</button></div>'+
+  '<div class="card"><h3>3. Your answer</h3><p>These rates are valid until</p><input type="date" id="pv" value="'+esc(valid)+'" style="width:200px"><p>Your name</p><input type="text" id="pb" maxlength="60" value="'+esc(by)+'" placeholder="Full name"><p>Note for SOE (optional)</p><textarea id="pn" rows="3" maxlength="400">'+esc(note)+'</textarea><p class="err" id="pe">'+esc(msg)+'</p><button type="button" class="go" id="ps">Send my answer to SOE</button></div>';
+  app.innerHTML=h;
+ }
+ function keep(){var a=document.getElementById("pv");if(a)valid=a.value;a=document.getElementById("pb");if(a)by=a.value;a=document.getElementById("pn");if(a)note=a.value}
+ app.addEventListener("input",function(e){var t=e.target;if(t.dataset&&t.dataset.f){var i=+t.dataset.i;ans[i]=Object.assign({},ans[i]);ans[i][t.dataset.f]=t.value}});
+ app.addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.all){keep();SH.lines.forEach(function(l,i){ans[i]={v:"ok"}});msg="";paint();return}
+  if(b.dataset.a){keep();var i=+b.dataset.i;ans[i]=Object.assign({},ans[i],{v:b.dataset.a});paint();return}
+  if(b.id==="ps"){
+   keep();var out=[];
+   for(var i=0;i<SH.lines.length;i++){var a=ans[i];
+    if(!a||!a.v){msg="Please answer every line, or press Confirm every line as shown.";return paint()}
+    if(a.v==="chg"&&(!a.to||isNaN(+a.to)||+a.to<0)){msg="Enter the new rate for: "+SH.lines[i].n;return paint()}
+    out.push(a.v==="chg"?{n:String(SH.lines[i].n).slice(0,80),v:"chg",from:SH.lines[i].v,to:+a.to,why:String(a.why||"").slice(0,120)}:{n:String(SH.lines[i].n).slice(0,80),v:"ok"});
+   }
+   var today=new Date().toISOString().slice(0,10);
+   if(!valid||valid<today){msg="Please set a valid-until date that is today or later.";return paint()}
+   if(!by.trim()){msg="Please type your name.";return paint()}
+   var payload=JSON.stringify({by:by.trim().slice(0,60),valid:valid,note:note.trim().slice(0,400),answers:out});
+   if(payload.length>5900){msg="The answer is too long. Please shorten the reasons.";return paint()}
+   b.disabled=true;b.textContent="Sending...";
+   db.collection("partnerReplies").add({key:KEY,dealId:SH.dealId||"",round:SH.round||1,payload:payload,createdAt:firebase.firestore.FieldValue.serverTimestamp(),sid:Math.random().toString(36).slice(2,12)}).then(function(){
+    app.innerHTML='<div class="ok"><h1>Thank you</h1><p>SOE has your answer for '+esc(SH.client)+'. You can close this page.</p></div>';
+   }).catch(function(){b.disabled=false;b.textContent="Send my answer to SOE";msg="We could not send your answer. Please check your connection and try again.";paint()});
+  }
+ });
+})();
+</script>
+</body>
+</html>
