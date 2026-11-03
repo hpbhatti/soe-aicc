@@ -35,6 +35,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--ink);font-s
 .step h2 .opt{font-size:11px;font-weight:600;color:var(--muted);background:var(--lime-soft);padding:2px 8px;border-radius:3px;margin-left:8px;vertical-align:middle}
 .hint{padding:6px 22px 0 66px;font-size:12px;color:var(--muted);line-height:1.55}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;padding:14px 22px 18px}
+.multi-check-wrap{display:flex;flex-wrap:wrap;gap:6px 10px;padding:6px 0}
+.multi-check-wrap label{display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;padding:4px 10px;border:1px solid var(--rule);border-radius:4px;background:#fff;transition:background .15s,border-color .15s}
+.multi-check-wrap label:has(input:checked){background:#E8F5E9;border-color:#43A047;font-weight:600}
+.multi-check-wrap label.mc-disabled{opacity:.45;cursor:not-allowed}
+.multi-check-wrap input{margin:0}
 .f{display:flex;flex-direction:column;gap:3px}
 .lbl{font-size:11.5px;font-weight:600;color:var(--ink)}
 .f input,.f select{font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink)}
@@ -241,6 +246,41 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
   .panel{position:static}
   .client-fields input{border:0;padding:0;font-weight:600}
 }
+/* ---- Deal library ---- */
+.dl{max-width:1260px;margin:0 auto 18px;padding:0 20px}
+.dl-in{background:#fff;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.dl-head{background:var(--deep);color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.dl-head b{font-size:15px}
+.dl-mode{font-size:11.5px;color:#C6E2CB;margin-left:10px}
+.dl-mode.warn{color:#FFE082}
+.dl-auth{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px}
+.dl-auth input{font:inherit;font-size:12px;padding:5px 8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;border-radius:4px;width:150px}
+.dl-auth input::placeholder{color:rgba(255,255,255,.6)}
+.dl button{font:inherit;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:5px;border:1px solid var(--rule);background:#fff;color:var(--deep);cursor:pointer}
+.dl button:hover{background:var(--lime-soft)}
+.dl button.pri{background:var(--deep);color:#fff;border-color:var(--deep)}
+.dl button.pri:hover{background:var(--deep-dk)}
+.dl button.sm{padding:4px 9px;font-size:11.5px}
+.dl button.danger{color:var(--red)}
+.dl-head button{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff}
+.dl-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--rule)}
+.dl-bar input{font:inherit;font-size:12.5px;padding:7px 10px;border:1px solid var(--rule);border-radius:5px;min-width:200px;margin-left:auto}
+.dl-status{font-size:12.5px;color:var(--deep);font-weight:600}
+.dl-status.err{color:var(--red)}
+.dl-row{display:grid;grid-template-columns:2fr 1.3fr 1fr auto;gap:10px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--rule-2);font-size:13px}
+.dl-row:last-child{border-bottom:0}
+.dl-row.cur{background:var(--lime-soft)}
+.dl-name{font-weight:700}
+.dl-meta{font-size:11.5px;color:var(--muted)}
+.dl-q{font-weight:700;color:var(--deep)}
+.dl-acts{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.dl-empty{padding:22px 18px;font-size:13px;color:var(--muted)}
+.logo-prev{display:flex;align-items:center;gap:6px;font-size:11px;color:#C6E2CB}
+.logo-prev img{height:26px;max-width:80px;object-fit:contain;background:#fff;border-radius:3px;padding:2px}
+.logo-prev button{background:none;border:0;color:#FFCDD2;cursor:pointer;font-size:14px;padding:0 3px}
+.field-s input[type=file]{width:170px;font-size:11px;padding:3px 6px}
+@media(max-width:820px){.dl-row{grid-template-columns:1fr}.dl-acts{justify-content:flex-start}.dl-bar input{margin-left:0;width:100%}}
+@media print{.dl{display:none!important}}
 </style>
 </head>
 <body>
@@ -260,6 +300,7 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
       <div class="field-s"><label for="quoteDate">Date</label><input id="quoteDate" type="text"></div>
       <div class="field-s"><label for="presalesLead">Presales Lead</label><input id="presalesLead" type="text" placeholder="Your name"></div>
       <div class="field-s"><label for="responseBy">Response by</label><input id="responseBy" type="text" placeholder="e.g. 5 Nov 2026"></div>
+      <div class="field-s"><label for="logoFile">Customer logo (optional)</label><input id="logoFile" type="file" accept="image/*"><div class="logo-prev" id="logoPrev"></div></div>
     </div>
   </div>
 </header>
@@ -273,14 +314,19 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
     <!-- STEP 0: Industry & Business Goal -->
     <section class="step">
       <div class="step-head"><div class="step-num">&bull;</div><h2>Customer profile</h2></div>
-      <div class="note">Select the customer's industry and primary business goal. These shape the executive summary in the internal brief.</div>
+      <div class="note">Select the customer's industry, current pain points (up to 3) and business goals (up to 3). These shape the executive summary, KPIs and chart suggestions in the internal brief.</div>
       <div class="fields">
         <label class="f"><span class="lbl">Industry</span>
           <select id="industry"><option value="">— Select industry —</option></select>
         </label>
-        <label class="f"><span class="lbl">Primary business goal</span>
-          <select id="bizGoal"><option value="">— Select business goal —</option></select>
-        </label>
+        <div class="f" style="grid-column:1/-1">
+          <span class="lbl">Pain points — what hurts today <span style="font-weight:400;color:var(--muted)">(select up to 3)</span></span>
+          <div id="painPointsWrap" class="multi-check-wrap"></div>
+        </div>
+        <div class="f" style="grid-column:1/-1">
+          <span class="lbl">Business goals — what they want to achieve <span style="font-weight:400;color:var(--muted)">(select up to 3)</span></span>
+          <div id="bizGoalsWrap" class="multi-check-wrap"></div>
+        </div>
         <label class="f" id="goalOtherWrap" style="display:none"><span class="lbl">Describe the business goal</span>
           <input id="goalOtherText" type="text" placeholder="e.g. Screen and qualify leads before they reach sales">
         </label>
@@ -309,38 +355,49 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
     <section class="step">
       <div class="step-head"><div class="step-num">2</div><h2>Phone setup</h2></div>
       <div class="note">
-        <b>Two paths, different cost profiles.</b>
-        The customer brings their own mobile numbers: no Grandstream device and no minimum extensions.
-        The customer brings their own landline number: this uses SIP and a Grandstream device per branch, and the 3-extension minimum applies.
-        Mobile numbers are limited to one concurrent call per number (STC limitation).
+        <b>Three ways to connect phones.</b>
+        The customer brings their own digital telephony (SIP), or their own mobile numbers, or we provide a landline number.
+        A Grandstream device is required in every case, one per deployment.
+        Own mobile numbers cannot carry concurrent calls. Carrier charges for calls are not included in any option.
       </div>
       <div class="fields">
-        <label class="f"><span class="lbl">Which numbers does the customer bring?</span>
+        <label class="f"><span class="lbl">How do phones connect?</span>
           <select id="phoneSetup">
+            <option value="sip" selected>Customer brings their own digital telephony (SIP)</option>
             <option value="ownMobile">Customer brings their own mobile numbers</option>
-            <option value="sip" selected>Customer brings their own landline number (SIP / Grandstream)</option>
+            <option value="ourLine">We provide a landline number</option>
           </select>
         </label>
         <label class="f" id="mobilesField"><span class="lbl">How many mobile numbers</span>
-          <input type="number" id="mobiles" min="1" step="1" value="3"><span>Each handles 1 concurrent call (STC limit)</span>
+          <input type="number" id="mobiles" min="1" step="1" value="3"><span>No cost for customer-supplied mobile numbers</span>
+        </label>
+        <label class="f" id="landlinesField"><span class="lbl">How many landline numbers from us</span>
+          <input type="number" id="landlines" min="1" step="1" value="1"><span>1,200 SAR per number per year, excluding VAT</span>
+        </label>
+        <label class="f" id="lineDiscField"><span class="lbl">10% discount on the landline number?</span>
+          <select id="lineDisc"><option value="0" selected>No</option><option value="1">Yes — 10% off</option></select>
         </label>
       </div>
       <div class="plan-out" id="phoneOut"></div>
     </section>
 
-    <!-- STEP 3: Extensions (landline/SIP only) -->
+    <!-- STEP 3: Extensions (human agent desktops) -->
     <section class="step" id="extStep">
-      <div class="step-head"><div class="step-num">3</div><h2>Extensions &amp; branches</h2></div>
-      <div class="note">Minimum 3 extensions (1,500 SAR/month floor). One Grandstream device per branch location.</div>
+      <div class="step-head"><div class="step-num">3</div><h2>Extensions (human agent desktops)</h2></div>
+      <div class="note">An extension is a desktop seat for a human agent, used in the browser. It does not limit AI capacity. One Grandstream device per deployment is added automatically.</div>
       <div class="fields">
-        <label class="f"><span class="lbl">Extensions (people answering)</span>
-          <input type="number" id="extensions" min="3" step="1" value="3"><span>500 SAR each, minimum 3</span>
-        </label>
-        <label class="f"><span class="lbl">Branch locations</span>
-          <input type="number" id="branches" min="1" step="1" value="1"><span>Grandstream device 2,500 each, one-time</span>
+        <label class="f"><span class="lbl">Extensions (human agents on desktop)</span>
+          <input type="number" id="extensions" min="0" step="1" value="0"><span>500 SAR each per month, no minimum</span>
         </label>
       </div>
       <div class="plan-out" id="extOut"></div>
+      <p class="hint" style="padding-top:14px"><b>Mobile service</b> — gives human agents access to the platform software on their mobile phones, in addition to their desktop extensions. A human agent seat on mobile instead of desktop. 500 SAR per month flat per deployment, regardless of the number of mobiles. Available for any phone setup.</p>
+      <div class="fields">
+        <label class="f"><span class="lbl">Include mobile service?</span>
+          <select id="mobileOn"><option value="0" selected>No</option><option value="1">Yes — 500 SAR per month (flat per deployment)</option></select>
+        </label>
+      </div>
+      <div class="plan-out" id="mobileOut"></div>
     </section>
 
     <!-- STEP 4: Flows -->
@@ -366,18 +423,16 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
           <input type="number" id="humanAgents" min="1" step="1" value="3"></label>
         <label class="f"><span class="lbl">Where will they work?</span>
           <select id="humanWhere">
-            <option value="platform" selected>On the 700Apps platform — seat charge</option>
+            <option value="platform" selected>On the 700Apps platform — covered by extensions</option>
             <option value="external">In the customer's own system — endpoint charge</option>
             <option value="both">Both</option>
           </select>
         </label>
         <label class="f" id="humanSeatsField"><span class="lbl">How many of them on 700Apps?</span>
           <input type="number" id="humanSeats" min="0" step="1" value="1"></label>
-        <label class="f" id="humanRateField"><span class="lbl">Rate per seat per month</span>
+        <label class="f" id="humanRateField" style="display:none"><span class="lbl">Rate per seat per month</span>
           <select id="agentRate">
-            <option value="100">100 SAR</option>
-            <option value="120">120 SAR</option>
-            <option value="150" selected>150 SAR</option>
+            <option value="0" selected>0</option>
           </select>
         </label>
         <label class="f" id="humanExtField"><span class="lbl">Which customer system? (generic name)</span>
@@ -470,9 +525,9 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
     </section>
 
     <!-- STEP 8: Concurrent calls -->
-    <section class="step">
+    <section class="step" id="concurrentStep">
       <div class="step-head"><div class="step-num">8</div><h2>Concurrent calls</h2></div>
-      <p class="hint">How many calls can happen at the same time. This is a telephony capacity charge, separate from extensions. Each concurrent call costs 250 SAR a month. Cannot exceed the number of extensions (agent seats) set in Step 3. For mobile setups, concurrency is also limited to the number of mobile numbers.</p>
+      <p class="hint">How many calls can happen at the same time. This is a telephony capacity charge. Each concurrent call costs 250 SAR a month. It applies to SIP and to a landline from us. It does not apply to the customer's own mobile numbers, which cannot carry concurrent calls.</p>
       <div class="fields">
         <label class="f"><span class="lbl">Concurrent calls</span>
           <input type="number" id="peak" min="1" step="1" value="2"><span>250 SAR per concurrent call per month</span>
@@ -532,6 +587,26 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
         </label>
       </div>
       <div class="plan-out" id="kbOut"></div>
+      <p class="hint" style="padding-top:14px"><b>Sentiment analysis</b> — analyses the tone and sentiment of inbound calls. 1 SAR per inbound call (each call is charged individually, regardless of whether it is the same or a different contact). Available only when inbound calls are in scope.</p>
+      <div class="fields">
+        <label class="f"><span class="lbl">Include sentiment analysis?</span>
+          <select id="sentimentOn"><option value="0" selected>No</option><option value="1">Yes — 1 SAR per inbound call</option></select>
+        </label>
+        <label class="f" id="sentimentWaiveField" style="display:none"><span class="lbl">Waive sentiment analysis?</span>
+          <select id="sentimentWaive"><option value="0" selected>Charge — 1 SAR per call</option><option value="1">Waive — absorb as concession</option></select>
+        </label>
+      </div>
+      <div class="plan-out" id="sentimentOut"></div>
+      <p class="hint" style="padding-top:14px"><b>Dashboard / admin panel</b> is required in every deal. It costs 100 SAR per user per month, with a minimum of one user. A customised dashboard is a one-time 700 SAR charge. It delivers up to 7 custom KPI charts tailored to the customer's business goal and active flows — for example, calls by hour, no-show rate trend, or cost per AI-handled call.</p>
+      <div class="fields">
+        <label class="f"><span class="lbl">Dashboard users</span>
+          <input type="number" id="dashUsers" min="1" step="1" value="1"><span>100 SAR per user per month, minimum 1</span>
+        </label>
+        <label class="f"><span class="lbl">Customised dashboard?</span>
+          <select id="dashCustom"><option value="0" selected>No</option><option value="1">Yes — 700 SAR one-time, up to 7 charts</option></select>
+        </label>
+      </div>
+      <div class="plan-out" id="dashOut"></div>
     </section>
 
     <!-- STEP 11: CRM upsell -->
@@ -571,6 +646,15 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
             <option value="1">Charge 250/mo — connecting to external CRM</option>
           </select>
         </label>
+      </div>
+      <div id="crmFeaturesSection" class="hide">
+        <p class="hint" style="padding-top:10px">Select the CRM features the customer needs. These appear in the internal brief under CRM requirements.</p>
+        <div class="fields">
+          <div class="f" style="grid-column:1/-1">
+            <span class="lbl">CRM feature requirements <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></span>
+            <div id="crmFeaturesWrap" class="multi-check-wrap"></div>
+          </div>
+        </div>
       </div>
       <div class="plan-out" id="crmOut"></div>
     </section>
@@ -633,6 +717,7 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
       </div>
       <div class="printhint acts">In the print window, turn on "Background graphics" so the colours print.
       </div>
+      <div class="acts" style="margin-top:8px"><button id="btnExcel" class="sec" style="width:100%">📊 Export Excel rate sheet + architecture PNG ↓</button></div>
     </div>
 
     <details class="internal">
@@ -651,6 +736,33 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
 </div>
 </div>
 
+<div class="dl" id="dl_panel">
+  <div class="dl-in">
+    <div class="dl-head">
+      <div><b>Deal library</b><span class="dl-mode" id="dl_mode"></span></div>
+      <div class="dl-auth" id="dl_auth"></div>
+    </div>
+    <div class="dl-bar">
+      <button type="button" class="pri" id="dl_save">Save deal</button>
+      <button type="button" id="dl_savenew" style="display:none">Save as new copy</button>
+      <button type="button" id="dl_new">New deal</button>
+      <span class="dl-status" id="dl_status"></span>
+      <input type="search" id="dl_search" placeholder="Search by client name">
+    </div>
+    <div id="dl_list"></div>
+  </div>
+</div>
+
+<div style="max-width:1260px;margin:0 auto;padding:0 20px 32px">
+  <div style="background:#0D3B13;border:2px solid #7CB342;border-radius:8px;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+    <div>
+      <div style="font-size:15px;font-weight:700;color:#fff">Customer Demo View</div>
+      <div style="font-size:12px;color:#C6E2CB;margin-top:2px">Opens a separate window with no pricing — safe for screen-sharing during demos</div>
+    </div>
+    <button id="btnCustView" style="background:#7CB342;color:#fff;border:none;border-radius:6px;padding:12px 28px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap">▶ &nbsp;Open customer view</button>
+  </div>
+</div>
+
 <div id="printArch"></div><div id="printBrief"></div><style id="pageStyle"></style>
 <div class="mobar">
   <div><div class="cap">One-time</div><div class="fig" id="moOne">—</div></div>
@@ -658,6 +770,9 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
   <div><div class="cap">Year one</div><div class="fig" id="moYear">—</div></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
 
@@ -667,9 +782,15 @@ var VAT_RATE = 0.15;
 var IMPL_FEE = 5000;
 var DEVICE_COST = 2500;
 var EXT_COST = 500;
-var MIN_EXT = 3;
+var MIN_EXT = 0;
+var MOBILE_PKG = 500;      // SAR per month per deployment, any number of mobiles
+var LANDLINE_YEAR = 1200;  // SAR per number per year, excluding VAT
+var LANDLINE_DISC = 0.10;
+var DASH_USER = 100;       // SAR per user per month, minimum 1 user
+var DASH_CUSTOM = 700;     // SAR one-time, up to 7 charts
 var ENDPOINT_COST = 250;
 var CONTACT_CHARGE = 1;
+var SENTIMENT_COST = 1;    // SAR per inbound call for sentiment analysis
 var EXTRA_LINE_COST = 250;
 var KB_COST = 38;
 var OVERAGE_RATE = 0.51;   // SAR per voice minute above the package — confirmed $0.1356 (51 halalas)
@@ -706,6 +827,27 @@ var CRM = [
   { name:"Growth",   sar:60,  desc:"Plus WhatsApp, payments, KPIs" },
   { name:"Business", sar:65,  desc:"Plus branches, campaigns, claims, API" },
   { name:"Scale",    sar:75,  desc:"Plus HIS/EMR, SSO, 24/7" }
+];
+
+var CRM_FEATURES = [
+  { id:"contacts",    label:"Contact & lead management" },
+  { id:"pipeline",    label:"Deal / opportunity pipeline" },
+  { id:"activity",    label:"Activity logging (calls, emails, visits)" },
+  { id:"tasks",       label:"Task & follow-up automation" },
+  { id:"appointments",label:"Appointment booking (showroom, clinic, field)" },
+  { id:"campaigns",   label:"Campaign management (email, SMS, WhatsApp)" },
+  { id:"reporting",   label:"Reporting & dashboards" },
+  { id:"ticketing",   label:"Ticketing & case management" },
+  { id:"quotes",      label:"Quotation & proposal generation" },
+  { id:"invoicing",   label:"Invoicing & payment tracking" },
+  { id:"inventory",   label:"Product / inventory catalogue" },
+  { id:"loyalty",     label:"Loyalty & rewards programme" },
+  { id:"contracts",   label:"Contract & renewal management" },
+  { id:"referrals",   label:"Referral tracking" },
+  { id:"webforms",    label:"Web forms & lead capture" },
+  { id:"mobile",      label:"Mobile CRM app for field teams" },
+  { id:"social",      label:"Social media integration" },
+  { id:"docmgmt",     label:"Document management & e-signature" }
 ];
 
 /* Generic systems a flow can touch. "native" = a 700Apps module exists (no endpoint charge). */
@@ -758,29 +900,61 @@ var INDUSTRY_DATA = {
   other:{ noun:"customers", place:"office", pain:"The business receives a high volume of routine phone calls that compete with core operations for staff time. Calls go unanswered during peak periods. Outbound follow-ups and reminders are manual and inconsistent.", success:"Every call is answered on the first ring, around the clock. Routine enquiries are resolved without human involvement. Outbound follow-ups and reminders happen automatically. Staff focus on their core responsibilities." }
 };
 
+var PAIN_POINTS = [
+  { id:"missed",      label:"Missed calls / lost enquiries" },
+  { id:"noafter",     label:"No after-hours coverage (prayer times, evenings, weekends)" },
+  { id:"overwhelm",   label:"Staff overwhelmed at peak times" },
+  { id:"noshow",      label:"High no-show rate for appointments" },
+  { id:"leadslost",   label:"Leads not captured / followed up" },
+  { id:"nooutbound",  label:"No outbound capability (renewals, follow-ups, collections)" },
+  { id:"highcost",    label:"High cost per interaction" },
+  { id:"novisibility",label:"No visibility into operations (no KPIs, no call analytics)" },
+  { id:"inconsistent",label:"Inconsistent customer experience" },
+  { id:"holdtimes",   label:"Long hold times / high call abandonment" },
+  { id:"language",    label:"Arabic dialect gaps or language barriers" },
+  { id:"turnover",    label:"High agent turnover / constant retraining" },
+  { id:"seasonal",    label:"Seasonal demand spikes unmanageable (Ramadan, Eid, Hajj)" },
+  { id:"noself",      label:"No self-service options for customers" },
+  { id:"compliance",  label:"Compliance concerns (PDPL, call recording, data residency)" }
+];
+
 var BIZ_GOALS = [
-  { id:"missed",    label:"We are missing too many calls",                           lead:"Reduce missed calls" },
-  { id:"247",       label:"We need 24/7 availability",                               lead:"Enable round-the-clock service" },
-  { id:"overwhelm", label:"Our team is overwhelmed with routine calls",              lead:"Free the team from routine calls" },
-  { id:"noshow",    label:"We want to reduce no-shows with automated reminders",     lead:"Reduce no-shows" },
-  { id:"leads",     label:"We want to capture leads and enquiries outside hours",    lead:"Capture after-hours leads" },
-  { id:"outbound",  label:"We want to automate outbound follow-ups",                lead:"Automate outbound follow-ups" },
-  { id:"cost",      label:"We want to reduce the cost of handling calls",            lead:"Reduce call handling cost" },
-  { id:"visibility",label:"We have no visibility into call volumes and outcomes",    lead:"Gain visibility into call operations" },
-  { id:"consistency",label:"We want consistent service across all branches",         lead:"Standardise service across branches" },
-  { id:"other",     label:"Other (describe below)" }
+  { id:"sales",       label:"Increase sales conversations",                lead:"Increase sales conversations" },
+  { id:"247",         label:"Extend service hours (24/7, prayer times, holidays)", lead:"Enable round-the-clock service" },
+  { id:"scale",       label:"Scale without hiring (Saudization pressure)",  lead:"Scale operations without hiring" },
+  { id:"showrate",    label:"Improve appointment show rate",                lead:"Improve appointment show rate" },
+  { id:"leads",       label:"Convert more inbound leads",                   lead:"Convert more inbound leads" },
+  { id:"recover",     label:"Recover overdue payments and lapsed renewals", lead:"Recover overdue payments and lapsed renewals" },
+  { id:"grow",        label:"Grow revenue from existing customer base",     lead:"Grow revenue from existing customer base" },
+  { id:"cost",        label:"Reduce cost per interaction",                  lead:"Reduce cost per interaction" },
+  { id:"visibility",  label:"Get real-time operations visibility",          lead:"Gain real-time operations visibility" },
+  { id:"consistency", label:"Standardise customer experience",              lead:"Standardise customer experience" },
+  { id:"aht",         label:"Reduce average handle time",                   lead:"Reduce average handle time" },
+  { id:"fcr",         label:"Improve first-call resolution",                lead:"Improve first-call resolution" },
+  { id:"automate",    label:"Automate routine enquiries",                   lead:"Automate routine enquiries" },
+  { id:"csat",        label:"Improve customer satisfaction (CSAT)",         lead:"Improve customer satisfaction" },
+  { id:"bilingual",   label:"Serve customers in Arabic and English seamlessly", lead:"Serve customers bilingually" },
+  { id:"pdpl",        label:"Meet PDPL and data residency requirements",    lead:"Meet PDPL and data residency requirements" },
+  { id:"other",       label:"Other (describe below)" }
 ];
 
 var GOAL_KPIS = {
-  missed:     [{ kpi:"Calls received vs answered", why:"The core problem. Measures whether the AI has eliminated missed calls during peak hours and outside business hours." },{ kpi:"Calls by hour of day", why:"Shows exactly when the AI is absorbing calls that previously went unanswered. Helps the customer see the value during their peak periods." }],
+  sales:      [{ kpi:"Calls received vs answered", why:"Every answered call is a potential sales conversation. Measures whether the AI has eliminated missed calls during peak hours and outside business hours." },{ kpi:"Lead-to-booking conversion", why:"Tracks whether inbound enquiries are converting to appointments or sales. A high number validates the investment." }],
   "247":      [{ kpi:"After-hours calls handled", why:"Measures the volume of calls answered outside business hours that would previously have been lost entirely." },{ kpi:"After-hours conversion rate", why:"Tracks whether after-hours calls are being resolved or just answered. Bookings and enquiries captured at night have direct revenue impact." }],
-  overwhelm:  [{ kpi:"AI resolved vs escalated", why:"Measures how many routine calls the AI completes without transferring to a human. A high resolution rate means staff are freed for core work." },{ kpi:"Staff call volume (before vs after)", why:"The number the customer will watch. Compares how many calls reach staff now versus before deployment." }],
-  noshow:     [{ kpi:"Reminder calls completed", why:"Tracks how many reminders were successfully delivered. Every completed reminder is a chance to prevent a no-show." },{ kpi:"No-show rate (before vs after)", why:"The definitive measure. Compare the no-show rate before and after the AI reminders are live." }],
+  scale:      [{ kpi:"AI resolved vs escalated", why:"Measures how many routine calls the AI completes without transferring to a human. A high resolution rate means staff are freed for core work." },{ kpi:"Staff call volume (before vs after)", why:"The number the customer will watch. Compares how many calls reach staff now versus before deployment." }],
+  showrate:   [{ kpi:"Reminder calls completed", why:"Tracks how many reminders were successfully delivered. Every completed reminder is a chance to prevent a no-show." },{ kpi:"No-show rate (before vs after)", why:"The definitive measure. Compare the no-show rate before and after the AI reminders are live." }],
   leads:      [{ kpi:"Leads captured outside business hours", why:"Counts new enquiries that would previously have been lost. Each one is a potential customer the business would not have had." },{ kpi:"Lead-to-booking conversion", why:"Tracks whether captured leads are converting to appointments or sales. A high number validates the investment." }],
-  outbound:   [{ kpi:"Outbound calls completed", why:"Measures the volume of follow-ups, reminders and notifications the AI is delivering that were previously manual or not done at all." },{ kpi:"Outbound completion rate", why:"Tracks how many outbound calls were successfully delivered versus attempted. Low rates may indicate wrong numbers or call timing issues." }],
+  recover:    [{ kpi:"Overdue payment recovery rate", why:"Tracks how many overdue accounts were successfully contacted and resolved by the AI. Direct revenue impact." },{ kpi:"Renewal completion rate", why:"Measures how many lapsed renewals were recovered through automated follow-up calls." }],
+  grow:       [{ kpi:"Upsell / cross-sell calls completed", why:"Measures the volume of proactive outbound calls to existing customers with relevant offers." },{ kpi:"Revenue per existing customer (before vs after)", why:"Tracks whether outbound engagement is increasing wallet share from the current customer base." }],
   cost:       [{ kpi:"Cost per AI-handled call", why:"Divides the monthly platform cost by calls handled. Gives the customer a direct comparison against their current cost per call." },{ kpi:"Calls handled without staff", why:"The volume of calls resolved entirely by the AI. Each one is a call that did not consume staff time or salary." }],
   visibility: [{ kpi:"Total call volume and trends", why:"The foundational metric the customer currently lacks. Shows daily, weekly and monthly call patterns for the first time." },{ kpi:"Call outcomes by type", why:"Breaks down what happens on each call — booked, answered, escalated, abandoned. Turns invisible phone activity into actionable data." }],
-  consistency:[{ kpi:"Resolution rate by branch or location", why:"Compares AI performance across locations. Ensures every branch delivers the same service quality regardless of local staff." },{ kpi:"Call volume by branch", why:"Shows demand distribution across branches. Helps the customer allocate resources and identify underserved locations." }]
+  consistency:[{ kpi:"Resolution rate by branch or location", why:"Compares AI performance across locations. Ensures every branch delivers the same service quality regardless of local staff." },{ kpi:"Call volume by branch", why:"Shows demand distribution across branches. Helps the customer allocate resources and identify underserved locations." }],
+  aht:        [{ kpi:"Average handle time (before vs after)", why:"Measures the direct time saving per call. Shorter handle times mean more capacity without more staff." },{ kpi:"Calls resolved under 2 minutes", why:"Tracks how many routine calls the AI resolves quickly. High percentage validates the automation investment." }],
+  fcr:        [{ kpi:"First-call resolution rate", why:"Measures how many calls are fully resolved without the customer needing to call back. The single strongest driver of customer satisfaction." },{ kpi:"Repeat call rate", why:"Tracks how often the same customer calls about the same issue. A falling rate confirms the AI is resolving issues properly." }],
+  automate:   [{ kpi:"AI resolved vs escalated", why:"Measures the percentage of calls the AI handles end-to-end without human involvement." },{ kpi:"Top 5 automated enquiry types", why:"Shows which routine questions the AI handles most. Helps the customer see exactly what staff time has been freed." }],
+  csat:       [{ kpi:"Customer satisfaction score (CSAT)", why:"Direct measure of customer experience quality. Compare before and after AI deployment." },{ kpi:"Call abandonment rate (before vs after)", why:"Measures how many callers hang up before being served. A drop confirms the AI is reducing wait times." }],
+  bilingual:  [{ kpi:"Calls handled in Arabic vs English", why:"Shows the language split across all calls. Validates that the AI serves both language groups without quality gaps." },{ kpi:"Resolution rate by language", why:"Compares whether Arabic and English calls are resolved at the same rate. Highlights any dialect or language coverage gaps." }],
+  pdpl:       [{ kpi:"Calls recorded and stored in-region", why:"Confirms all call data stays within Saudi data residency requirements." },{ kpi:"Consent capture rate", why:"Tracks whether the AI is collecting caller consent for recording as required by PDPL." }]
 };
 
 // Always-included KPIs for every project
@@ -792,15 +966,22 @@ var COMMON_KPIS = [
 
 // Deal drivers: likely objection per business goal, and recommended next step logic
 var GOAL_OBJECTIONS = {
-  missed:     "The customer may want proof that the AI handles calls in Arabic at acceptable quality before committing to a full rollout.",
+  sales:      "The customer may want proof that the AI handles calls in Arabic at acceptable quality before committing to a full rollout.",
   "247":      "Concern about AI call quality outside business hours when no human backup is available. A short test period can address this.",
-  overwhelm:  "The operations team may resist automation if they see it as replacing their roles. Position it as freeing them for higher-value work.",
-  noshow:     "The customer may question whether reminders alone reduce no-shows without changing the booking process itself.",
+  scale:      "The operations team may resist automation if they see it as replacing their roles. Position it as freeing them for higher-value work.",
+  showrate:   "The customer may question whether reminders alone reduce no-shows without changing the booking process itself.",
   leads:      "Sales teams often distrust AI-captured leads until they see the quality first-hand. A short test with real calls builds trust.",
-  outbound:   "Concern about how customers react to AI-initiated calls. A controlled test on one campaign removes the uncertainty.",
+  recover:    "Concern about how customers react to AI collection or renewal calls. A controlled test on one segment removes the uncertainty.",
+  grow:       "Sales teams may want to control upsell messaging themselves. Start with one campaign type so they can review the approach.",
   cost:       "Budget approval may be slow if the savings are not proven first. A time-limited test with measured cost per call helps.",
   visibility: "Management may not act on new dashboards unless the data is trusted. A test period lets them compare the data against what they know.",
   consistency:"Staff across branches may not follow a new process unless they see it working. Start with one branch, then expand.",
+  aht:        "The customer may question whether shorter calls mean lower quality. Show that resolution rate stays high while handle time drops.",
+  fcr:        "First-call resolution depends on system integrations being in place. Confirm which systems the AI can access before promising improvements.",
+  automate:   "Staff may resist if they see automation as a threat. Position it as removing repetitive calls so they can focus on complex ones.",
+  csat:       "CSAT improvement takes time to measure. Set a realistic timeline — typically 60 to 90 days after go-live for meaningful data.",
+  bilingual:  "The customer may want to test Arabic dialect handling before full deployment. A short test with real calls builds confidence.",
+  pdpl:       "Legal and compliance teams may want to review the data handling process before sign-off. Provide the 700Apps data residency documentation early.",
   other:      "The business case may need internal validation before the customer commits. A defined test period lowers the risk of that first step."
 };
 
@@ -1219,8 +1400,12 @@ function buildRateCard(){
 
   h += '<div class="rc-h">Telephony &amp; setup</div>';
   h += '<table class="rc"><tr><th>Item</th><th>Basis</th><th style="text-align:end">SAR</th></tr>';
-  h += '<tr id="rc-ext"><td>Extension</td><td>Per extension, monthly (SIP/landline), minimum 3</td><td class="p">500</td></tr>';
-  h += '<tr id="rc-dev"><td>Grandstream device</td><td>Per branch, one-time (SIP/landline)</td><td class="p">2,500</td></tr>';
+  h += '<tr id="rc-ext"><td>Extension (human desktop)</td><td>Per extension, monthly, no minimum</td><td class="p">500</td></tr>';
+  h += '<tr id="rc-dev"><td>Grandstream device</td><td>Per deployment, one-time (all setups)</td><td class="p">2,500</td></tr>';
+  h += '<tr id="rc-mob"><td>Mobile service</td><td>Per deployment, monthly, any number of mobiles</td><td class="p">500</td></tr>';
+  h += '<tr id="rc-ll"><td>Landline number (from us)</td><td>Per number, yearly, excl. VAT; 10% discount available</td><td class="p">1,200</td></tr>';
+  h += '<tr id="rc-dash"><td>Dashboard / admin panel</td><td>Per user, monthly, minimum 1 user</td><td class="p">100</td></tr>';
+  h += '<tr id="rc-dashc"><td>Dashboard customisation</td><td>Up to 7 charts, one-time</td><td class="p">700</td></tr>';
   h += '<tr id="rc-imp"><td>Implementation &amp; setup</td><td>Per deployment, one-time (always)</td><td class="p">5,000</td></tr>';
   h += '<tr id="rc-end"><td>Endpoint / web service</td><td>Per external system, monthly</td><td class="p">250</td></tr>';
   h += '</table>';
@@ -1236,7 +1421,8 @@ function buildRateCard(){
   h += '<tr id="rc-con"><td>Outbound contact charge</td><td>Per contact loaded into the CRM, monthly</td><td class="p">1</td></tr>';
   h += '<tr id="rc-line"><td>Concurrent call</td><td>Per concurrent call, monthly</td><td class="p">250</td></tr>';
   h += '<tr id="rc-kb"><td>Knowledge base</td><td>Per KB, monthly</td><td class="p">38</td></tr>';
-  h += '<tr id="rc-agent"><td>Human agent seat</td><td>Per seat, monthly, on 700Apps platform</td><td class="p">100–150</td></tr>';
+  h += '<tr id="rc-sent"><td>Sentiment analysis</td><td>Per inbound call</td><td class="p">1</td></tr>';
+  h += '<tr id="rc-agent"><td>Human agent seat</td><td>Covered by extension charge — no separate seat fee</td><td class="p">—</td></tr>';
   h += '<tr id="rc-over"><td>Additional usage minutes</td><td>Per minute above the package</td><td class="p">0.51</td></tr>';
   h += '</table>';
 
@@ -1257,11 +1443,17 @@ function model(){
 
   var phone = $("phoneSetup").value;
   var isSip = phone==="sip";
-  var isMobileOwn = !isSip;
+  var isMobileOwn = phone==="ownMobile";
+  var isOurLine = phone==="ourLine";
 
-  var mobileCount = isSip ? 0 : Math.max(1, Math.round(num("mobiles",1)));
-  var extensions  = isSip ? Math.max(MIN_EXT, Math.round(num("extensions",MIN_EXT))) : mobileCount;
-  var branches    = isSip ? Math.max(1, Math.round(num("branches",1))) : 0;
+  var mobileCount = isMobileOwn ? Math.max(1, Math.round(num("mobiles",1))) : 0;
+  var extensions  = Math.max(0, Math.round(num("extensions",0)));
+  var branches    = 1; // Grandstream is per deployment, always 1
+  var landlines   = isOurLine ? Math.max(1, Math.round(num("landlines",1))) : 0;
+  var lineDisc    = isOurLine ? ($("lineDisc").value==="1") : false;
+  var mobileOn    = $("mobileOn").value==="1";
+  var dashUsers   = Math.max(1, Math.round(num("dashUsers",1)));
+  var dashCustom  = $("dashCustom").value==="1";
 
   var workDays = parseInt($("workDays").value,10);
   var aiShare  = parseFloat($("aiShare").value);
@@ -1311,12 +1503,9 @@ function model(){
   var contactAttempts = hasOutbound ? parseInt($("contactAttempts").value,10) : 1;
   var contactWaived = $("waiveContact").value==="1";
 
-  // Concurrent calls — standalone telephony charge, independent of extensions
-  // Cannot exceed the number of extensions (agent seats)
-  var concurrentCalls = Math.max(1, Math.min(extensions, Math.round(num("peak",1))));
-  var peak = concurrentCalls; // alias for backward compat in cross-checks
-  // Clamp the input field visually so the user sees the enforced cap
-  if(Math.round(num("peak",1)) > extensions) $("peak").value = concurrentCalls;
+  // Concurrent calls — applies to SIP and our landline only, not own mobile
+  var concurrentCalls = isMobileOwn ? 0 : Math.max(1, Math.round(num("peak",1)));
+  var peak = isMobileOwn ? 0 : concurrentCalls;
 
   // Knowledge base — one per client, included automatically if a flow answers from it
   var kbFlow = activeFlows().some(function(a){ return a.job.kb; });
@@ -1334,18 +1523,53 @@ function model(){
   if(vOverCost>0) R.push(["Additional usage minutes", vOverCost,
     nfmt(vOver)+" min × "+OVERAGE_RATE.toFixed(2)+" SAR per minute"]);
 
-  if(isSip){
+  // Grandstream device — always required, one per deployment
+  O.push(["Grandstream device", DEVICE_COST, "1 per deployment × "+nfmt(DEVICE_COST)]);
+
+  // Extensions (human agent desktops)
+  if(extensions>0){
     R.push([extensions+" extension"+(extensions>1?"s":""), EXT_COST*extensions,
       extensions+" × "+nfmt(EXT_COST)+" per extension/month"]);
-    O.push(["Grandstream device"+(branches>1?" × "+branches:""), DEVICE_COST*branches,
-      branches+" branch"+(branches>1?"es":"")+" × "+nfmt(DEVICE_COST)]);
+  }
+
+  // Mobile service — optional add-on, flat per deployment
+  if(mobileOn){
+    R.push(["Mobile service", MOBILE_PKG, "Flat per deployment, any number of mobiles — human agent seat on mobile"]);
+  }
+
+  // Sentiment analysis — 1 SAR per inbound call
+  var sentimentOn = hasInbound && $("sentimentOn").value==="1";
+  var sentimentWaived = sentimentOn && $("sentimentWaive").value==="1";
+  var sentimentCalls = hasInbound ? Math.round(num("inCallsDay",0) * workDays) : 0;
+  var sentimentCost = sentimentCalls * SENTIMENT_COST;
+  if(sentimentOn && !sentimentWaived){
+    R.push(["Sentiment analysis", sentimentCost,
+      nfmt(sentimentCalls)+" inbound calls × "+SENTIMENT_COST+" SAR per call"]);
+  }
+  if(sentimentOn && sentimentWaived){
+    W.push({label:"Sentiment analysis waived ("+nfmt(sentimentCalls)+" calls × "+SENTIMENT_COST+" SAR). Subject to 700Apps approval.", amount:sentimentCost, type:"recurring"});
+  }
+
+  // Landline from us — yearly charge
+  if(isOurLine){
+    var llUnit = lineDisc ? Math.round(LANDLINE_YEAR*(1-LANDLINE_DISC)) : LANDLINE_YEAR;
+    var llTotal = llUnit * landlines;
+    O.push(["Landline number"+(landlines>1?" × "+landlines:"")+" (yearly)", llTotal,
+      landlines+" × "+nfmt(llUnit)+"/year"+(lineDisc?" ("+nfmt(LANDLINE_YEAR)+" list less 10% discount)":"")+" — excl. VAT, renews annually"]);
+  }
+
+  // Dashboard / admin panel — mandatory
+  R.push(["Dashboard — "+dashUsers+" user"+(dashUsers>1?"s":""), DASH_USER*dashUsers,
+    dashUsers+" × "+nfmt(DASH_USER)+"/user/month"]);
+  if(dashCustom){
+    O.push(["Dashboard customisation", DASH_CUSTOM, "Up to 7 custom charts, one-time"]);
   }
 
   if(!implWaived){
     O.push(["Implementation & setup", IMPL_FEE, "Per deployment, charged once"]);
   } else {
     O.push(["Implementation & setup", 0, "Waived — list price "+nfmt(IMPL_FEE)]);
-    W.push({label:"Implementation fee waived", amount:IMPL_FEE, type:"onetime"});
+    W.push({label:"Implementation fee waived. Subject to 700Apps approval.", amount:IMPL_FEE, type:"onetime"});
   }
 
   if(endpoints>0){
@@ -1353,10 +1577,7 @@ function model(){
       chargedEps.map(function(e){ return e.name; }).join(", ")+" — "+endpoints+" × "+nfmt(ENDPOINT_COST)+"/mo, unlimited workflows per connection"]);
   }
 
-  if(seats>0){
-    R.push([seats+" human agent seat"+(seats>1?"s":""), seats*agentRate,
-      seats+" × "+nfmt(agentRate)+" per seat/mo on 700Apps platform"]);
-  }
+  /* Human agent seats are covered by the extension charge — no separate seat line item */
 
   if(hasOutbound && contacts>0){
     var contactTotal = contacts * CONTACT_CHARGE;
@@ -1364,7 +1585,7 @@ function model(){
       R.push(["Outbound contact charge", contactTotal,
         nfmt(contacts)+" contacts × "+CONTACT_CHARGE+" SAR per contact loaded"]);
     } else {
-      W.push({label:"Contact charge waived ("+nfmt(contacts)+" contacts × "+CONTACT_CHARGE+" SAR)", amount:contactTotal, type:"recurring"});
+      W.push({label:"Contact charge waived ("+nfmt(contacts)+" contacts × "+CONTACT_CHARGE+" SAR). Subject to 700Apps approval.", amount:contactTotal, type:"recurring"});
     }
   }
 
@@ -1373,7 +1594,7 @@ function model(){
     if(wOverCost>0) R.push(["Additional WhatsApp messages", wOverCost, nfmt(wOver)+" messages × "+wRate.toFixed(3)+" SAR per message"]);
   }
 
-  if(concurrentCalls>0){
+  if(concurrentCalls>0 && !isMobileOwn){
     R.push([concurrentCalls+" concurrent call"+(concurrentCalls>1?"s":""), concurrentCalls*EXTRA_LINE_COST,
       concurrentCalls+" × "+nfmt(EXTRA_LINE_COST)+"/mo"]);
   }
@@ -1407,10 +1628,17 @@ function model(){
   A.push("Voice allowances are monthly and expire at month end.");
   if(vOver>0) A.push("Additional usage minutes beyond the voice package are charged at "+OVERAGE_RATE.toFixed(2)+" SAR per minute. The package is not auto-upgraded. This per-minute rate must be included in the customer's service agreement.");
   if(wOver>0) A.push("Additional WhatsApp messages beyond the tier are priced at the tier's per-message rate.");
-  if(isSip) A.push("Extensions are concurrent agent seats on the Grandstream PBX. "+branches+" device"+(branches>1?"s":"")+" at "+nfmt(DEVICE_COST)+" each. Minimum 3 extensions.");
-  if(isMobileOwn) A.push("Customer supplies their own mobile numbers. Each handles one concurrent call (STC limitation). No Grandstream device and no minimum extension charge.");
-  if(contactWaived && contacts>0) A.push("Contact charge of "+sar(contacts*CONTACT_CHARGE)+"/month ("+nfmt(contacts)+" contacts × "+CONTACT_CHARGE+" SAR per contact loaded) has been waived as a sales concession.");
-  if(implWaived) A.push("Implementation fee of "+sar(IMPL_FEE)+" has been waived — absorbed by the partner.");
+  A.push("One Grandstream device per deployment ("+nfmt(DEVICE_COST)+" SAR one-time), required for all phone setups.");
+  A.push("Extensions are human agent desktop seats (browser-based), charged at "+nfmt(EXT_COST)+" SAR each per month. They do not limit AI capacity.");
+  if(isMobileOwn) A.push("Customer supplies their own mobile numbers. Own mobile numbers cannot have concurrent calls.");
+  if(sentimentOn && !sentimentWaived) A.push("Sentiment analysis is "+SENTIMENT_COST+" SAR per inbound call. Each call is charged individually regardless of contact. Estimated "+nfmt(sentimentCalls)+" calls a month.");
+  if(sentimentOn && sentimentWaived) A.push("Sentiment analysis has been waived as a sales concession (list price "+sar(sentimentCost)+"/month). Subject to 700Apps approval.");
+  if(mobileOn) A.push("Mobile service is "+nfmt(MOBILE_PKG)+" SAR per month flat per deployment, any number of mobiles. Gives human agents mobile access to the platform software on top of their desktop extensions.");
+  if(isOurLine) A.push("Landline number provided by us at "+nfmt(LANDLINE_YEAR)+" SAR per number per year excluding VAT"+(lineDisc?" (10% discount applied)":"")+". Renews yearly. Carrier charges for local numbers are not included.");
+  if(isSip) A.push("Customer brings their own digital telephony (SIP). Concurrent calls apply at "+nfmt(EXTRA_LINE_COST)+" SAR each.");
+  A.push("Dashboard / admin panel is mandatory. Minimum one user at "+nfmt(DASH_USER)+" SAR per user per month."+(dashCustom?" Custom dashboard (up to 7 charts) charged at "+nfmt(DASH_CUSTOM)+" SAR one-time.":""));
+  if(contactWaived && contacts>0) A.push("Contact charge of "+sar(contacts*CONTACT_CHARGE)+"/month ("+nfmt(contacts)+" contacts × "+CONTACT_CHARGE+" SAR per contact loaded) has been waived as a sales concession. Subject to 700Apps approval.");
+  if(implWaived) A.push("Implementation fee of "+sar(IMPL_FEE)+" has been waived. Subject to 700Apps approval.");
   if(endpoints>0) A.push(endpoints+" external system"+(endpoints>1?"s":"")+" connected at "+nfmt(ENDPOINT_COST)+"/mo each. A system used by several flows is charged once. Unlimited workflows within each connection.");
   var customs = eps.filter(function(e){ return e.custom; });
   if(customs.length) A.push("Custom integration"+(customs.length>1?"s":"")+" ("+customs.map(function(e){return e.name+(e.purposes.length?" – "+e.purposes.join("; "):"");}).join(", ")+") to be confirmed with 700Apps before go-live.");
@@ -1424,8 +1652,10 @@ function model(){
 
   return {
     dir:dir, hasInbound:hasInbound, hasOutbound:hasOutbound,
-    phone:phone, isSip:isSip, isMobileOwn:isMobileOwn,
+    phone:phone, isSip:isSip, isMobileOwn:isMobileOwn, isOurLine:isOurLine,
     mobileCount:mobileCount, extensions:extensions, branches:branches,
+    landlines:landlines, lineDisc:lineDisc,
+    mobileOn:mobileOn, dashUsers:dashUsers, dashCustom:dashCustom,
     workDays:workDays, aiShare:aiShare,
     inMinsDay:inMinsDay, outMinsDay:outMinsDay, totalMinsMonth:totalMinsMonth,
     vIdx:vIdx, vRec:vRec, vOver:vOver, voicePkg:voicePkg, vOverCost:vOverCost,
@@ -1433,6 +1663,8 @@ function model(){
     eps:eps, endpoints:endpoints, chargedEps:chargedEps,
     hOn:hOn, hWhere:hWhere, agents:agents, seats:seats, agentRate:agentRate,
     crmOn:crmOn, crmIdx:crmIdx, crmUsers:crmUsers, crmPlan:crmPlan, crmAnnual:crmAnnual,
+    crmFeatures: crmOn ? getMultiCheckIds($("crmFeaturesWrap")) : [],
+    sentimentOn:sentimentOn, sentimentWaived:sentimentWaived, sentimentCalls:sentimentCalls, sentimentCost:sentimentCost,
     contacts:contacts, contactAttempts:contactAttempts, contactWaived:contactWaived,
     peak:peak, concurrentCalls:concurrentCalls, kbOn:kbOn, kbFlow:kbFlow,
     vatOn:vatOn, implWaived:implWaived,
@@ -1447,6 +1679,19 @@ function model(){
 
 /* ═══════════════════ RENDER ═══════════════════ */
 function render(){
+  // Human escalation auto-logic: if extensions > 0, auto-enable and set agent count
+  var extCount = Math.max(0, Math.round(num("extensions",0)));
+  var humanAutoSet = extCount > 0;
+  if(humanAutoSet){
+    $("humanOn").value = "1";
+    $("humanAgents").value = extCount;
+    // Do NOT force humanWhere — let the user choose platform / external / both
+  }
+  // Show the human escalation question but disable the on/off toggle when auto-set
+  var humanQWrap = $("humanOn").closest(".fields");
+  if(humanQWrap) humanQWrap.classList.remove("hide");
+  $("humanOn").disabled = humanAutoSet;
+
   var m = model();
 
   // Visibility
@@ -1459,19 +1704,50 @@ function render(){
   $("inboundFields").classList.toggle("hide", !m.hasInbound);
   $("outboundVolFields").classList.toggle("hide", !m.hasOutbound);
   $("contactStep").classList.toggle("hide", !m.hasOutbound);
-  $("mobilesField").classList.toggle("hide", m.isSip);
-  $("extStep").classList.toggle("hide", !m.isSip);
+  $("mobilesField").classList.toggle("hide", !m.isMobileOwn);
+  var llShow = m.isOurLine;
+  if(document.getElementById("landlinesField")) $("landlinesField").classList.toggle("hide", !llShow);
+  if(document.getElementById("lineDiscField")) $("lineDiscField").classList.toggle("hide", !llShow);
 
   // Phone output
   if(m.isSip){
-    $("phoneOut").innerHTML = "<b>Customer's landline / SIP:</b> extensions (minimum 3) and a Grandstream device per branch are needed. Implementation fee "+sar(IMPL_FEE)+".";
+    $("phoneOut").innerHTML = "<b>Customer's own digital telephony (SIP):</b> Grandstream device included (1 per deployment). Concurrent calls apply at "+nfmt(EXTRA_LINE_COST)+" SAR each.";
+  } else if(m.isMobileOwn){
+    $("phoneOut").innerHTML = "<b>Customer's own mobile numbers:</b> "+m.mobileCount+" number"+(m.mobileCount>1?"s":"")+". No concurrent calls. Grandstream device included (1 per deployment).";
   } else {
-    $("phoneOut").innerHTML = "<b>Customer's own mobile numbers:</b> "+m.mobileCount+" number"+(m.mobileCount>1?"s":"")+", each handles 1 concurrent call. No Grandstream device, and the 3-extension minimum does not apply. Implementation fee "+sar(IMPL_FEE)+".";
+    var llU = m.lineDisc ? Math.round(LANDLINE_YEAR*(1-LANDLINE_DISC)) : LANDLINE_YEAR;
+    $("phoneOut").innerHTML = "<b>Landline number from us:</b> "+m.landlines+" number"+(m.landlines>1?"s":"")+" at "+nfmt(llU)+"/year each"+(m.lineDisc?" (10% discount)":"")+". Concurrent calls apply at "+nfmt(EXTRA_LINE_COST)+" SAR each. Grandstream device included (1 per deployment). Carrier charges excluded.";
   }
-  if(m.isSip){
-    $("extOut").innerHTML = "<b>"+m.extensions+" extension"+(m.extensions>1?"s":"")+"</b> at "+nfmt(EXT_COST)+" = "+sar(m.extensions*EXT_COST)+"/mo"+
-      (m.extensions===MIN_EXT ? " (minimum floor)." : ".") +
-      " "+m.branches+" Grandstream device"+(m.branches>1?"s":"")+" at "+nfmt(DEVICE_COST)+" = "+sar(m.branches*DEVICE_COST)+" one-time.";
+
+  // Extension output
+  $("extOut").innerHTML = m.extensions>0
+    ? "<b>"+m.extensions+" extension"+(m.extensions>1?"s":"")+"</b> (human agent desktops) at "+nfmt(EXT_COST)+" = "+sar(m.extensions*EXT_COST)+"/mo."
+    : "No extensions. Add extensions if the customer needs human agent desktop seats.";
+
+  // Dashboard output
+  if(document.getElementById("dashOut")){
+    var dh = "<b>Dashboard:</b> "+m.dashUsers+" user"+(m.dashUsers>1?"s":"")+" × "+nfmt(DASH_USER)+" = "+sar(DASH_USER*m.dashUsers)+"/mo.";
+    if(m.dashCustom) dh += " Custom dashboard: "+sar(DASH_CUSTOM)+" one-time (up to 7 charts).";
+    $("dashOut").innerHTML = dh;
+  }
+
+  // Sentiment analysis output
+  if(document.getElementById("sentimentOut")){
+    $("sentimentWaiveField").style.display = m.sentimentOn ? "" : "none";
+    if(m.sentimentOn){
+      $("sentimentOut").innerHTML = m.sentimentWaived
+        ? "<b>Sentiment analysis:</b> waived (list price "+sar(m.sentimentCost)+"/mo for "+nfmt(m.sentimentCalls)+" calls). Subject to 700Apps approval."
+        : "<b>Sentiment analysis:</b> "+nfmt(m.sentimentCalls)+" inbound calls × "+SENTIMENT_COST+" SAR = "+sar(m.sentimentCost)+"/mo.";
+    } else {
+      $("sentimentOut").innerHTML = m.hasInbound ? "Sentiment analysis not selected." : "Not available — no inbound calls in scope.";
+    }
+  }
+
+  // Mobile service output
+  if(document.getElementById("mobileOut")){
+    $("mobileOut").innerHTML = m.mobileOn
+      ? "<b>Mobile service:</b> "+sar(MOBILE_PKG)+"/mo flat per deployment. Agents get mobile access to the platform on top of desktop extensions."
+      : "Mobile service not selected.";
   }
 
   // Flows summary
@@ -1482,14 +1758,15 @@ function render(){
   $("humanFields").classList.toggle("hide", !m.hOn);
   $("humanSeatsField").classList.toggle("hide", !(m.hOn && m.hWhere==="both"));
   $("humanExtField").classList.toggle("hide", !(m.hOn && (m.hWhere==="external"||m.hWhere==="both")));
-  $("humanRateField").classList.toggle("hide", !(m.hOn && (m.hWhere==="platform"||m.hWhere==="both")));
+  $("humanRateField").classList.add("hide"); /* seat rate removed — extensions cover it */
   $("humanNoteField").classList.toggle("hide", !(m.hOn && m.hWhere==="both"));
   var ho = "";
   if(m.hOn){
-    if(m.hWhere==="platform") ho = "<b>"+m.seats+" seat"+(m.seats!==1?"s":"")+" × "+nfmt(m.agentRate)+" = "+sar(m.seats*m.agentRate)+"/month</b> on the 700Apps platform. No endpoint charge.";
+    if(m.hWhere==="platform") ho = "<b>"+m.seats+" seat"+(m.seats!==1?"s":"")+"</b> on the 700Apps platform. Covered by extension charge. No endpoint charge.";
     else if(m.hWhere==="external") ho = "<b>"+esc(humanExtName())+"</b> is added as an endpoint in Step 7 (250/month). No seat fee.";
-    else ho = "<b>"+m.seats+" seat"+(m.seats!==1?"s":"")+" × "+nfmt(m.agentRate)+" = "+sar(m.seats*m.agentRate)+"/month</b> on 700Apps, plus <b>"+esc(humanExtName())+"</b> as an endpoint (250/month).";
+    else ho = "<b>"+m.seats+" seat"+(m.seats!==1?"s":"")+"</b> on 700Apps (covered by extension charge), plus <b>"+esc(humanExtName())+"</b> as an endpoint (250/month).";
   }
+  if(humanAutoSet) ho = '<small style="color:#2E7D32">⬤ Auto-set: '+extCount+' extension'+(extCount>1?'s':'')+' → '+extCount+' human agent'+(extCount>1?'s':'')+' on 700Apps platform.</small><br>' + ho;
   $("humanOut").innerHTML = ho;
   $("humanWarn").innerHTML = (m.hOn && m.hWhere==="both") ? box("Human agents are in two places. Confirm this is intended, and note which calls go where.") : "";
 
@@ -1570,10 +1847,14 @@ function render(){
   var waNeeded = activeFlows().some(function(a){ return a.f.sys.whatsapp; });
   $("waFlowWarn").innerHTML = (waNeeded && m.waMode==="none") ? box("A flow uses WhatsApp, but Step 9 says WhatsApp is not needed. WhatsApp is still counted as an endpoint here. Set up WhatsApp in Step 9.") : "";
 
-  // Concurrent calls
-  var ccCost = m.concurrentCalls * EXTRA_LINE_COST;
-  $("peakOut").innerHTML = '<b>'+m.concurrentCalls+' concurrent call'+(m.concurrentCalls>1?'s':'')+'</b> × '+nfmt(EXTRA_LINE_COST)+' = '+sar(ccCost)+'/mo. <span style="color:#666">(max '+m.extensions+' — limited by extensions)</span>'+
-    (!m.isSip && m.peak>m.mobileCount ? ' <span class="warn">You have '+m.mobileCount+' mobile number'+(m.mobileCount>1?'s':'')+' but '+m.peak+' concurrent calls — each mobile handles one call. Add more numbers in Step 2 or move to landline/SIP.</span>' : '');
+  // Concurrent calls — hide entire step for own mobile
+  $("concurrentStep").classList.toggle("hide", m.isMobileOwn);
+  if(m.isMobileOwn){
+    $("peakOut").innerHTML = '';
+  } else {
+    var ccCost = m.concurrentCalls * EXTRA_LINE_COST;
+    $("peakOut").innerHTML = '<b>'+m.concurrentCalls+' concurrent call'+(m.concurrentCalls>1?'s':'')+'</b> × '+nfmt(EXTRA_LINE_COST)+' = '+sar(ccCost)+'/mo.';
+  }
 
   // WhatsApp
   var plat = m.waMode==="platform";
@@ -1611,15 +1892,18 @@ function render(){
   $("crmUsersField").classList.toggle("hide", !m.crmOn);
   $("crmPlanFields").classList.toggle("hide", !m.crmOn);
   $("crmBillingField").classList.toggle("hide", !m.crmOn);
+  $("crmFeaturesSection").classList.toggle("hide", !m.crmOn);
   if(m.crmOn){
     var crmEff = m.crmAnnual ? Math.round(m.crmPlan.sar * 0.9) : m.crmPlan.sar;
-    $("crmOut").innerHTML = '<b>'+m.crmPlan.name+' plan</b>'+(m.crmAnnual?' (annual billing)':'')+' — '+m.crmPlan.desc+'. '+sar(crmEff)+'/user × '+m.crmUsers+' user'+(m.crmUsers>1?'s':'')+ ' = '+sar(crmEff*m.crmUsers)+'/mo.'+(m.crmAnnual?' <small>10% discount applied, list price '+sar(m.crmPlan.sar)+'/user.</small>':'');
+    var crmFeatList = m.crmFeatures.length ? '<br><small>Features: '+m.crmFeatures.map(function(id){return CRM_FEATURES.filter(function(f){return f.id===id})[0].label}).join(', ')+'</small>' : '';
+    $("crmOut").innerHTML = '<b>'+m.crmPlan.name+' plan</b>'+(m.crmAnnual?' (annual billing)':'')+' — '+m.crmPlan.desc+'. '+sar(crmEff)+'/user × '+m.crmUsers+' user'+(m.crmUsers>1?'s':'')+ ' = '+sar(crmEff*m.crmUsers)+'/mo.'+(m.crmAnnual?' <small>10% discount applied, list price '+sar(m.crmPlan.sar)+'/user.</small>':'')+crmFeatList;
+    if(m.crmFeatures.length) $("crmOut").innerHTML += '<div style="margin-top:8px;padding:8px 12px;background:#FFF3E0;border-left:4px solid #FF9800;border-radius:4px;font-size:13px;color:#E65100"><b>⚠ Note:</b> CRM feature scope and pricing to be validated with 700Apps team before customer commitment.</div>';
   } else {
     $("crmOut").innerHTML = 'No CRM — contact center only.';
   }
 
   // Track tag
-  $("trackTag").textContent = (m.isSip ? "SIP/Landline" : "Own Mobile")+" · "+m.voicePkg.name;
+  $("trackTag").textContent = (m.isSip ? "Own SIP" : m.isMobileOwn ? "Own Mobile" : "Our Landline")+" · "+m.voicePkg.name;
 
   // ── Quote panel ──
   $("oneTime").innerHTML = m.onePrice>0 ? sar(m.onePrice) : "—";
@@ -1719,15 +2003,49 @@ function highlightRateCard(m){
 }
 
 /* ═══════════════════ POPULATE DROPDOWNS ═══════════════════ */
+function buildMultiCheck(wrap, items, maxSel){
+  wrap.innerHTML = "";
+  items.forEach(function(item){
+    var lbl = document.createElement("label");
+    var cb = document.createElement("input");
+    cb.type = "checkbox"; cb.value = item.id;
+    cb.addEventListener("change", function(){
+      var checked = wrap.querySelectorAll("input:checked");
+      if(checked.length > maxSel){ cb.checked = false; return; }
+      // disable unchecked if at max
+      wrap.querySelectorAll("input").forEach(function(c){
+        var parent = c.parentElement;
+        if(!c.checked && checked.length >= maxSel){ parent.classList.add("mc-disabled"); c.disabled = true; }
+        else { parent.classList.remove("mc-disabled"); c.disabled = false; }
+      });
+      // show/hide "other" text
+      if(wrap.id === "bizGoalsWrap"){
+        var ids = getMultiCheckIds(wrap);
+        $("goalOtherWrap").style.display = ids.indexOf("other") >= 0 ? "" : "none";
+      }
+      refresh();
+    });
+    lbl.appendChild(cb);
+    lbl.appendChild(document.createTextNode(" " + item.label));
+    wrap.appendChild(lbl);
+  });
+}
+function getMultiCheckIds(wrap){
+  var ids = [];
+  wrap.querySelectorAll("input:checked").forEach(function(c){ ids.push(c.value); });
+  return ids;
+}
 (function(){
-  var indSel = $("industry"), goalSel = $("bizGoal");
+  var indSel = $("industry");
   INDUSTRIES.forEach(function(ind){ var o = document.createElement("option"); o.value = ind.id; o.textContent = ind.label; indSel.appendChild(o); });
-  BIZ_GOALS.forEach(function(bg){ var o = document.createElement("option"); o.value = bg.id; o.textContent = bg.label; goalSel.appendChild(o); });
-  goalSel.addEventListener("change", function(){ $("goalOtherWrap").style.display = goalSel.value==="other" ? "" : "none"; });
+  buildMultiCheck($("painPointsWrap"), PAIN_POINTS, 3);
+  buildMultiCheck($("bizGoalsWrap"), BIZ_GOALS, 3);
+  // CRM features — no max limit
+  buildMultiCheck($("crmFeaturesWrap"), CRM_FEATURES, 99);
 })();
 
 /* ═══════════════════ EVENTS ═══════════════════ */
-function refresh(){ updateSuggest(); buildSystemQuestions(); render(); }
+function refresh(){ updateSuggest(); buildSystemQuestions(); render(); sendToCustView(); }
 
 $("flowsIn").addEventListener("change", flowHandler);
 $("flowsIn").addEventListener("input", flowHandler);
@@ -1766,13 +2084,13 @@ $("copyBtn").addEventListener("click", function(){
   t.push("AI Contact Center — estimate for "+name);
   t.push($("quoteDate").value.trim() || new Date().toDateString());
   t.push("");
-  t.push("Phone setup: "+(m.isSip?"Customer landline/SIP, "+m.extensions+" extensions, "+m.branches+" branch(es)":"Customer's own mobile, "+m.mobileCount+" numbers"));
+  t.push("Phone setup: "+(m.isSip?"Customer's own SIP":m.isMobileOwn?"Customer's own mobile, "+m.mobileCount+" numbers":"Landline from us, "+m.landlines+" number(s)")+", "+m.extensions+" extension(s)");
   t.push("Direction: "+m.dir);
   t.push("Voice: "+m.voicePkg.name+" package ("+nfmt(m.voicePkg.mins)+" min), "+nfmt(m.totalMinsMonth)+" min/mo estimated");
   var af = activeFlows();
   if(af.length){ t.push("Flows:"); af.forEach(function(a){ t.push("- "+a.label); }); }
   t.push(m.endpoints+" endpoint connection"+(m.endpoints!==1?"s":"")+(m.chargedEps.length?": "+m.chargedEps.map(function(e){return e.name;}).join(", "):""));
-  if(m.seats>0) t.push(m.seats+" human agent seat"+(m.seats>1?"s":"")+" at "+nfmt(m.agentRate)+"/mo");
+  if(m.seats>0) t.push(m.seats+" human agent seat"+(m.seats>1?"s":"")+" (covered by extensions)");
   if(m.kbOn) t.push("Knowledge base: 1");
   if(m.crmOn) t.push("CRM: "+m.crmPlan.name+" plan, "+m.crmUsers+" user"+(m.crmUsers>1?"s":"")+(m.crmAnnual?", annual":""));
   t.push("");
@@ -1998,21 +2316,41 @@ var ARCH = (function(){
     var tiles = [];
     if(D.kb) tiles.push({ ic:"book", t:"Knowledge base", s:"Your documents and FAQs, used to answer questions" });
     if(D.whatsapp) tiles.push({ ic:"chat", t:"WhatsApp", s: D.waMsgs>0 ? "About "+D.waMsgs.toLocaleString("en-US")+" messages a month" : "Connected to your own WhatsApp account" });
+    /* Dashboard tile — always shown (mandatory component) */
+    var ph = D.phone || {};
+    var dU = ph.dashUsers || 1;
+    tiles.push({ ic:"layers", t:"Dashboard — "+dU+" user"+(dU>1?"s":""), s: ph.dashCustom ? "With custom KPI charts (up to 7)" : "Standard admin panel", accent:"dash" });
+    /* Human agents tile — enhanced with extensions and mobile detail */
     var ag = human.agents || 0, agTxt = ag+" human agent"+(ag!==1?"s":"");
     var xn = human.extName || "your contact center system";
-    if(human.on && human.where==="platform") tiles.push({ ic:"users", t:agTxt, s:"on the platform, with full call context" });
-    else if(extHuman && !platHuman) tiles.push({ ic:"users", t:agTxt, s:"in "+xn+", with call context" });
-    else if(extHuman && platHuman) tiles.push({ ic:"users", t:agTxt, s:human.seats+" on the platform, "+Math.max(0,ag-human.seats)+" in "+xn });
-    if(D.native && D.native.length) tiles.push({ ic:"layers", t:"Built-in modules", s:D.native.join(", ")+" included in the platform" });
+    var ext = ph.extensions || 0;
+    var hSub = "";
+    if(human.on || ext > 0){
+      if(human.on && human.where==="platform") hSub = "On the platform, with full call context";
+      else if(extHuman && !platHuman) hSub = "In "+xn+", with call context";
+      else if(extHuman && platHuman) hSub = human.seats+" on platform, "+Math.max(0,ag-human.seats)+" in "+xn;
+      else hSub = ext+" extension"+(ext!==1?"s":"");
+      if(ext > 0 && human.on) hSub = ext+" extension"+(ext!==1?"s":"")+". "+hSub;
+      if(ph.mobileOn) hSub += ". Mobile access ON";
+      tiles.push({ ic:"users", t: human.on ? agTxt : ext+" extension"+(ext!==1?"s":""), s:hSub, accent:"human" });
+    }
+    if(D.native && D.native.length) tiles.push({ ic:"layers", t:"Built-in modules", s:D.native.join(", ")+" — included inside CRM" });
     if(tiles.length){
-      var tw = (innerW - (tiles.length-1)*12)/tiles.length;
-      var lim = Math.floor((tw-24)/5.3), th = 96;
-      parts.push({ h:th, draw:function(y){
+      var perRow = tiles.length <= 3 ? tiles.length : 2;
+      var rowCount = Math.ceil(tiles.length / perRow);
+      var tw = (innerW - (perRow-1)*12) / perRow;
+      var lim = Math.floor((tw-24)/5.3), th = 96, rowGap = 12;
+      var totalTileH = rowCount * th + (rowCount-1) * rowGap;
+      parts.push({ h:totalTileH, draw:function(y){
         var s = "";
         tiles.forEach(function(t,i){
-          var x = inner + i*(tw+12), narrow = tiles.length>=4;
-          s += rect(x,y,tw,th,10,"#fff",C.rule) + badge(t.ic,x+24,y+26,15,C.lime,"#fff") + text(x+46,y+31,trunc(t.t,Math.floor((tw-54)/6.6)),narrow?11:12.5,700,C.deepdk);
-          wrap(t.s,lim,3).forEach(function(l,li){ s += text(x+12,y+56+li*13,l,9.5,400,C.mute); });
+          var col = i % perRow, row = Math.floor(i / perRow);
+          var x = inner + col*(tw+12), ty = y + row*(th+rowGap);
+          var borderC = t.accent==="human" ? "#F59E0B" : t.accent==="dash" ? "#2563EB" : C.rule;
+          var badgeBg = t.accent==="human" ? "#F59E0B" : t.accent==="dash" ? "#2563EB" : C.lime;
+          var bw2 = t.accent ? 1.8 : 1;
+          s += rect(x,ty,tw,th,10,"#fff",borderC,bw2) + badge(t.ic,x+24,ty+26,15,badgeBg,"#fff") + text(x+46,ty+31,trunc(t.t,Math.floor((tw-54)/6.6)),12.5,700,C.deepdk);
+          wrap(t.s,lim,3).forEach(function(l,li){ s += text(x+12,ty+56+li*13,l,9.5,400,C.mute); });
         });
         return s;
       }});
@@ -2040,6 +2378,10 @@ var ARCH = (function(){
     out += badge("ai",bx+30,contY+24,15,C.deep,"#fff") + text(bx+54,contY+29,"AI Contact Center platform",14.5,700,C.deepdk);
     var py = contY + yy;
     parts.forEach(function(p){ out += p.draw(py); py += p.h + 14; });
+    if(D.crmEndpointWaived){
+      out += rect(bx+inner,py,innerW,28,6,"#FFF3E0","#FF9800",1.2);
+      out += text(bx+inner+10,py+19,"⚠ CRM endpoint waived — using 700Apps CRM",9.5,600,"#E65100");
+    }
 
     var aTop = mainY + (mainH - colAH)/2;
     out += rect(ax,aTop,aw,80,12,"#fff",C.rule) + badge("users",ax+38,aTop+40,22,C.soft,C.deep);
@@ -2049,9 +2391,12 @@ var ARCH = (function(){
     out += rect(ax,pTop,aw,150,12,"#fff",C.rule);
     var rows = ph.type==="sip"
       ? [ { ic:"phone", t:"Your landline number", s:"Stays with your current provider" },
-          { ic:"sip",   t:"SIP trunk + Grandstream", s:ph.branches+" device"+(ph.branches>1?"s":"")+", one per branch" } ]
-      : [ { ic:"phone", t:"Your mobile numbers", s:ph.lines+" line"+(ph.lines>1?"s":"")+" connected" },
-          { ic:"link",  t:"Direct connection", s:"No extra hardware needed" } ];
+          { ic:"sip",   t:"SIP trunk + Grandstream", s:"1 device per deployment" } ]
+      : ph.type==="ourLine"
+      ? [ { ic:"phone", t:"Landline from us", s:ph.landlines+" number"+(ph.landlines>1?"s":"") },
+          { ic:"sip",   t:"Grandstream device", s:"1 per deployment" } ]
+      : [ { ic:"phone", t:"Your mobile numbers", s:ph.lines+" number"+(ph.lines>1?"s":"")+" connected" },
+          { ic:"sip",   t:"Grandstream device", s:"1 per deployment" } ];
     rows.forEach(function(r,i){
       var ry = pTop + 12 + i*66;
       out += badge(r.ic,ax+34,ry+27,19,C.deep,"#fff") + text(ax+62,ry+24,r.t,12,700,C.deepdk) + text(ax+62,ry+41,r.s,10,400,C.mute);
@@ -2083,10 +2428,12 @@ var ARCH = (function(){
         out += text(cx+54,waMid_l-3,"WhatsApp Business",11.5,700,C.deepdk) + text(cx+54,waMid_l+13,D.waMsgs>0?"~"+D.waMsgs.toLocaleString("en-US")+" messages a month":"Customer account",9.5,400,C.mute);
       }
       if(extHuman){
-        out += arrow(spineX,hMid_l_pre,cx,hMid_l_pre,C.lime,false);
-        out += rect(cx,hY_l_pre,cw,tileH,10,"#fff","#FF7043",1.5) + badge("users",cx+28,hMid_l_pre,17,"#FF7043","#fff");
+        out += arrow(spineX,hMid_l_pre,cx,hMid_l_pre,"#F59E0B",false);
+        out += text((spineX+cx)/2,hMid_l_pre-6,"Escalation",8,700,"#B45309","middle");
+        out += rect(cx,hY_l_pre,cw,tileH,10,"#fff","#F59E0B",1.8) + badge("users",cx+28,hMid_l_pre,17,"#F59E0B","#fff");
         var hLabel = human.extName || "Contact Center";
-        out += text(cx+54,hMid_l_pre-3,trunc(hLabel,27),11.5,700,C.deepdk) + text(cx+54,hMid_l_pre+13,"Human agent handoff",9.5,400,C.mute);
+        var hDetail = (D.phone.extensions||0)+" ext"+(D.phone.extensions!==1?"s":"") + (D.phone.mobileOn ? " + mobile" : "");
+        out += text(cx+54,hMid_l_pre-3,trunc(hLabel,27),11.5,700,C.deepdk) + text(cx+54,hMid_l_pre+13,hDetail,9.5,400,C.mute);
       }
     } else if(D.whatsapp || extHuman) {
       out += text(cx,cTop+10,"Connected through secure API integrations",10,400,C.mute);
@@ -2103,17 +2450,19 @@ var ARCH = (function(){
       if(extHuman){
         var hY2 = cTop + 32 + tileIdx2*(tileH+tileGap), hMid2 = hY2 + tileH/2;
         if(tileIdx2===0) firstT2 = hMid2; lastT2 = hMid2; tileIdx2++;
-        out += arrow(spineX,hMid2,cx,hMid2,C.lime,false);
-        out += rect(cx,hY2,cw,tileH,10,"#fff","#FF7043",1.5) + badge("users",cx+28,hMid2,17,"#FF7043","#fff");
+        out += arrow(spineX,hMid2,cx,hMid2,"#F59E0B",false);
+        out += text((spineX+cx)/2,hMid2-6,"Escalation",8,700,"#B45309","middle");
+        out += rect(cx,hY2,cw,tileH,10,"#fff","#F59E0B",1.8) + badge("users",cx+28,hMid2,17,"#F59E0B","#fff");
         var hLab2 = human.extName || "Contact Center";
-        out += text(cx+54,hMid2-3,trunc(hLab2,27),11.5,700,C.deepdk) + text(cx+54,hMid2+13,"Human agent handoff",9.5,400,C.mute);
+        var hDet2 = (D.phone.extensions||0)+" ext"+(D.phone.extensions!==1?"s":"") + (D.phone.mobileOn ? " + mobile" : "");
+        out += text(cx+54,hMid2-3,trunc(hLab2,27),11.5,700,C.deepdk) + text(cx+54,hMid2+13,hDet2,9.5,400,C.mute);
       }
       out += '<path d="M'+spineX+' '+Math.min(firstT2,midY2)+'V'+Math.max(lastT2,midY2)+'" stroke="'+C.lime+'" stroke-width="2" fill="none"/>';
     } else {
       out += rect(cx,cTop+20,cw,70,10,"#fff",C.rule)+text(cx+14,cTop+60,"No external systems needed",11,400,C.mute);
     }
 
-    var sy = Math.max(bodyBottom + 10, 620);
+    var sy = Math.max(bodyBottom + 24, 620);
     out += text(28,sy,"WHAT THIS MEANS FOR YOUR BUSINESS",10.5,700,C.deep,"start",'letter-spacing="1"');
     var nflows = D.inbound.length + D.outbound.length;
     var mets = [
@@ -2125,20 +2474,23 @@ var ARCH = (function(){
     ];
     if(D.waMsgs>0) mets.splice(3,0,{ n:"~"+Math.round(D.waMsgs).toLocaleString("en-US"), l:"WhatsApp messages a month" });
     var mw = (W - 56 - (mets.length-1)*14)/mets.length;
+    var metY = sy + 18;
     mets.forEach(function(m,i){
       var x = 28 + i*(mw+14), numW = String(m.n).length*14 + 4;
-      out += rect(x,sy+10,mw,64,12,C.deep) + rect(x,sy+10,6,64,3,C.lime) + text(x+18,sy+52,m.n,26,700,"#fff");
+      out += rect(x,metY,mw,64,12,C.deep) + rect(x,metY,6,64,3,C.lime) + text(x+18,metY+42,m.n,26,700,"#fff");
       var lx = x+18+numW+10, avail = mw - (18+numW+10) - 8;
       var lns = wrap(m.l, Math.floor(avail/5), 3);
-      out += text(lx,sy+34,lns[0]||"",10.5,400,"#DCEFD9") + text(lx,sy+47,lns[1]||"",10.5,400,"#DCEFD9") + text(lx,sy+60,lns[2]||"",10.5,400,"#DCEFD9");
+      out += text(lx,metY+24,lns[0]||"",10.5,400,"#DCEFD9") + text(lx,metY+37,lns[1]||"",10.5,400,"#DCEFD9") + text(lx,metY+50,lns[2]||"",10.5,400,"#DCEFD9");
     });
 
+    var footerY = metY + 86;
+    H = Math.max(H, footerY + 50);
     out += '<line x1="28" y1="'+(H-40)+'" x2="'+(W-28)+'" y2="'+(H-40)+'" stroke="'+C.rule+'"/>';
     out += text(28,H-20,"Indicative design based on high-level requirements. It will be confirmed and refined in the detailed requirements phase.",10,400,C.mute);
     out += text(W-28,H-20,"Prepared by SOE Presales",10,700,C.deep,"end");
-    return out;
+    return { body:out, h:H };
   }
-  function svg(D){ return '<svg viewBox="0 0 1123 794" xmlns="http://www.w3.org/2000/svg" font-family="Cairo, Arial, sans-serif">'+render(D)+'</svg>'; }
+  function svg(D){ var r = render(D); return '<svg viewBox="0 0 1123 '+r.h+'" xmlns="http://www.w3.org/2000/svg" font-family="Cairo, Arial, sans-serif">'+r.body+'</svg>'; }
   /* ---------- vertical (portrait) version for the internal brief ---------- */
   function renderV(D){
     var W = 700, y = 0, out = "";
@@ -2151,8 +2503,9 @@ var ARCH = (function(){
     out += text(0,y+12,"1   CUSTOMER CALLS AND PHONE CONNECTION",10,700,C.deep,"start",'letter-spacing="1"'); y += 22;
     var ph = D.phone, bw2 = 330;
     out += rect(0,y,bw2,70,12,"#fff",C.rule) + badge("users",34,y+35,20,C.soft,C.deep) + text(68,y+31,"Customers",13,700,C.deepdk) + text(68,y+50,"Call in, and receive calls",10,400,C.mute);
-    var p1 = ph.type==="sip" ? ["Landline via SIP trunk","SIP trunk to Grandstream, "+ph.branches+" device"+(ph.branches>1?"s":"")+" (one per branch)","sip"]
-                             : ["Own mobile numbers",ph.lines+" number"+(ph.lines>1?"s":"")+", 1 concurrent call each","phone"];
+    var p1 = ph.type==="sip" ? ["Customer's SIP","SIP trunk to Grandstream (1 per deployment)","sip"]
+           : ph.type==="ourLine" ? ["Landline from us",ph.landlines+" number"+(ph.landlines>1?"s":"")+", Grandstream (1 per deployment)","phone"]
+                                 : ["Own mobile numbers",ph.lines+" number"+(ph.lines>1?"s":"")+", Grandstream (1 per deployment)","phone"];
     out += rect(W-bw2,y,bw2,70,12,"#fff",C.rule) + badge(p1[2],W-bw2+34,y+35,20,C.deep,"#fff") + text(W-bw2+68,y+31,p1[0],12.5,700,C.deepdk);
     wrap(p1[1],Math.floor((bw2-80)/5),2).forEach(function(l,i){ out += text(W-bw2+68,y+48+i*12,l,9.5,400,C.mute); });
     out += arrow(bw2+4,y+35,W-bw2-4,y+35,C.lime,true);
@@ -2184,17 +2537,40 @@ var ARCH = (function(){
     var tl = [];
     if(D.kb) tl.push({ic:"book",t:"Knowledge base",s:"1 knowledge base"});
     if(D.whatsapp) tl.push({ic:"chat",t:"WhatsApp",s:D.waMsgs>0 ? "About "+D.waMsgs.toLocaleString("en-US")+" messages a month" : "Connected to client's own account"});
+    /* Dashboard tile */
+    var phV = D.phone || {};
+    var dUV = phV.dashUsers || 1;
+    tl.push({ic:"layers",t:"Dashboard — "+dUV+" user"+(dUV>1?"s":""),s: phV.dashCustom ? "Custom KPI charts (up to 7)" : "Standard admin panel", accent:"dash"});
+    /* Human agents tile — enhanced */
     var ag = human.agents||0, xn = human.extName || "customer system";
-    if(human.on) tl.push({ic:"users",t:ag+" human agent"+(ag!==1?"s":""),s: human.where==="platform" ? "On the platform" : human.where==="external" ? "In "+xn : human.seats+" on platform, rest in "+xn});
-    if(D.native && D.native.length) tl.push({ic:"layers",t:"Built-in modules",s:D.native.join(", ")});
+    var extV = phV.extensions || 0;
+    if(human.on || extV > 0){
+      var hSubV = "";
+      if(human.on) hSubV = human.where==="platform" ? "On the platform" : human.where==="external" ? "In "+xn : human.seats+" on platform, rest in "+xn;
+      else hSubV = extV+" extension"+(extV!==1?"s":"");
+      if(extV > 0 && human.on) hSubV = extV+" ext"+(extV!==1?"s":"")+". "+hSubV;
+      if(phV.mobileOn) hSubV += ". Mobile ON";
+      tl.push({ic:"users",t: human.on ? ag+" human agent"+(ag!==1?"s":"") : extV+" extension"+(extV!==1?"s":""),s:hSubV, accent:"human"});
+    }
+    if(D.native && D.native.length) tl.push({ic:"layers",t:"Built-in modules",s:D.native.join(", ")+" — included inside CRM"});
     if(tl.length){
-      var per = Math.min(tl.length,4), tw2 = (iw - 10*(per-1))/per, rows2 = Math.ceil(tl.length/per);
+      var perV = tl.length <= 3 ? tl.length : 2;
+      var tw2 = (iw - 10*(perV-1))/perV, rows2 = Math.ceil(tl.length/perV);
       tl.forEach(function(t,i){
-        var x = ix + (i%per)*(tw2+10), yy3 = cy2 + Math.floor(i/per)*70;
-        body += rect(x,yy3,tw2,60,10,"#fff",C.rule)+badge(t.ic,x+20,yy3+20,12,C.lime,"#fff")+text(x+38,yy3+24,trunc(t.t,Math.floor((tw2-44)/6.3)),11,700,C.deepdk);
+        var col2 = i % perV, row2 = Math.floor(i / perV);
+        var x = ix + col2*(tw2+10), yy3 = cy2 + row2*70;
+        var borderCV = t.accent==="human" ? "#F59E0B" : t.accent==="dash" ? "#2563EB" : C.rule;
+        var badgeBgV = t.accent==="human" ? "#F59E0B" : t.accent==="dash" ? "#2563EB" : C.lime;
+        var bwV = t.accent ? 1.8 : 1;
+        body += rect(x,yy3,tw2,60,10,"#fff",borderCV,bwV)+badge(t.ic,x+20,yy3+20,12,badgeBgV,"#fff")+text(x+38,yy3+24,trunc(t.t,Math.floor((tw2-44)/6.3)),11,700,C.deepdk);
         wrap(t.s,Math.floor((tw2-16)/5),2).forEach(function(l,li){ body += text(x+10,yy3+42+li*11,l,9,400,C.mute); });
       });
       cy2 += rows2*70;
+    }
+    if(D.crmEndpointWaived){
+      body += rect(ix,cy2,iw,36,8,"#FFF3E0","#FF9800",1.5);
+      body += text(ix+14,cy2+23,"⚠ CRM endpoint waived — using 700Apps CRM natively. No endpoint charge.",10.5,600,"#E65100");
+      cy2 += 44;
     }
     var boxH = cy2 + 6 - boxTop;
     out += rect(0,boxTop,W,boxH,16,C.soft2,C.lime,1.5) + badge("ai",30,boxTop+24,14,C.deep,"#fff") + text(52,boxTop+29,"AI Contact Center platform",13.5,700,C.deepdk) + body;
@@ -2222,8 +2598,9 @@ var ARCH = (function(){
     }
     if(extHuman){
       var hLabelV = human.extName || "Contact Center";
-      out += rect(0,y,W,52,10,"#fff","#FF7043",1.5) + badge("users",26,y+26,16,"#FF7043","#fff");
-      out += text(50,y+23,trunc(hLabelV,50),11,700,C.deepdk) + text(50,y+39,"Human agent handoff",9,400,C.mute);
+      var hDetV = (D.phone.extensions||0)+" ext"+(D.phone.extensions!==1?"s":"") + (D.phone.mobileOn ? " + mobile" : "");
+      out += rect(0,y,W,52,10,"#fff","#F59E0B",1.8) + badge("users",26,y+26,16,"#F59E0B","#fff");
+      out += text(50,y+23,trunc(hLabelV,50),11,700,C.deepdk) + text(50,y+39,"Escalation — "+hDetV,9,400,C.mute);
       y += 62;
     }
 
@@ -2266,29 +2643,42 @@ function docData(m){
     date: $("quoteDate").value.trim() || new Date().toDateString(),
     presalesLead: ($("presalesLead").value||"").trim(),
     responseBy: ($("responseBy").value||"").trim(),
-    phone: { type: m.isSip ? "sip" : "mobile", lines:m.mobileCount, branches:m.branches },
+    phone: { type: m.isSip ? "sip" : m.isMobileOwn ? "mobile" : "ourLine", lines:m.isMobileOwn?m.mobileCount:m.landlines, branches:m.branches, landlines:m.landlines, lineDisc:m.lineDisc, mobileOn:m.mobileOn, dashUsers:m.dashUsers, dashCustom:m.dashCustom, extensions:m.extensions },
     inbound:inb, outbound:out, kb:m.kbOn, whatsapp: m.waMode!=="none", waMsgs: m.waMode==="platform" ? Math.round(m.msgs) : 0,
     human: { on:m.hOn, where:m.hWhere, agents:m.agents, seats:m.seats, extName:humanExtName() },
+    crmEndpointWaived: m.crmOn && m.eps.some(function(ep){ return (ep.key==="crm"||ep.key==="ticketing") && !ep.charged; }),
     systems:systems, native:native,
-    metrics: { callsAI:callsAI, minutes:m.totalMinsMonth, peak:m.peak }
+    metrics: { callsAI:callsAI, minutes:m.totalMinsMonth, peak:m.peak },
+    painIds: getMultiCheckIds($("painPointsWrap")),
+    goalIds: getMultiCheckIds($("bizGoalsWrap")),
+    logo: (typeof CUST_LOGO==="string" ? CUST_LOGO : "")
   };
 }
 
 /* ---------- executive summary generator ---------- */
 function briefSummary(m, D){
   var indId = ($("industry").value || "").trim();
-  var goalId = ($("bizGoal").value || "").trim();
+  var painIds = getMultiCheckIds($("painPointsWrap"));
+  var goalIds = getMultiCheckIds($("bizGoalsWrap"));
   var ctx = ($("custContext").value || "").trim();
   if(!indId) return ""; // no industry selected, skip summary
 
   var ind = INDUSTRY_DATA[indId] || INDUSTRY_DATA["other"];
-  var goal = BIZ_GOALS.filter(function(g){ return g.id === goalId; })[0];
-  var goalLabel = "";
-  if(goalId === "other"){
-    goalLabel = ($("goalOtherText").value || "").trim() || "";
-  } else if(goal){
-    goalLabel = goal.lead;
-  }
+  var goalLabels = [];
+  goalIds.forEach(function(gid){
+    if(gid === "other"){
+      var ot = ($("goalOtherText").value || "").trim();
+      if(ot) goalLabels.push(ot);
+    } else {
+      var g = BIZ_GOALS.filter(function(x){ return x.id === gid; })[0];
+      if(g) goalLabels.push(g.lead);
+    }
+  });
+  var painLabels = [];
+  painIds.forEach(function(pid){
+    var p = PAIN_POINTS.filter(function(x){ return x.id === pid; })[0];
+    if(p) painLabels.push(p.label);
+  });
 
   // ---- 1. Customer situation ----
   var sit = "";
@@ -2326,32 +2716,37 @@ function briefSummary(m, D){
   // ---- 2. What success looks like ----
   var succ = ind.success;
 
-  // ---- 3. Primary business goal ----
+  // ---- 3. Pain points and business goals ----
   var goalHtml = "";
-  if(goalLabel){
-    goalHtml = '<div class="b-goal"><b>Primary business goal:</b> ' + esc(goalLabel) + '</div>';
+  if(painLabels.length){
+    goalHtml += '<div class="b-goal"><b>Current pain points:</b> ' + painLabels.map(function(l){ return esc(l); }).join("; ") + '</div>';
+  }
+  if(goalLabels.length){
+    goalHtml += '<div class="b-goal"><b>Business goals:</b> ' + goalLabels.map(function(l){ return esc(l); }).join("; ") + '</div>';
   }
 
   // ---- 4. Dashboard KPIs ----
   var kpis = [];
-  // Goal-specific KPIs first
-  if(goalId && goalId !== "other" && GOAL_KPIS[goalId]){
-    GOAL_KPIS[goalId].forEach(function(k){ kpis.push(k); });
-  }
+  // Goal-specific KPIs from all selected goals
+  goalIds.forEach(function(gid){
+    if(gid !== "other" && GOAL_KPIS[gid]){
+      GOAL_KPIS[gid].forEach(function(k){ kpis.push(k); });
+    }
+  });
   // Flow-derived KPIs
   var flowIds = {};
   D.inbound.forEach(function(f){ flowIds[f.id] = true; });
   D.outbound.forEach(function(f){ flowIds[f.id] = true; });
-  if((flowIds["remind"] || flowIds["noshow"]) && goalId !== "noshow"){
+  if((flowIds["remind"] || flowIds["noshow"]) && goalIds.indexOf("showrate") < 0){
     kpis.push({ kpi:"Reminder completion rate", why:"Automated reminders are a core flow. Track how many are successfully delivered and whether they reduce no-shows." });
   }
-  if((flowIds["book"] || flowIds["resched"]) && goalId !== "missed"){
+  if((flowIds["book"] || flowIds["resched"]) && goalIds.indexOf("sales") < 0){
     kpis.push({ kpi:"Bookings made by AI", why:"Appointment booking is a core flow. Track how many bookings the AI completes without human involvement." });
   }
-  if((flowIds["lead"] || flowIds["leadfol"]) && goalId !== "leads"){
+  if((flowIds["lead"] || flowIds["leadfol"]) && goalIds.indexOf("leads") < 0){
     kpis.push({ kpi:"Leads captured by AI", why:"Lead capture is a core flow. Track enquiries captured and their conversion to appointments or sales." });
   }
-  if((flowIds["order"] || flowIds["stock"]) && goalId !== "overwhelm"){
+  if((flowIds["order"] || flowIds["stock"]) && goalIds.indexOf("scale") < 0){
     kpis.push({ kpi:"Order and stock queries resolved", why:"Operational queries are a core flow. Track how many are resolved from the system without human involvement." });
   }
   if(flowIds["payremind"] || flowIds["ptp"]){
@@ -2376,7 +2771,59 @@ function briefSummary(m, D){
   kpis.forEach(function(k){
     html += '<tr><td><b>' + esc(k.kpi) + '</b></td><td>' + esc(k.why) + '</td></tr>';
   });
-  html += '</tbody></table></div>';
+  html += '</tbody></table>';
+
+  // Chart recommendations when dashboard customisation is selected
+  if(m.dashCustom){
+    // Map each KPI to a chart type based on 700Apps dashboard capabilities
+    var CHART_TYPES = {
+      "Calls received vs answered": "Live counter",
+      "Calls by hour of day": "Bar chart",
+      "After-hours calls handled": "Live counter",
+      "After-hours conversion rate": "Gauge",
+      "AI resolved vs escalated": "Gauge",
+      "Staff call volume (before vs after)": "Bar chart",
+      "Reminder calls completed": "Live counter",
+      "No-show rate (before vs after)": "Line chart",
+      "Leads captured outside business hours": "Live counter",
+      "Lead-to-booking conversion": "Gauge",
+      "Outbound calls completed": "Live counter",
+      "Outbound completion rate": "Gauge",
+      "Cost per AI-handled call": "Live counter",
+      "Calls handled without staff": "Live counter",
+      "Total call volume and trends": "Line chart",
+      "Call outcomes by type": "Bar chart",
+      "Resolution rate by branch or location": "Bar chart",
+      "Call volume by branch": "Bar chart",
+      "Bookings made by AI": "Live counter",
+      "Leads captured by AI": "Live counter",
+      "Order and stock queries resolved": "Live counter",
+      "Payment reminders delivered": "Live counter",
+      "AI first-call resolution rate": "Gauge",
+      "Average AI call duration": "Live counter",
+      "Human escalation rate": "Gauge"
+    };
+    var charts = [];
+    kpis.forEach(function(k){
+      if(charts.length < 7){
+        charts.push({ kpi:k.kpi, type:CHART_TYPES[k.kpi] || "Bar chart" });
+      }
+    });
+    html += '<h4 style="margin-top:14px">Recommended custom charts (up to 7)</h4>';
+    html += '<table class="bt"><thead><tr><th style="width:5%">#</th><th style="width:30%">Chart</th><th style="width:18%">Type</th><th>Based on</th></tr></thead><tbody>';
+    charts.forEach(function(c, i){
+      var goalKpiCount = 0; goalIds.forEach(function(gid){ goalKpiCount += (GOAL_KPIS[gid]||[]).length; });
+      html += '<tr><td>'+(i+1)+'</td><td><b>'+esc(c.kpi)+'</b></td><td>'+esc(c.type)+'</td><td>'+( (i < goalKpiCount) ? "Business goal" : "Active flows / standard" )+'</td></tr>';
+    });
+    html += '</tbody></table>';
+    html += '<p class="b-note" style="margin-top:6px">Chart types reference the 700Apps dashboard: live counters (single number, real-time), gauges (percentage target), bar charts (comparison), line charts (trend over time). The 700 SAR one-time fee covers setup of up to 7 charts.</p>';
+    html += '<p class="b-note" style="margin-top:6px;font-style:italic">KPIs are based on initial data. Final KPI customisation to be confirmed by the customer in a detailed session post-onboarding.</p>';
+  }
+
+  if(!m.dashCustom){
+    html += '<p class="b-note" style="margin-top:6px;font-style:italic">KPIs are based on initial data. Final KPI customisation to be confirmed by the customer in a detailed session post-onboarding.</p>';
+  }
+  html += '</div>';
 
   // ---- 5. Deal drivers ----
   var hasExtSys = D.systems.length > 0;
@@ -2395,7 +2842,7 @@ function briefSummary(m, D){
     urgency += esc(ctx) + ". ";
   }
   urgency += esc(ind.pain);
-  if(callsPerMonth > 0 && (goalId === "missed" || goalId === "overwhelm" || goalId === "247")){
+  if(callsPerMonth > 0 && (goalIds.indexOf("sales") >= 0 || goalIds.indexOf("scale") >= 0 || goalIds.indexOf("247") >= 0 || painIds.indexOf("missed") >= 0)){
     var lostEst = Math.round(callsPerMonth * 0.05);
     if(lostEst > 0) urgency += " At even a 5% missed-call rate, that is roughly " + nfmt(lostEst) + " lost customer interactions a month.";
   }
@@ -2404,10 +2851,10 @@ function briefSummary(m, D){
   var hesitation = "";
   if(sysCount === 0){
     hesitation = "This setup has no system integration, so there is little technical risk. ";
-    if(goalId === "missed" || goalId === "247" || goalId === "overwhelm"){
+    if(goalIds.indexOf("sales") >= 0 || goalIds.indexOf("247") >= 0 || goalIds.indexOf("scale") >= 0){
       hesitation += "The hesitation is more likely about whether the AI sounds natural in Arabic on real calls.";
     } else {
-      hesitation += (GOAL_OBJECTIONS[goalId] || GOAL_OBJECTIONS["other"]);
+      hesitation += (GOAL_OBJECTIONS[goalIds[0]] || GOAL_OBJECTIONS["other"]);
     }
   } else if(sysCount === 1){
     hesitation = "One system integration (" + esc(D.systems[0].name) + "). The customer may want to see the " + esc(D.inbound.length ? D.inbound[0].label : D.outbound[0].label) + " flow work end-to-end before committing.";
@@ -2435,15 +2882,15 @@ function briefSummary(m, D){
 
   // --- What the customer does not see yet ---
   var blind = "";
-  if(goalId === "visibility" || sysCount === 0){
+  if(goalIds.indexOf("visibility") >= 0 || sysCount === 0){
     blind = "The customer does not currently track call volumes, peak hours, or missed calls. The AI dashboard will give them this visibility for the first time. This often becomes the strongest retention factor after go-live.";
-  } else if(goalId === "missed" || goalId === "247"){
+  } else if(goalIds.indexOf("sales") >= 0 || goalIds.indexOf("247") >= 0 || painIds.indexOf("missed") >= 0){
     blind = "The customer knows they miss calls but does not know how many, or when. The AI dashboard will show exact numbers by hour for the first time. This data changes the conversation from opinion to fact.";
-  } else if(goalId === "cost"){
+  } else if(goalIds.indexOf("cost") >= 0){
     blind = "The customer will see a cost-per-call metric for the first time. Once they compare their current staffing cost against the AI cost per handled call, the business case becomes self-evident.";
-  } else if(goalId === "noshow"){
+  } else if(goalIds.indexOf("showrate") >= 0 || painIds.indexOf("noshow") >= 0){
     blind = "The customer does not measure the cost of no-shows today. The AI dashboard will show reminder completion rates alongside no-show rates, making the financial impact visible for the first time.";
-  } else if(goalId === "leads" || goalId === "outbound"){
+  } else if(goalIds.indexOf("leads") >= 0 || goalIds.indexOf("recover") >= 0 || goalIds.indexOf("grow") >= 0){
     blind = "The customer does not currently capture how many enquiries are lost outside business hours. The AI dashboard will show every captured lead by time and channel, revealing revenue that was previously invisible.";
   } else {
     blind = "The AI dashboard will give the customer real-time call data they do not have today. Customers who see their own numbers for the first time often discover patterns that change their priorities.";
@@ -2469,7 +2916,8 @@ function openPoints(m){
   if(m.waMode==="platform") P.push({ pt:"WhatsApp extra messages: if messages exceed the tier, what is the per-message rate? Or should we upgrade to a larger tier? Also confirm template approval and sender setup.", why:"Price. Estimated "+nfmt(m.msgs)+" messages against the "+VOICE[m.wIdx].name+" tier ("+nfmt(WMSGS[m.wIdx])+")"+(m.wOver>0?", so "+nfmt(m.wOver)+" extra messages depend on this answer":"")+".", owner:"700Apps", cust:"Business name, sender number and the message types (reminders, campaigns, chat)." });
   if(m.waMode==="own") P.push({ pt:"WhatsApp: client keeps their own account. Confirm the connection method and that no separate message metering applies.", why:"Price and scope.", owner:"700Apps", cust:"WhatsApp business account details and who administers it." });
   if(m.hasOutbound && m.contacts>0) P.push({ pt:"Outbound campaign setup: confirm the CRM contact-loading charge of "+CONTACT_CHARGE+" SAR per contact and whether there is a separate one-time cost for campaign setup. Also confirm whether the rate changes at higher volumes (currently "+nfmt(m.contacts)+" contacts a month).", why:"Price. Currently quoted at "+sar(m.contacts*CONTACT_CHARGE)+"/month"+(m.contactWaived?" (waived)":"")+". Volume cross-check: "+m.contactAttempts+" attempt"+(m.contactAttempts>1?"s":"")+" per contact ≈ "+nfmt(m.contacts*m.contactAttempts)+" outbound calls a month.", owner:"700Apps", cust:"Expected contact volumes and campaign frequency." });
-  if(!m.isSip) P.push({ pt:"Own mobile numbers: confirm the "+m.mobileCount+" mobile number"+(m.mobileCount>1?"s":"")+" can be connected. Each carries one concurrent call.", why:"Scope. Peak demand is "+m.peak+" simultaneous call"+(m.peak>1?"s":"")+(m.peak>m.mobileCount?", which is more than the numbers available":"")+".", owner:"700Apps", cust:"The mobile numbers, their provider and who holds the SIM cards." });
+  if(m.isMobileOwn) P.push({ pt:"Own mobile numbers: confirm the "+m.mobileCount+" mobile number"+(m.mobileCount>1?"s":"")+" can be connected. No concurrent calls on mobile.", why:"Scope. Mobile numbers do not support concurrent calls.", owner:"700Apps", cust:"The mobile numbers, their provider and who holds the SIM cards." });
+  if(m.isOurLine) P.push({ pt:"Landline number from us: "+m.landlines+" number"+(m.landlines>1?"s":"")+". Yearly charge of "+nfmt(m.lineDisc?Math.round(LANDLINE_YEAR*(1-LANDLINE_DISC)):LANDLINE_YEAR)+" SAR per number"+(m.lineDisc?" (10% discount applied)":"")+". Carrier charges excluded.", why:"Scope and billing. Landline renews yearly, carrier charges billed separately.", owner:"700Apps", cust:"Confirm number count and carrier requirements." });
   eps.forEach(function(ep){
     if(ep.key==="whatsapp") return;
     if(ep.custom){
@@ -2535,8 +2983,13 @@ function briefHtml(m){
 
   h += '<h2>3. Telephony and volumes</h2>'+tbl(["Item","Requirement"],[
     ["Call direction", dirName],
-    ["Phone setup", m.isSip ? "Customer's landline via SIP trunk. "+m.extensions+" extension"+(m.extensions>1?"s":"")+" (minimum 3), "+m.branches+" Grandstream device"+(m.branches>1?"s":"")+" (one per branch)." : "Customer's own mobile numbers: "+m.mobileCount+" number"+(m.mobileCount>1?"s":"")+", one concurrent call each (STC limit). No Grandstream device, no minimum extensions."],
-    ["Concurrent calls", m.concurrentCalls+" at "+nfmt(EXTRA_LINE_COST)+" SAR each ("+sar(m.concurrentCalls*EXTRA_LINE_COST)+"/mo)"+((!m.isSip && m.peak>m.mobileCount) ? " — exceeds "+m.mobileCount+" mobile numbers available" : "")],
+    ["Phone setup", m.isSip ? "Customer's own digital telephony (SIP). 1 Grandstream device per deployment."
+      : m.isMobileOwn ? "Customer's own mobile numbers: "+m.mobileCount+" number"+(m.mobileCount>1?"s":"")+". 1 Grandstream device per deployment. No concurrent calls."
+      : "Landline number from us: "+m.landlines+" number"+(m.landlines>1?"s":"")+" at "+nfmt(m.lineDisc?Math.round(LANDLINE_YEAR*(1-LANDLINE_DISC)):LANDLINE_YEAR)+"/year each"+(m.lineDisc?" (10% discount)":"")+". 1 Grandstream device per deployment. Carrier charges excluded."],
+    ["Extensions", m.extensions>0 ? m.extensions+" human agent desktop seat"+(m.extensions>1?"s":"")+" at "+nfmt(EXT_COST)+" SAR each/mo" : "None"],
+    ["Mobile service", m.mobileOn ? "Yes — "+nfmt(MOBILE_PKG)+" SAR/mo flat per deployment. Human agent seat on mobile instead of desktop." : "No"],
+    ["Dashboard", m.dashUsers+" user"+(m.dashUsers>1?"s":"")+" at "+nfmt(DASH_USER)+"/mo"+(m.dashCustom?". Custom dashboard (7 charts) "+nfmt(DASH_CUSTOM)+" one-time":"")],
+    ["Concurrent calls", m.isMobileOwn ? "Not applicable (own mobile)" : m.concurrentCalls+" at "+nfmt(EXTRA_LINE_COST)+" SAR each ("+sar(m.concurrentCalls*EXTRA_LINE_COST)+"/mo)"],
     ["Inbound", m.hasInbound ? nfmt(num("inCallsDay",0))+" calls a day, "+num("inCallLen",0)+" min average, AI handles "+Math.round(m.aiShare*100)+"%" : "Not in scope"],
     ["Outbound", m.hasOutbound ? nfmt(num("outCallsDay",0))+" calls a day, "+num("outCallLen",0)+" min average"+(m.contacts>0?"; about "+nfmt(m.contacts)+" contacts loaded a month ("+m.contactAttempts+" attempt"+(m.contactAttempts>1?"s":"")+" each for volume estimate)":"") : "Not in scope"],
     ["Working days a month", String(m.workDays)],
@@ -2568,8 +3021,18 @@ function briefHtml(m){
     var wl = []; waParts().forEach(function(x){ wl.push(esc(x.name)+": "+nfmt(x.n)+" × "+nfmt(x.m)); });
     sv.push(["WhatsApp","Platform provides it. About "+nfmt(m.msgs)+" messages a month. Recommended tier: "+VOICE[m.wRec].name+(m.wIdx!==m.wRec?"; selected: "+VOICE[m.wIdx].name:"")+"."+(wl.length && $("waEst").value!=="direct" ? "<br>"+wl.join("<br>") : "")]);
   }
-  sv.push(["Human escalation", !m.hOn ? "Not needed" : m.hWhere==="platform" ? m.agents+" agents on the 700Apps platform ("+m.seats+" seat"+(m.seats!==1?"s":"")+" at "+nfmt(m.agentRate)+" SAR)" : m.hWhere==="external" ? m.agents+" agents in "+esc(humanExtName())+" (endpoint)" : m.agents+" agents: "+m.seats+" on 700Apps ("+nfmt(m.agentRate)+" SAR a seat) and the rest in "+esc(humanExtName())]);
-  sv.push(["CRM", m.crmOn ? m.crmPlan.name+" plan, "+m.crmUsers+" user"+(m.crmUsers>1?"s":"")+(m.crmAnnual?", annual billing (10% discount)":""): "Not included"]);
+  sv.push(["Human escalation", !m.hOn ? "Not needed" : m.hWhere==="platform" ? m.agents+" agents on the 700Apps platform ("+m.seats+" seat"+(m.seats!==1?"s":"")+", covered by extensions)" : m.hWhere==="external" ? m.agents+" agents in "+esc(humanExtName())+" (endpoint)" : m.agents+" agents: "+m.seats+" on 700Apps (covered by extensions) and the rest in "+esc(humanExtName())]);
+  sv.push(["Sentiment analysis", m.sentimentOn ? (m.sentimentWaived ? "Waived (list: "+sar(m.sentimentCost)+"/mo for "+nfmt(m.sentimentCalls)+" calls). Subject to 700Apps approval." : nfmt(m.sentimentCalls)+" calls × "+SENTIMENT_COST+" SAR = "+sar(m.sentimentCost)+"/mo") : "Not included"]);
+  var crmDesc = "Not included";
+  if(m.crmOn){
+    crmDesc = m.crmPlan.name+" plan, "+m.crmUsers+" user"+(m.crmUsers>1?"s":"")+(m.crmAnnual?", annual billing (10% discount)":"");
+    if(m.crmFeatures.length){
+      var fl = m.crmFeatures.map(function(id){ return CRM_FEATURES.filter(function(f){return f.id===id})[0].label; });
+      crmDesc += "<br><b>CRM requirements:</b> "+fl.join("; ");
+      crmDesc += "<br><i>⚠ CRM feature scope and pricing to be validated with 700Apps team before customer commitment.</i>";
+    }
+  }
+  sv.push(["CRM", crmDesc]);
   h += '<h2>6. Services and add-ons</h2>'+tbl(["Service","Requirement"],sv,["28%","72%"]);
 
   var pr = [];
@@ -2666,6 +3129,765 @@ window.addEventListener("afterprint", function(){
 });
 $("btnArch").addEventListener("click", function(){ printDoc("arch"); });
 $("btnBrief").addEventListener("click", function(){ printDoc("brief"); });
+
+/* ═══════════════════ CUSTOMER VIEW ═══════════════════ */
+var custViewWin = null;
+function sendToCustView(){
+  if(!custViewWin || custViewWin.closed) return;
+  try{
+    var m = model();
+    custViewWin.postMessage({type:"AICC_DESIGN_UPDATE", payload:docData(m)}, "*");
+  }catch(e){console.warn("Customer view send failed",e)}
+}
+window.addEventListener("message", function(ev){
+  if(ev.data && ev.data.type === "AICC_READY") sendToCustView();
+});
+$("btnCustView").addEventListener("click", function(){
+  if(custViewWin && !custViewWin.closed){
+    custViewWin.focus();
+    sendToCustView();
+    return;
+  }
+  custViewWin = window.open("customer-view.html", "aicc_customer_view", "width=1280,height=800");
+});
+
+/* ═══════════════════ EXCEL RATE SHEET ═══════════════════ */
+function loadExcelJS(cb){
+  if(window.ExcelJS) return cb();
+  var s = document.createElement("script");
+  s.src = "https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js";
+  s.onload = cb;
+  s.onerror = function(){ alert("Could not load the Excel library. Check your internet connection."); };
+  document.head.appendChild(s);
+}
+
+function generateExcel(){
+  var m = model();
+  var D = docData(m);
+  var client = $("clientName").value || "Customer";
+  loadExcelJS(function(){
+    var wb = new ExcelJS.Workbook();
+    wb.creator = "SOE AI Contact Center Calculator";
+
+    /* ── Style constants ── */
+    var SOE_GREEN = "2E7D32";
+    var LIGHT_GREEN = "E8F5E9";
+    var SECTION_BG = "1B5E20";
+    var YELLOW_INPUT = "FFF9C4";
+    var WHITE = "FFFFFF";
+    var LIGHT_GRAY = "F5F5F5";
+    var BORDER_COLOR = "BDBDBD";
+
+    var thinBorder = {style:"thin", color:{argb:"FF"+BORDER_COLOR}};
+    var allBorders = {top:thinBorder, bottom:thinBorder, left:thinBorder, right:thinBorder};
+
+    function fillStyle(argb){ return {type:"pattern", pattern:"solid", fgColor:{argb:"FF"+argb}}; }
+    function headerFont(sz){ return {name:"Calibri", size:sz||11, bold:true, color:{argb:"FF"+WHITE}}; }
+    function sectionFont(){ return {name:"Calibri", size:11, bold:true, color:{argb:"FF"+WHITE}}; }
+    function normalFont(bold){ return {name:"Calibri", size:11, bold:!!bold}; }
+    function inputFont(){ return {name:"Calibri", size:11, bold:false, color:{argb:"FF0D47A1"}}; }
+
+    /* Apply header style to a row */
+    function styleRow(ws, r, colCount, bg, font){
+      var row = ws.getRow(r);
+      for(var c=1;c<=colCount;c++){
+        var cell = row.getCell(c);
+        cell.fill = fillStyle(bg||SOE_GREEN);
+        cell.font = font || headerFont();
+        cell.border = allBorders;
+        cell.alignment = {horizontal:"center", vertical:"middle", wrapText:true};
+      }
+    }
+    function styleSectionRow(ws, r, colCount){
+      styleRow(ws, r, colCount, SECTION_BG, sectionFont());
+      ws.getRow(r).getCell(1).alignment = {horizontal:"left", vertical:"middle"};
+    }
+    function styleDataRow(ws, r, colCount, alt){
+      var row = ws.getRow(r);
+      for(var c=1;c<=colCount;c++){
+        var cell = row.getCell(c);
+        cell.border = allBorders;
+        cell.font = normalFont();
+        if(alt) cell.fill = fillStyle(LIGHT_GRAY);
+      }
+    }
+    function styleInputCell(cell){
+      cell.fill = fillStyle(YELLOW_INPUT);
+      cell.font = inputFont();
+      cell.border = allBorders;
+    }
+    function styleTotalRow(ws, r, colCount, bg){
+      var row = ws.getRow(r);
+      for(var c=1;c<=colCount;c++){
+        var cell = row.getCell(c);
+        cell.font = normalFont(true);
+        cell.border = allBorders;
+        if(bg) cell.fill = fillStyle(bg);
+      }
+    }
+
+    /* ═══ Sheet 1: SOE Margin Calculator ═══ */
+    var ws = wb.addWorksheet("SOE Margin Calculator");
+    ws.columns = [
+      {width:40}, /* A: Line item */
+      {width:12}, /* B: Qty */
+      {width:20}, /* C: Basis */
+      {width:18}, /* D: 700Apps rate */
+      {width:18}, /* E: SOE margin % */
+      {width:20}, /* F: Customer unit price */
+      {width:20}, /* G: Customer total */
+      {width:42}  /* H: Notes */
+    ];
+
+    /* Row tracker */
+    var R = 0;
+    var lineRows = [];
+
+    function addRow(vals){ R++; var row = ws.getRow(R); vals.forEach(function(v,i){ row.getCell(i+1).value = v; }); return R; }
+
+    /* Title rows */
+    var r1 = addRow(["AI Contact Center — SOE Margin Calculator: "+client]);
+    ws.mergeCells(r1,1,r1,8);
+    ws.getRow(r1).getCell(1).font = {name:"Calibri", size:16, bold:true, color:{argb:"FF"+SOE_GREEN}};
+    ws.getRow(r1).height = 28;
+
+    var r2 = addRow(["Confidential — SOE internal use only. Not for customer distribution."]);
+    ws.mergeCells(r2,1,r2,8);
+    ws.getRow(r2).getCell(1).font = {name:"Calibri", size:10, italic:true, color:{argb:"FF757575"}};
+
+    addRow([]);
+
+    /* SOE margin % input row */
+    var marginRow = addRow(["SOE Margin %:", 0, "", "← Enter your margin here (e.g. 10 for 10%). All customer prices update automatically."]);
+    ws.mergeCells(marginRow,4,marginRow,8);
+    ws.getRow(marginRow).getCell(1).font = {name:"Calibri", size:13, bold:true, color:{argb:"FF"+SOE_GREEN}};
+    ws.getRow(marginRow).getCell(1).alignment = {horizontal:"right", vertical:"middle"};
+    var marginCell = ws.getRow(marginRow).getCell(2); /* B{marginRow} is THE input cell */
+    marginCell.value = 0;
+    marginCell.numFmt = '0%';
+    styleInputCell(marginCell);
+    marginCell.font = {name:"Calibri", size:16, bold:true, color:{argb:"FF0D47A1"}};
+    marginCell.alignment = {horizontal:"center", vertical:"middle"};
+    ws.getRow(marginRow).getCell(4).font = {name:"Calibri", size:10, italic:true, color:{argb:"FF757575"}};
+    ws.getRow(marginRow).height = 30;
+    /* marginRef = absolute reference to the margin cell */
+    var marginRef = "$B$"+marginRow;
+
+    addRow([]);
+
+    /* Column headers */
+    var hR = addRow(["Line item","Qty","Basis","700Apps rate (SAR)","SOE markup (SAR)","Customer unit price","Customer total","Notes"]);
+    styleRow(ws, hR, 8);
+    ws.getRow(hR).getCell(1).alignment = {horizontal:"left", vertical:"middle", wrapText:true};
+    ws.getRow(hR).getCell(8).alignment = {horizontal:"left", vertical:"middle", wrapText:true};
+    ws.getRow(hR).height = 22;
+
+    /* ── Helper: add a priced line with formulas ── */
+    var altToggle = false;
+    function priceLine(label, qty, basis, rate, notes, isOneTime){
+      var r = addRow([label, qty, basis, rate, 0, null, null, notes||""]);
+      /* E = SOE margin % (default 0, editable yellow cell) */
+      var row = ws.getRow(r);
+      /* E = D * margin% → SOE markup amount per unit */
+      row.getCell(5).value = {formula:"D"+r+"*"+marginRef};
+      row.getCell(5).numFmt = '#,##0.00';
+
+      /* F = D + E → Customer unit price */
+      row.getCell(6).value = {formula:"D"+r+"+E"+r};
+      row.getCell(6).numFmt = '#,##0.00';
+      /* G = F * B → Customer total */
+      row.getCell(7).value = {formula:"F"+r+"*B"+r};
+      row.getCell(7).numFmt = '#,##0.00';
+      /* D format */
+      row.getCell(4).numFmt = '#,##0.00';
+
+      styleDataRow(ws, r, 8, altToggle);
+      altToggle = !altToggle;
+      lineRows.push({row:r, oneTime:!!isOneTime});
+      return r;
+    }
+
+    /* ── Voice package ── */
+    var secR = addRow(["VOICE AI PACKAGE (monthly recurring)","","","","","","",""]);
+    styleSectionRow(ws, secR, 8);
+    altToggle = false;
+
+    var vp = m.voicePkg;
+    priceLine(vp.name+" ("+nfmt(vp.mins)+" min)", 1, "Monthly", vp.sar, nfmt(vp.mins)+" minutes included.", false);
+    if(m.vOver>0){
+      priceLine("Estimated overage (~"+nfmt(m.vOver)+" min)", Math.round(m.vOver), "Per min, monthly", 0.51, "Overage at 0.51 SAR/min.", false);
+    }
+
+    /* ── Telephony & Infrastructure ── */
+    secR = addRow(["TELEPHONY & INFRASTRUCTURE","","","","","","",""]);
+    styleSectionRow(ws, secR, 8);
+    altToggle = false;
+
+    if(m.extensions>0)
+      priceLine("Extension (human desktop)", m.extensions, "Per ext, monthly", EXT_COST, "Browser-based agent seat.", false);
+    priceLine("Grandstream device", 1, "One-time", DEVICE_COST, "Required for all setups.", true);
+    if(m.mobileOn)
+      priceLine("Mobile service", 1, "Monthly flat", MOBILE_PKG, "Agent mobile access.", false);
+    if(m.isOurLine && m.landlines>0)
+      priceLine("Landline number", m.landlines, "Per number, yearly", m.lineDisc?Math.round(LANDLINE_YEAR*0.9):LANDLINE_YEAR, m.lineDisc?"10% discount.":"", true);
+    if(m.concurrentCalls>0 && !m.isMobileOwn)
+      priceLine("Concurrent call line", m.concurrentCalls, "Per line, monthly", EXTRA_LINE_COST, "", false);
+    priceLine("Dashboard / admin panel", m.dashUsers, "Per user, monthly", DASH_USER, "Mandatory. Minimum 1 user.", false);
+    if(m.dashCustom)
+      priceLine("Dashboard customisation", 1, "One-time", DASH_CUSTOM, "Up to 7 KPI charts.", true);
+    if(!m.implWaived)
+      priceLine("Implementation & setup", 1, "One-time", IMPL_FEE, "~20 days to go-live.", true);
+    else {
+      var wr = addRow(["Implementation & setup", 1, "WAIVED", 0, "", 0, 0, "Subject to 700Apps approval. List: "+nfmt(IMPL_FEE)+" SAR."]);
+      styleDataRow(ws, wr, 8, false);
+      ws.getRow(wr).getCell(3).font = {name:"Calibri", size:11, bold:true, color:{argb:"FFFF6F00"}};
+      lineRows.push({row:wr, oneTime:true});
+    }
+    if(m.endpoints>0)
+      priceLine("Endpoint connections", m.endpoints, "Per system, monthly", ENDPOINT_COST, m.chargedEps.map(function(e){return e.name}).join(", "), false);
+    if(m.kbOn)
+      priceLine("Knowledge base", 1, "Monthly", KB_COST, "", false);
+
+    /* ── Sentiment ── */
+    if(m.sentimentOn){
+      if(m.sentimentWaived){
+        var sr = addRow(["Sentiment analysis", m.sentimentCalls, "WAIVED", 0, "", 0, 0, "Subject to 700Apps approval."]);
+        styleDataRow(ws, sr, 8, false);
+        ws.getRow(sr).getCell(3).font = {name:"Calibri", size:11, bold:true, color:{argb:"FFFF6F00"}};
+        lineRows.push({row:sr, oneTime:false});
+      } else {
+        priceLine("Sentiment analysis", m.sentimentCalls, "Per call, monthly", SENTIMENT_COST, "Per inbound call.", false);
+      }
+    }
+
+    /* ── WhatsApp ── */
+    if(m.waMode==="platform" && m.msgs>0){
+      secR = addRow(["WHATSAPP TIER","","","","","","",""]);
+      styleSectionRow(ws, secR, 8);
+      altToggle = false;
+      priceLine(VOICE[m.wIdx].name+" ("+nfmt(WMSGS[m.wIdx])+" msgs)", 1, "Monthly", WA.sar[m.wIdx], "", false);
+    }
+
+    /* ── Outbound contacts ── */
+    if(m.hasOutbound && m.contacts>0){
+      if(m.contactWaived){
+        var cr = addRow(["Contact charge", m.contacts, "WAIVED", 0, "", 0, 0, "Subject to 700Apps approval."]);
+        styleDataRow(ws, cr, 8, false);
+        ws.getRow(cr).getCell(3).font = {name:"Calibri", size:11, bold:true, color:{argb:"FFFF6F00"}};
+        lineRows.push({row:cr, oneTime:false});
+      } else {
+        priceLine("Contact charge", m.contacts, "Per contact, monthly", CONTACT_CHARGE, "Per contact loaded.", false);
+      }
+    }
+
+    /* ── CRM ── */
+    if(m.crmOn){
+      secR = addRow(["CRM (700Apps)","","","","","","",""]);
+      styleSectionRow(ws, secR, 8);
+      altToggle = false;
+      var crmEff = m.crmAnnual ? Math.round(m.crmPlan.sar*0.9) : m.crmPlan.sar;
+      priceLine("CRM — "+m.crmPlan.name, m.crmUsers, "Per user, "+(m.crmAnnual?"annual":"monthly"), crmEff, m.crmAnnual?"10% annual discount.":"", false);
+    }
+
+    /* ── Totals ── */
+    addRow([]);
+    secR = addRow(["PRICING SUMMARY","","","","","","",""]);
+    styleSectionRow(ws, secR, 8);
+
+    var monthlyRefs = lineRows.filter(function(x){return !x.oneTime}).map(function(x){return "G"+x.row});
+    var oneTimeRefs = lineRows.filter(function(x){return x.oneTime}).map(function(x){return "G"+x.row});
+
+    var mfR = addRow(["Monthly recurring (excl. VAT)","","","","","", null, ""]);
+    ws.getRow(mfR).getCell(7).value = monthlyRefs.length ? {formula:monthlyRefs.join("+")} : 0;
+    ws.getRow(mfR).getCell(7).numFmt = '#,##0.00';
+    styleTotalRow(ws, mfR, 8, LIGHT_GREEN);
+
+    var otR = addRow(["One-time charges (excl. VAT)","","","","","", null, ""]);
+    ws.getRow(otR).getCell(7).value = oneTimeRefs.length ? {formula:oneTimeRefs.join("+")} : 0;
+    ws.getRow(otR).getCell(7).numFmt = '#,##0.00';
+    styleTotalRow(ws, otR, 8, LIGHT_GREEN);
+
+    addRow([]);
+    var vatSec = addRow(["VAT CALCULATION (15%)","","","","","","",""]);
+    styleSectionRow(ws, vatSec, 8);
+
+    var vmR = addRow(["VAT on monthly recurring","","","","","",null,""]);
+    ws.getRow(vmR).getCell(7).value = {formula:"G"+mfR+"*0.15"};
+    ws.getRow(vmR).getCell(7).numFmt = '#,##0.00';
+    styleDataRow(ws, vmR, 8, false);
+
+    var voR = addRow(["VAT on one-time charges","","","","","",null,""]);
+    ws.getRow(voR).getCell(7).value = {formula:"G"+otR+"*0.15"};
+    ws.getRow(voR).getCell(7).numFmt = '#,##0.00';
+    styleDataRow(ws, voR, 8, true);
+
+    addRow([]);
+    var totSec = addRow(["CUSTOMER TOTALS (incl. VAT)","","","","","","",""]);
+    styleSectionRow(ws, totSec, 8);
+
+    var tmR = addRow(["Monthly total (incl. 15% VAT)","","","","","",null,""]);
+    ws.getRow(tmR).getCell(7).value = {formula:"G"+mfR+"+G"+vmR};
+    ws.getRow(tmR).getCell(7).numFmt = '#,##0.00';
+    styleTotalRow(ws, tmR, 8, LIGHT_GREEN);
+
+    var toR = addRow(["One-time total (incl. 15% VAT)","","","","","",null,""]);
+    ws.getRow(toR).getCell(7).value = {formula:"G"+otR+"+G"+voR};
+    ws.getRow(toR).getCell(7).numFmt = '#,##0.00';
+    styleTotalRow(ws, toR, 8, LIGHT_GREEN);
+
+    var gtR = addRow(["Grand total — first month (incl. VAT)","","","","","",null,""]);
+    ws.getRow(gtR).getCell(7).value = {formula:"G"+mfR+"+G"+vmR+"+G"+otR+"+G"+voR};
+    ws.getRow(gtR).getCell(7).numFmt = '#,##0.00';
+    ws.getRow(gtR).getCell(7).font = {name:"Calibri", size:13, bold:true, color:{argb:"FF"+SOE_GREEN}};
+    styleTotalRow(ws, gtR, 8, "C8E6C9");
+    ws.getRow(gtR).getCell(7).font = {name:"Calibri", size:13, bold:true, color:{argb:"FF"+SOE_GREEN}};
+    ws.getRow(gtR).height = 24;
+
+    /* ── Concessions ── */
+    if(m.W.length>0){
+      addRow([]);
+      var conSec = addRow(["CONCESSIONS (subject to 700Apps approval)","Amount (SAR)","Type","","","","",""]);
+      styleSectionRow(ws, conSec, 8);
+      m.W.forEach(function(w){
+        var cr2 = addRow([w.label, Math.round(w.amount), w.type, "", "", "", "", ""]);
+        styleDataRow(ws, cr2, 8, false);
+      });
+    }
+
+    /* ═══ Sheet 2: Customer Pricing Summary ═══ */
+    var ws2 = wb.addWorksheet("Customer Architecture");
+    ws2.columns = [{width:26},{width:44},{width:14},{width:20}];
+
+    var aR = 0;
+    function addARow(vals){ aR++; var row = ws2.getRow(aR); vals.forEach(function(v,i){ row.getCell(i+1).value = v; }); return aR; }
+
+    var ar1 = addARow(["AI Contact Center — Architecture: "+client]);
+    ws2.mergeCells(ar1,1,ar1,4);
+    ws2.getRow(ar1).getCell(1).font = {name:"Calibri", size:14, bold:true, color:{argb:"FF"+SOE_GREEN}};
+
+    addARow(["Generated from calculator. Review and adjust."]);
+    ws2.getRow(aR).getCell(1).font = {name:"Calibri", size:10, italic:true, color:{argb:"FF757575"}};
+    addARow([]);
+
+    var ahR = addARow(["Component","Description","Quantity","Pricing basis"]);
+    styleRow(ws2, ahR, 4);
+
+    function archSection(title){
+      var sr2 = addARow([title,"","",""]);
+      styleSectionRow(ws2, sr2, 4);
+    }
+    var archAlt = false;
+    function archLine(vals){
+      var lr = addARow(vals);
+      styleDataRow(ws2, lr, 4, archAlt);
+      archAlt = !archAlt;
+    }
+
+    archSection("PHONE CONNECTION");
+    archAlt = false;
+    archLine(["Phone setup", m.isSip?"Own SIP trunk":m.isMobileOwn?"Own mobile numbers":"700Apps landline","",""]);
+    archLine(["Grandstream device","Hardware gateway",1,"One-time"]);
+    if(m.extensions>0) archLine(["Extensions","Human agent desktop seats",m.extensions,"Per ext, monthly"]);
+    if(m.mobileOn) archLine(["Mobile service","Agent mobile access","Yes","Monthly"]);
+    if(m.concurrentCalls>0) archLine(["Concurrent calls","",m.concurrentCalls,"Per line, monthly"]);
+    if(m.isOurLine && m.landlines>0) archLine(["Landline numbers","700Apps provided",m.landlines,"Yearly"]);
+
+    archSection("AI PLATFORM");
+    archAlt = false;
+    archLine(["Voice package",m.voicePkg.name+" ("+nfmt(m.voicePkg.mins)+" min)",1,"Monthly"]);
+    archLine(["Dashboard",m.dashUsers+" user"+(m.dashUsers>1?"s":""),m.dashUsers,"Monthly"]);
+    if(m.dashCustom) archLine(["Dashboard customisation","Up to 7 KPI charts",1,"One-time"]);
+    if(m.kbOn) archLine(["Knowledge base","FAQ and reference for AI",1,"Monthly"]);
+    if(m.sentimentOn) archLine(["Sentiment analysis",nfmt(m.sentimentCalls)+" calls/mo",m.sentimentWaived?"Waived":"Yes","Per call"]);
+    archLine(["Implementation","Setup and configuration",1,"One-time"]);
+
+    archSection("INTEGRATIONS");
+    archAlt = false;
+    if(m.endpoints>0) archLine(["Endpoint connections","CRM, booking, ERP etc.",m.endpoints,"Monthly"]);
+    if(m.waMode==="platform" && m.msgs>0) archLine(["WhatsApp channel",VOICE[m.wIdx].name+" tier",1,"Monthly"]);
+    if(m.crmOn) archLine(["CRM (700Apps)",m.crmPlan.name+" plan, "+m.crmUsers+" user"+(m.crmUsers>1?"s":""),m.crmUsers,"Monthly"]);
+
+    /* ═══ Sheet 3: SOE Revenue Summary ═══ */
+    var ws3 = wb.addWorksheet("SOE Revenue");
+    ws3.columns = [{width:40},{width:18},{width:18},{width:18},{width:18}];
+
+    var sR = 0;
+    function addSRow(vals){ sR++; var row = ws3.getRow(sR); vals.forEach(function(v,i){ row.getCell(i+1).value = v; }); return sR; }
+
+    var s1 = addSRow(["SOE Revenue Summary: "+client]);
+    ws3.mergeCells(s1,1,s1,5);
+    ws3.getRow(s1).getCell(1).font = {name:"Calibri", size:16, bold:true, color:{argb:"FF"+SOE_GREEN}};
+    ws3.getRow(s1).height = 28;
+
+    var s2 = addSRow(["SOE margin % is set in cell B"+marginRow+" of the Margin Calculator sheet. All figures in SAR."]);
+    ws3.mergeCells(s2,1,s2,5);
+    ws3.getRow(s2).getCell(1).font = {name:"Calibri", size:10, italic:true, color:{argb:"FF757575"}};
+
+    addSRow([]);
+
+    var shR = addSRow(["Line item","700Apps rate","SOE markup","Customer price","Frequency"]);
+    styleRow(ws3, shR, 5);
+    ws3.getRow(shR).getCell(1).alignment = {horizontal:"left", vertical:"middle", wrapText:true};
+
+    var soeMonthlyRows = [];
+    var soeOneTimeRows = [];
+    var sAlt = false;
+
+    lineRows.forEach(function(lr){
+      var srcRow = lr.row;
+      var sr2 = addSRow([
+        {formula:"'SOE Margin Calculator'!A"+srcRow},
+        {formula:"'SOE Margin Calculator'!D"+srcRow+"*'SOE Margin Calculator'!B"+srcRow},
+        {formula:"'SOE Margin Calculator'!E"+srcRow+"*'SOE Margin Calculator'!B"+srcRow},
+        {formula:"'SOE Margin Calculator'!G"+srcRow},
+        lr.oneTime ? "One-time" : "Monthly"
+      ]);
+      var srow = ws3.getRow(sr2);
+      for(var c=1;c<=5;c++){
+        srow.getCell(c).border = allBorders;
+        srow.getCell(c).font = normalFont();
+        if(sAlt) srow.getCell(c).fill = fillStyle(LIGHT_GRAY);
+      }
+      srow.getCell(2).numFmt = '#,##0.00';
+      srow.getCell(3).numFmt = '#,##0.00';
+      srow.getCell(4).numFmt = '#,##0.00';
+      /* Highlight the SOE markup column */
+      srow.getCell(3).font = {name:"Calibri", size:11, bold:true, color:{argb:"FF"+SOE_GREEN}};
+      sAlt = !sAlt;
+
+      if(lr.oneTime) soeOneTimeRows.push(sr2);
+      else soeMonthlyRows.push(sr2);
+    });
+
+    addSRow([]);
+    var sumSec = addSRow(["SOE EARNINGS SUMMARY","","","",""]);
+    styleSectionRow(ws3, sumSec, 5);
+
+    /* Monthly SOE earnings */
+    var smR = addSRow(["SOE monthly recurring earnings","",null,"",""]);
+    if(soeMonthlyRows.length){
+      ws3.getRow(smR).getCell(3).value = {formula: soeMonthlyRows.map(function(r){return "C"+r}).join("+")};
+    } else {
+      ws3.getRow(smR).getCell(3).value = 0;
+    }
+    ws3.getRow(smR).getCell(3).numFmt = '#,##0.00';
+    styleTotalRow(ws3, smR, 5, LIGHT_GREEN);
+    ws3.getRow(smR).getCell(3).font = {name:"Calibri", size:13, bold:true, color:{argb:"FF"+SOE_GREEN}};
+
+    /* One-time SOE earnings */
+    var soR = addSRow(["SOE one-time earnings","",null,"",""]);
+    if(soeOneTimeRows.length){
+      ws3.getRow(soR).getCell(3).value = {formula: soeOneTimeRows.map(function(r){return "C"+r}).join("+")};
+    } else {
+      ws3.getRow(soR).getCell(3).value = 0;
+    }
+    ws3.getRow(soR).getCell(3).numFmt = '#,##0.00';
+    styleTotalRow(ws3, soR, 5, LIGHT_GREEN);
+    ws3.getRow(soR).getCell(3).font = {name:"Calibri", size:13, bold:true, color:{argb:"FF"+SOE_GREEN}};
+
+    /* Annual SOE projection */
+    var saR = addSRow(["SOE projected annual earnings","",null,"",""]);
+    ws3.getRow(saR).getCell(3).value = {formula: "C"+smR+"*12+C"+soR};
+    ws3.getRow(saR).getCell(3).numFmt = '#,##0.00';
+    styleTotalRow(ws3, saR, 5, "C8E6C9");
+    ws3.getRow(saR).getCell(3).font = {name:"Calibri", size:14, bold:true, color:{argb:"FF"+SOE_GREEN}};
+    ws3.getRow(saR).height = 26;
+
+    /* ═══ Download Excel + Architecture PNG ═══ */
+    var fname = "AICC_Rate_Sheet_"+client.replace(/[^a-zA-Z0-9]/g,"_");
+
+    /* Write Excel via ExcelJS (returns a Promise with a Blob) */
+    wb.xlsx.writeBuffer().then(function(buffer){
+      var blob = new Blob([buffer], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = fname+".xlsx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    });
+
+    /* Architecture PNG download */
+    try {
+      var svgStr = ARCH.svg(D);
+      var canvas = document.createElement("canvas");
+      canvas.width = 2246; canvas.height = 1588;
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0,0,2246,1588);
+      var img = new Image();
+      var svgBlob = new Blob([svgStr], {type:"image/svg+xml;charset=utf-8"});
+      var svgUrl = URL.createObjectURL(svgBlob);
+      img.onload = function(){
+        ctx.drawImage(img, 0, 0, 2246, 1588);
+        URL.revokeObjectURL(svgUrl);
+        var dataUrl = canvas.toDataURL("image/png");
+        var a2 = document.createElement("a");
+        a2.href = dataUrl;
+        a2.download = "AICC_Architecture_"+client.replace(/[^a-zA-Z0-9]/g,"_")+".png";
+        document.body.appendChild(a2);
+        a2.click();
+        document.body.removeChild(a2);
+      };
+      img.onerror = function(){ /* silently skip if SVG render fails */ };
+      img.src = svgUrl;
+    } catch(e) { /* skip architecture PNG on error */ }
+  });
+}
+
+$("btnExcel").addEventListener("click", generateExcel);
+
+/* ═══════════════════ DEAL LIBRARY (Firebase) ═══════════════════ */
+/* Firebase web-app config for project soe-aicc. If it is removed or left as PASTE_..., the library falls back to "this browser only" mode. */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAA6Q56Lko-g_8LkYsf0NZH0eIXjAc6lEc",
+  authDomain: "soe-aicc.firebaseapp.com",
+  projectId: "soe-aicc",
+  storageBucket: "soe-aicc.firebasestorage.app",
+  messagingSenderId: "161535317861",
+  appId: "1:161535317861:web:d3b5eb7a0860dee6d6738c"
+};
+var CUST_LOGO = "";
+
+var DL = (function(){
+  var live = false, db = null, auth = null, user = null, currentId = null, cache = [];
+  try{
+    if(window.firebase && FIREBASE_CONFIG.apiKey.indexOf("PASTE")!==0 && FIREBASE_CONFIG.projectId.indexOf("PASTE")!==0){
+      firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.firestore(); auth = firebase.auth(); live = true;
+    }
+  }catch(e){ console.warn("Firebase start failed", e); live = false; }
+
+  /* ---------- storage: Firebase, or this browser only ---------- */
+  var LS_KEY = "aicc_deals_v1";
+  function lsAll(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"{}"); }catch(e){ return {}; } }
+  function lsPut(o){ try{ localStorage.setItem(LS_KEY, JSON.stringify(o)); }catch(e){ throw new Error("This browser blocked saving."); } }
+  var store = {
+    save: function(id, deal, share){
+      if(live){
+        var ts = firebase.firestore.FieldValue.serverTimestamp();
+        var ref = id ? db.collection("deals").doc(id) : db.collection("deals").doc();
+        var d = Object.assign({}, deal, {updatedAt: ts}); if(!id) d.createdAt = ts;
+        var b = db.batch();
+        b.set(ref, d, {merge:true});
+        b.set(db.collection("shares").doc(ref.id), Object.assign({}, share, {updatedAt: ts}));
+        return b.commit().then(function(){ return ref.id; });
+      }
+      return new Promise(function(res){
+        var all = lsAll(); id = id || ("local" + Date.now().toString(36));
+        var old = all[id] || {};
+        all[id] = Object.assign({}, deal, {createdMs: old.createdMs || Date.now(), ms: Date.now()});
+        lsPut(all); res(id);
+      });
+    },
+    list: function(){
+      if(live) return db.collection("deals").orderBy("updatedAt","desc").limit(200).get().then(function(s){
+        return s.docs.map(function(x){ var o = x.data(); o.id = x.id; o.ms = (o.updatedAt && o.updatedAt.toMillis) ? o.updatedAt.toMillis() : Date.now(); return o; });
+      });
+      return new Promise(function(res){
+        var all = lsAll(), a = Object.keys(all).map(function(k){ var o = all[k]; o.id = k; return o; });
+        a.sort(function(x,y){ return y.ms - x.ms; }); res(a);
+      });
+    },
+    get: function(id){
+      if(live) return db.collection("deals").doc(id).get().then(function(x){ if(!x.exists) throw new Error("Deal not found"); return x.data(); });
+      return new Promise(function(res,rej){ var o = lsAll()[id]; if(o) res(o); else rej(new Error("Deal not found")); });
+    },
+    remove: function(id){
+      if(live){ var b = db.batch(); b.delete(db.collection("deals").doc(id)); b.delete(db.collection("shares").doc(id)); return b.commit(); }
+      return new Promise(function(res){ var all = lsAll(); delete all[id]; lsPut(all); res(); });
+    }
+  };
+
+  /* ---------- capture and restore the whole form ---------- */
+  var MULTI = ["painPointsWrap","bizGoalsWrap","crmFeaturesWrap"];
+  function captureState(){
+    var f = {};
+    document.querySelectorAll("input[id],select[id],textarea[id]").forEach(function(el){
+      if(el.type==="file" || el.id.indexOf("dl_")===0) return;
+      f[el.id] = (el.type==="checkbox"||el.type==="radio") ? el.checked : el.value;
+    });
+    var mc = {}; MULTI.forEach(function(w){ mc[w] = getMultiCheckIds($(w)); });
+    var cu = [];
+    document.querySelectorAll("#waCustom .wa-cu").forEach(function(r){
+      cu.push({ on:r.querySelector(".cu-on").checked, name:r.querySelector(".cu-name").value, n:r.querySelector(".cu-n").value, m:r.querySelector(".cu-m").value });
+    });
+    return JSON.parse(JSON.stringify({ v:1, fields:f, multi:mc, waCustom:cu, flows:flows, flowN:flowN, sysChoice:sysChoice, monthsFree:monthsFree }));
+  }
+  function setFields(f){
+    Object.keys(f).forEach(function(id){
+      var el = $(id); if(!el) return;
+      if(el.type==="checkbox"||el.type==="radio") el.checked = !!f[id]; else el.value = f[id];
+    });
+  }
+  function applyState(st){
+    flowN["in"] = st.flowN["in"]; flowN.out = st.flowN.out;
+    flows["in"] = st.flows["in"]; flows.out = st.flows.out;
+    Object.keys(sysChoice).forEach(function(k){ delete sysChoice[k]; });
+    Object.keys(st.sysChoice||{}).forEach(function(k){ sysChoice[k] = st.sysChoice[k]; });
+    monthsFree = st.monthsFree;
+    $("segFree").querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", parseInt(b.getAttribute("data-free"),10)===monthsFree); });
+    setFields(st.fields);
+    $("waCustom").innerHTML = "";
+    (st.waCustom||[]).forEach(function(c){
+      $("waCustom").insertAdjacentHTML("beforeend", waCustomRow());
+      var r = $("waCustom").lastElementChild;
+      r.querySelector(".cu-on").checked = !!c.on; r.querySelector(".cu-name").value = c.name;
+      r.querySelector(".cu-n").value = c.n; r.querySelector(".cu-m").value = c.m;
+    });
+    renderFlows();
+    MULTI.forEach(function(w){
+      var wrap = $(w), want = (st.multi && st.multi[w]) || [];
+      wrap.querySelectorAll("input").forEach(function(c){ c.checked = false; c.disabled = false; c.parentElement.classList.remove("mc-disabled"); });
+      want.forEach(function(v){
+        var c = wrap.querySelector('input[value="'+v+'"]');
+        if(c){ c.checked = true; c.dispatchEvent(new Event("change",{bubbles:true})); }
+      });
+      if(w==="bizGoalsWrap") $("goalOtherWrap").style.display = want.indexOf("other")>=0 ? "" : "none";
+    });
+    lastSysHtml = null;
+    refresh(); setFields(st.fields); refresh();
+  }
+
+  /* ---------- customer logo ---------- */
+  function showLogo(){
+    var box = $("logoPrev");
+    if(!CUST_LOGO){ box.innerHTML = ""; return; }
+    box.innerHTML = '<img src="'+CUST_LOGO+'" alt="Logo"><button type="button" id="logoClear" title="Remove logo" aria-label="Remove logo">×</button>';
+    $("logoClear").addEventListener("click", function(){ CUST_LOGO = ""; $("logoFile").value = ""; showLogo(); refresh(); });
+  }
+  $("logoFile").addEventListener("change", function(){
+    var file = this.files && this.files[0]; if(!file) return;
+    if(file.size > 4*1024*1024){ alert("Please choose an image smaller than 4 MB."); this.value = ""; return; }
+    var rd = new FileReader();
+    rd.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var s = Math.min(1, 320/img.width, 160/img.height), w = Math.max(1,Math.round(img.width*s)), h = Math.max(1,Math.round(img.height*s));
+        var cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+        cv.getContext("2d").drawImage(img, 0, 0, w, h);
+        var out = cv.toDataURL("image/png");
+        if(out.length > 150000) out = cv.toDataURL("image/jpeg", 0.85);
+        CUST_LOGO = out; showLogo(); refresh();
+      };
+      img.onerror = function(){ alert("That image could not be read. Try a PNG or JPG file."); };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(file);
+  });
+
+  /* ---------- UI ---------- */
+  function status(msg, err){ var s = $("dl_status"); s.textContent = msg || ""; s.className = "dl-status" + (err ? " err" : ""); }
+  function canUse(){ return !live || !!user; }
+  function drawAuth(){
+    var a = $("dl_auth"), mode = $("dl_mode");
+    if(!live){
+      mode.className = "dl-mode warn";
+      mode.textContent = "Test mode: deals are saved in this browser only. Add the Firebase config to share with the team.";
+      a.innerHTML = ""; return;
+    }
+    mode.className = "dl-mode"; mode.textContent = "Connected to Firebase";
+    if(user){
+      a.innerHTML = '<span>Signed in as '+esc(user.email||"")+'</span><button type="button" id="dl_out">Sign out</button>';
+      $("dl_out").addEventListener("click", function(){ auth.signOut(); });
+    } else {
+      a.innerHTML = '<input type="email" id="dl_email" placeholder="Team email" autocomplete="username"><input type="password" id="dl_pw" placeholder="Password" autocomplete="current-password"><button type="button" id="dl_in">Sign in</button>';
+      var go = function(){
+        auth.signInWithEmailAndPassword($("dl_email").value.trim(), $("dl_pw").value).catch(function(e){ status("Sign in failed: "+(e.message||e), true); });
+      };
+      $("dl_in").addEventListener("click", go);
+      $("dl_pw").addEventListener("keydown", function(e){ if(e.key==="Enter") go(); });
+    }
+  }
+  function fmtDate(ms){ return ms ? new Date(ms).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : ""; }
+  function drawList(){
+    var q = ($("dl_search").value||"").trim().toLowerCase(), box = $("dl_list");
+    if(!canUse()){ box.innerHTML = '<div class="dl-empty">Sign in with your team account to see saved deals.</div>'; return; }
+    var rows = cache.filter(function(d){ return !q || String(d.client||"").toLowerCase().indexOf(q) >= 0; });
+    if(!rows.length){ box.innerHTML = '<div class="dl-empty">'+(cache.length ? "No deal matches your search." : "No saved deals yet. Fill the form and press Save deal.")+'</div>'; return; }
+    box.innerHTML = rows.map(function(d){
+      var qt = d.quote || {};
+      return '<div class="dl-row'+(d.id===currentId?' cur':'')+'" data-id="'+esc(d.id)+'">'+
+        '<div><div class="dl-name">'+esc(d.client||"Client")+(d.id===currentId?' (open now)':'')+'</div>'+
+          '<div class="dl-meta">'+esc(String(qt.flows||0))+' flows · '+esc(qt.pkg||"")+' package'+(d.presalesLead?' · '+esc(d.presalesLead):'')+'</div></div>'+
+        '<div><div class="dl-q">'+sar(qt.recPrice||0)+' / month</div><div class="dl-meta">+ '+sar(qt.onePrice||0)+' one-time</div></div>'+
+        '<div class="dl-meta">Saved '+fmtDate(d.ms)+'</div>'+
+        '<div class="dl-acts">'+
+          '<button type="button" class="sm pri" data-act="load">Load</button>'+
+          '<button type="button" class="sm" data-act="brief">Internal brief</button>'+
+          '<button type="button" class="sm" data-act="view">Customer view</button>'+
+          '<button type="button" class="sm" data-act="share">Copy link</button>'+
+          '<button type="button" class="sm danger" data-act="del">Delete</button></div></div>';
+    }).join("");
+  }
+  function refreshList(){
+    if(!canUse()){ drawList(); return Promise.resolve(); }
+    return store.list().then(function(a){ cache = a; drawList(); }).catch(function(e){ status("Could not read deals: "+(e.message||e), true); });
+  }
+  function drawButtons(){ $("dl_savenew").style.display = currentId ? "" : "none"; $("dl_save").textContent = currentId ? "Save changes" : "Save deal"; }
+
+  function save(asNew){
+    if(!canUse()){ status("Please sign in first.", true); return; }
+    var name = ($("clientName").value||"").trim();
+    if(!name){ status("Enter the client name first.", true); $("clientName").focus(); return; }
+    var m = model(), D = docData(m);
+    var S = JSON.parse(JSON.stringify(D));            /* customer-safe copy: no names of our team, no discounts */
+    delete S.presalesLead; delete S.responseBy; if(S.phone) delete S.phone.lineDisc; delete S.logo;
+    var deal = {
+      client:name, date:D.date, presalesLead:D.presalesLead, logo:CUST_LOGO,
+      quote:{ onePrice:m.onePrice, recPrice:m.recPrice, yearTotal:m.yearTotal, pkg:m.voicePkg.name, flows:activeFlows().length },
+      stateJson: JSON.stringify(captureState())
+    };
+    var share = { client:name, date:D.date, logo:CUST_LOGO, customerJson: JSON.stringify(S) };
+    status("Saving...");
+    store.save(asNew ? null : currentId, deal, share).then(function(id){
+      currentId = id; status("Saved: "+name); drawButtons(); return refreshList();
+    }).catch(function(e){ status("Save failed: "+(e.message||e), true); });
+  }
+  function loadDeal(id, then){
+    status("Loading...");
+    store.get(id).then(function(d){
+      applyState(JSON.parse(d.stateJson));
+      CUST_LOGO = d.logo || ""; showLogo(); refresh();
+      currentId = id; drawButtons(); drawList();
+      status("Loaded: "+(d.client||"deal")+". Edit anything and press Save changes.");
+      if(then) setTimeout(then, 400); else window.scrollTo({top:0,behavior:"smooth"});
+    }).catch(function(e){ status("Could not load: "+(e.message||e), true); });
+  }
+  function shareLink(id){ return new URL("customer-view.html", location.href).href + "?id=" + encodeURIComponent(id); }
+
+  $("dl_save").addEventListener("click", function(){ save(false); });
+  $("dl_savenew").addEventListener("click", function(){ save(true); });
+  $("dl_new").addEventListener("click", function(){ if(confirm("Clear the form and start a new deal? Unsaved changes will be lost.")) location.reload(); });
+  $("dl_search").addEventListener("input", drawList);
+  $("dl_list").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-act]"); if(!b) return;
+    var id = b.closest(".dl-row").getAttribute("data-id"), act = b.getAttribute("data-act");
+    if(act==="load") loadDeal(id);
+    else if(act==="brief") loadDeal(id, function(){ printDoc("brief"); });
+    else if(act==="view") loadDeal(id, function(){ $("btnCustView").click(); });
+    else if(act==="share"){
+      if(!live){ status("Share links need Firebase. Add the config first.", true); return; }
+      var link = shareLink(id);
+      var ok = function(){ status("Link copied: "+link); };
+      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(ok, function(){ window.prompt("Copy this link:", link); });
+      else window.prompt("Copy this link:", link);
+    }
+    else if(act==="del"){
+      var nm = b.closest(".dl-row").querySelector(".dl-name").textContent;
+      if(!confirm("Delete the saved deal for "+nm+"? This also stops its share link working.")) return;
+      store.remove(id).then(function(){ if(id===currentId){ currentId = null; drawButtons(); } status("Deleted."); return refreshList(); })
+        .catch(function(e){ status("Delete failed: "+(e.message||e), true); });
+    }
+  });
+
+  drawAuth(); drawButtons(); showLogo();
+  if(live) auth.onAuthStateChanged(function(u){ user = u; drawAuth(); status(""); refreshList(); });
+  else refreshList();
+  return { captureState:captureState, applyState:applyState, store:store, isLive:function(){return live;} };
+})();
 
 
 </script>
