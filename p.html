@@ -20,6 +20,20 @@ input,textarea{font:inherit;padding:8px 10px;border:1px solid var(--rule);border
 .lnk{border:0;background:none;color:var(--g);text-decoration:underline;cursor:pointer;font:inherit;padding:0;margin-top:6px}
 .err{color:var(--red);font-weight:600;min-height:20px}.ok{background:var(--soft);border:1px solid var(--rule);border-radius:12px;padding:20px;text-align:center}
 .chips span{display:inline-block;background:var(--soft);border:1px solid var(--rule);border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;font-size:13px}
+
+.a3{display:grid;grid-template-columns:200px 1fr 200px;gap:16px;align-items:center}.a3h{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--g);margin-bottom:8px}
+.a3n{background:#fff;border:1.5px solid var(--rule);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13.5px;font-weight:700}.a3n small{display:block;font-weight:400;color:var(--mut);font-size:12px}
+.a3n.sy{border-color:#2563EB55}.a3n.wa{border-color:#25D36688}.a3p{background:var(--soft);border:2px solid #A5D6A7;border-radius:16px;padding:12px}
+.a3ag{background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-weight:800}.a3ag small{display:block;font-weight:400;color:var(--mut);font-size:12px}
+.a3fl{display:grid;grid-template-columns:1fr 1fr;gap:10px}.a3fl>div{background:#fff;border-radius:10px;padding:10px}.a3fh{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--g);margin-bottom:6px}
+.a3f{font-size:13px;padding:3px 0;font-weight:600}.a3f small{display:block;font-weight:600;color:var(--g);font-size:11.5px}.a3f small.v{color:var(--mut);font-weight:400}
+.bi{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.bi span{background:#C5E1A5;color:var(--gd);border-radius:8px;padding:3px 9px;font-size:12px;font-weight:700}
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch;margin:8px 0}.chain>div{flex:1;min-width:92px;border:1.5px solid var(--rule);border-radius:10px;padding:8px;text-align:center;background:#fff}.chain b{display:block;font-size:19px;color:var(--g);line-height:1.1}.chain span{font-size:11.5px;color:var(--mut)}
+.chain .op{flex:0 0 auto;min-width:0;border:0;background:none;padding:0;align-self:center;font-size:18px;font-weight:800;color:var(--gl)}.chain .res{background:var(--g);border-color:var(--g)}.chain .res b,.chain .res span{color:#fff}
+.lad{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:6px 0 4px}.lad>div{border:1.5px solid var(--rule);border-radius:10px;padding:6px;text-align:center;opacity:.55;background:#fff}.lad b{display:block;font-size:12px}.lad span{display:block;font-size:11px;color:var(--mut)}.lad em{font-style:normal;font-weight:800;color:var(--g)}
+.lad>div.pk{opacity:1;background:var(--g);border-color:var(--g)}.lad>div.pk b,.lad>div.pk span,.lad>div.pk em{color:#fff}.lad>div.ot{opacity:1}
+.fx{font-size:12px;color:var(--mut);display:block}
+@media(max-width:760px){.a3{grid-template-columns:1fr}.a3fl{grid-template-columns:1fr}.lad{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:640px){th:nth-child(2),td:nth-child(2){display:none}.r{white-space:normal}}
 </style>
 </head>
@@ -30,7 +44,7 @@ input,textarea{font:inherit;padding:8px 10px;border:1px solid var(--rule);border
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 (function(){
- var KEY=decodeURIComponent((location.hash||"").replace(/^#/,"")).trim(), app=document.getElementById("app"), db, SH, ans={};
+ var KEY=decodeURIComponent((location.hash||"").replace(/^#/,"")).trim(), app=document.getElementById("app"), db, SH, ans={}, qaans={};
  function esc(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
  function n2(x){return Number(x||0).toLocaleString("en-US")}
  function state(t,m){app.innerHTML='<div class="card"><h3>'+esc(t)+'</h3><p>'+esc(m)+'</p></div>'}
@@ -48,18 +62,45 @@ input,textarea{font:inherit;padding:8px 10px;border:1px solid var(--rule);border
  var msg="",by="",note="",valid=(function(){var d=new Date(Date.now()+30*864e5);return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)})();
  function kind(l){return l.k==="o"?"One-time":l.k==="u"?"Usage":"Monthly"}
  function chips(a){return (a&&a.length)?'<span class="chips">'+a.map(function(x){return'<span>'+esc(x)+'</span>'}).join("")+'</span>':'<span class="mut">None</span>'}
+function design(sc){
+  var fl=sc.flows||[], isObj=fl.length&&typeof fl[0]==="object";
+  if(!isObj)return '<p><b>Call flows:</b></p>'+chips(fl)+'<p><b>Systems to connect:</b></p>'+chips(sc.systems);
+  function list(pre){var r=fl.filter(function(f){return f.c.indexOf(pre)===0});return r.length?r.map(function(f){var md=(f.m||[]);return'<div class="a3f">'+esc(f.c)+': '+esc(f.n)+(md.length?'<small>&rarr; '+md.map(function(x){return esc(x.n)+(x.x?'':' (connect)')}).join(", ")+'</small>':'<small class="v">Handled by the Voice Agent</small>')+'</div>'}).join(""):'<div class="a3f"><small class="v">None</small></div>'}
+  var ext=sc.ext||[],nat=sc.native||[];
+  return '<div class="a3"><div><div class="a3h">1 CUSTOMER CALLS</div><div class="a3n">The customer\'s callers<small>By phone'+(ext.indexOf("WhatsApp Business")>=0?' or WhatsApp':'')+'</small></div>'+(sc.ph?'<div class="a3n">'+esc(sc.ph.t==="mobile"?"The customer\'s mobile numbers":sc.ph.t==="sip"?"The customer\'s SIP lines":"SOE phone lines")+'<small>'+esc(sc.ph.n)+' connected</small></div>':'')+(sc.wa?'<div class="a3n wa">WhatsApp<small>Customers message the business</small></div>':'')+'</div>'+
+   '<div><div class="a3h">2 THE AI CONTACT CENTER</div><div class="a3p"><div class="a3ag">AI Voice Agent<small>Answers in Arabic and English, and works with the systems</small></div><div class="a3fl"><div><div class="a3fh">INBOUND FLOWS</div>'+list("IN-")+'</div><div><div class="a3fh">OUTBOUND FLOWS</div>'+list("OUT-")+'</div></div>'+(nat.length?'<div class="bi"><span style="background:none;color:var(--g);padding:3px 0">Built in, nothing to connect:</span>'+nat.map(function(x){return'<span>'+esc(x)+'</span>'}).join("")+'</div>':'')+'</div></div>'+
+   '<div><div class="a3h">3 OUTSIDE SYSTEMS TO CONNECT</div>'+(ext.length?ext.map(function(x){return'<div class="a3n '+(x.indexOf("WhatsApp")>=0?'wa':'sy')+'">'+esc(x)+'<small>'+(x.indexOf("WhatsApp")>=0?'Official connection, 1 endpoint':'Secure API connection, 1 endpoint')+'</small></div>'}).join(""):'<div class="a3n">No outside system<small>Everything runs inside the platform</small></div>')+'</div></div>';
+}
+ function volumes(sc){
+  var z=sc.sz||{};if(!z.days)return"";
+  var ai=(z["in"]||0)*(z.share||0)/100,inM=ai*(z.inlen||0),outM=(z.out||0)*(z.outlen||0),mo=Math.round((inM+outM)*z.days),L=sc.lad&&sc.lad.v,pk=L&&L.t[L.p];
+  function b(n,l){return'<div><b>'+esc(n)+'</b><span>'+esc(l)+'</span></div>'}function o(x){return'<div class="op">'+x+'</div>'}
+  return '<div class="card"><h3>2. Volumes, and how we calculated the voice minutes</h3><div class="chain">'+b(n2(z["in"]||0),"inbound calls a day")+o("&times;")+b((z.share||0)+"%","finished by the Voice Agent alone")+o("=")+b(n2(Math.round(ai)),"AI calls a day")+o("&times;")+b((z.inlen||0)+" min","average call")+o("=")+b(n2(Math.round(inM)),"inbound minutes a day")+'</div>'+
+  '<div class="chain">'+b(n2(z.out||0),"outbound calls a day")+o("&times;")+b((z.outlen||0)+" min","average call")+o("=")+b(n2(Math.round(outM)),"outbound minutes a day")+o("+")+b(n2(Math.round(inM)),"inbound minutes a day")+o("&times;")+b(z.days,"working days")+o("=")+'<div class="res"><b>'+n2(mo)+'</b><span>voice minutes a month</span></div></div>'+(pk?'<p class="mut">The '+esc(pk.n)+' package includes '+n2(pk.m)+' minutes. This customer uses '+Math.round(mo/pk.m*100)+'%.</p>':'')+'</div>';
+ }
+ function ladders(sc){
+  var L=sc.lad;if(!L)return"";
+  function box(t,x,unit){return'<div class="lad">'+x.t.map(function(r,i){return'<div class="'+(i===x.p?'pk':i>x.p?'ot':'')+'"><b>'+esc(r.n)+'</b><span>'+n2(r.m)+' '+unit+'</span><em>'+n2(r.s)+'</em></div>'}).join("")+'</div>'}
+  return '<p><b>Voice AI package.</b> Needs about '+n2(L.v.need)+' minutes a month. The dark box is the level we chose. Rates are SAR a month.</p>'+box("v",L.v,"min")+
+   '<p><b>WhatsApp messages.</b> Needs about '+n2(L.w.need)+' messages a month. The dark box is the smallest level that covers it.</p>'+box("w",L.w,"msgs");
+ }
+function qcard(sc){
+  var q=sc.qs||[];if(!q.length)return"";
+  return '<div class="card"><h3>4. Questions from SOE</h3><p class="mut">Please type a short answer for each question. You can skip a question if you do not know.</p>'+q.map(function(x,i){return'<p><b>'+(i+1)+'. '+esc(x)+'</b></p><textarea rows="2" maxlength="300" data-qa="'+i+'">'+esc(qaans[i]||"")+'</textarea>'}).join("")+'</div>';
+ }
  function paint(){
   var sc=SH.scopeO;
   var h='<h1>'+esc(SH.client)+'</h1><p class="mut">Review round R'+esc(SH.round)+'. Requested by '+esc(SH.lead||"SOE")+'. Please check the scope and your rates, then send your answer at the bottom.</p>'+
-  '<div class="card"><h3>1. What the customer wants</h3><p><b>Call flows:</b></p>'+chips(sc.flows)+'<p><b>Systems to connect:</b></p>'+chips(sc.systems)+'<p><b>Channels:</b></p>'+chips(sc.channels)+'<p><b>Sizing:</b></p>'+chips(sc.sizing)+'</div>'+
-  '<div class="card"><h3>2. Your rates</h3><p class="mut">Please confirm each rate, or propose a change with a reason. This page does not show SOE margin or customer prices.</p><table><thead><tr><th>Line</th><th>Type</th><th class="r">Your rate, SAR</th><th>Your answer</th></tr></thead><tbody>'+
-  SH.lines.map(function(l,i){var a=ans[i]||{};return'<tr><td>'+esc(l.n)+'</td><td>'+kind(l)+'</td><td class="r">'+n2(l.v)+'</td><td class="seg"><button type="button" data-a="ok" data-i="'+i+'" class="'+(a.v==="ok"?"on":"")+'">Confirm</button><button type="button" data-a="chg" data-i="'+i+'" class="'+(a.v==="chg"?"on":"")+'">Propose a change</button>'+(a.v==="chg"?'<div style="margin-top:6px"><input type="number" min="0" data-f="to" data-i="'+i+'" placeholder="New rate, SAR" value="'+esc(a.to||"")+'"> <input type="text" maxlength="120" data-f="why" data-i="'+i+'" placeholder="Reason" value="'+esc(a.why||"")+'" style="margin-top:6px"></div>':'')+'</td></tr>'}).join("")+
+  '<div class="card"><h3>1. The design we propose</h3><p class="mut">Read from left to right. Under each flow, the arrow shows which module it uses. Green tags are built into the platform.</p>'+design(sc)+'<p><b>Channels:</b></p>'+chips(sc.channels)+'</div>'+
+  volumes(sc)+
+  '<div class="card"><h3>3. Your rates</h3><p class="mut">Each line shows how the rate is built. Please confirm it, or propose a change with a reason. This page does not show SOE margin or customer prices.</p>'+ladders(sc)+'<table><thead><tr><th>Line and how it is built</th><th>Type</th><th class="r">Your rate, SAR</th><th>Your answer</th></tr></thead><tbody>'+
+  SH.lines.map(function(l,i){var a=ans[i]||{};return'<tr><td>'+esc(l.n)+(l.f?'<span class="fx">'+esc(l.f)+'</span>':'')+'</td><td>'+kind(l)+'</td><td class="r">'+n2(l.v)+'</td><td class="seg"><button type="button" data-a="ok" data-i="'+i+'" class="'+(a.v==="ok"?"on":"")+'">Confirm</button><button type="button" data-a="chg" data-i="'+i+'" class="'+(a.v==="chg"?"on":"")+'">Propose a change</button>'+(a.v==="chg"?'<div style="margin-top:6px"><input type="number" min="0" data-f="to" data-i="'+i+'" placeholder="New rate, SAR" value="'+esc(a.to||"")+'"> <input type="text" maxlength="120" data-f="why" data-i="'+i+'" placeholder="Reason" value="'+esc(a.why||"")+'" style="margin-top:6px"></div>':'')+'</td></tr>'}).join("")+
   '</tbody></table><button type="button" class="lnk" data-all="1">Confirm every line as shown</button></div>'+
-  '<div class="card"><h3>3. Your answer</h3><p>These rates are valid until</p><input type="date" id="pv" value="'+esc(valid)+'" style="width:200px"><p>Your name</p><input type="text" id="pb" maxlength="60" value="'+esc(by)+'" placeholder="Full name"><p>Note for SOE (optional)</p><textarea id="pn" rows="3" maxlength="400">'+esc(note)+'</textarea><p class="err" id="pe">'+esc(msg)+'</p><button type="button" class="go" id="ps">Send my answer to SOE</button></div>';
+  qcard(sc)+'<div class="card"><h3>'+(sc.qs&&sc.qs.length?5:4)+'. Your answer</h3><p>These rates are valid until</p><input type="date" id="pv" value="'+esc(valid)+'" style="width:200px"><p>Your name</p><input type="text" id="pb" maxlength="60" value="'+esc(by)+'" placeholder="Full name"><p>Note for SOE (optional)</p><textarea id="pn" rows="3" maxlength="400">'+esc(note)+'</textarea><p class="err" id="pe">'+esc(msg)+'</p><button type="button" class="go" id="ps">Send my answer to SOE</button></div>';
   app.innerHTML=h;
  }
  function keep(){var a=document.getElementById("pv");if(a)valid=a.value;a=document.getElementById("pb");if(a)by=a.value;a=document.getElementById("pn");if(a)note=a.value}
- app.addEventListener("input",function(e){var t=e.target;if(t.dataset&&t.dataset.f){var i=+t.dataset.i;ans[i]=Object.assign({},ans[i]);ans[i][t.dataset.f]=t.value}});
+ app.addEventListener("input",function(e){var t=e.target;if(t.dataset&&t.dataset.qa!=null&&t.dataset.qa!==""){qaans[+t.dataset.qa]=t.value}if(t.dataset&&t.dataset.f){var i=+t.dataset.i;ans[i]=Object.assign({},ans[i]);ans[i][t.dataset.f]=t.value}});
  app.addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
   if(b.dataset.all){keep();SH.lines.forEach(function(l,i){ans[i]={v:"ok"}});msg="";paint();return}
@@ -74,7 +115,8 @@ input,textarea{font:inherit;padding:8px 10px;border:1px solid var(--rule);border
    var today=new Date().toISOString().slice(0,10);
    if(!valid||valid<today){msg="Please set a valid-until date that is today or later.";return paint()}
    if(!by.trim()){msg="Please type your name.";return paint()}
-   var payload=JSON.stringify({by:by.trim().slice(0,60),valid:valid,note:note.trim().slice(0,400),answers:out});
+   var qa=((SH.scopeO&&SH.scopeO.qs)||[]).map(function(x,i){return{q:String(x).slice(0,200),a:String(qaans[i]||"").trim().slice(0,300)}});
+   var payload=JSON.stringify({by:by.trim().slice(0,60),valid:valid,note:note.trim().slice(0,400),answers:out,qa:qa});
    if(payload.length>5900){msg="The answer is too long. Please shorten the reasons.";return paint()}
    b.disabled=true;b.textContent="Sending...";
    db.collection("partnerReplies").add({key:KEY,dealId:SH.dealId||"",round:SH.round||1,payload:payload,createdAt:firebase.firestore.FieldValue.serverTimestamp(),sid:Math.random().toString(36).slice(2,12)}).then(function(){
