@@ -1754,7 +1754,7 @@ function model(){
   var R = [], O = [], W = [], A = [];
 
   R.push(["Voice AI — "+voicePkg.name+" package", voicePkg.sar,
-    nfmt(voicePkg.mins)+" min included"]);
+    nfmt(voicePkg.mins)+" AI minutes included. Unused minutes carry over for 15 days."]);
   if(vOverCost>0) R.push(["Additional usage minutes", vOverCost,
     nfmt(vOver)+" min × "+OVERAGE_RATE.toFixed(2)+" SAR per minute"]);
 
@@ -2043,7 +2043,7 @@ function render(){
       var optB = nxPkg.sar;
       var diff = optB - optA;
       cmpH += '<tr style="background:#fff"><td style="padding:8px;border-bottom:1px solid #ddd"><b>Option B: Upgrade to '+nxPkg.name+'</b></td>';
-      cmpH += '<td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">'+nfmt(nxPkg.mins)+' min included (covers all usage)</td>';
+      cmpH += '<td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">'+nfmt(nxPkg.mins)+' AI minutes included (covers all usage)</td>';
       cmpH += '<td style="padding:8px;border-bottom:1px solid #ddd;font-weight:700;text-align:right">'+sar(optB)+'/mo</td></tr>';
       cmpH += '<tr style="background:'+(diff>0?'#E8F5E9':'#FFF3E0')+'"><td colspan="2" style="padding:8px;font-weight:700">'+(diff>0 ? '✓ Option A saves '+sar(diff)+' a month' : 'Option B is '+sar(Math.abs(diff))+' a month cheaper — consider upgrading')+'</td>';
       cmpH += '<td style="padding:8px;text-align:right;font-weight:700">'+(diff>0?'Save '+sar(diff):'Save '+sar(Math.abs(diff)))+'</td></tr>';
@@ -2263,8 +2263,8 @@ function qxRender(m){
   $("lines").innerHTML = h;
   $("termsBox").innerHTML = "<b>Commercial terms.</b> Contract between the customer and SOE. Minimum commitment 3 months. This quotation: "+t+" months. Commitment discount on monthly charges: 6 months 5%, 12 months 10%. "+
     "One-time charges (A) are due immediately after contract signing. Monthly charges are invoiced in advance each month from go-live; billing cycles run from the go-live date. "+
-    "Usage charges are invoiced monthly after use, at the actual quantity, on the same invoice. Package minutes do not roll over. Monthly charges (B) and usage charges (C) are due within 7 calendar days from the invoice date. Calendar days include weekends and public holidays. "+
-    "Usage beyond the allowance is agreed in advance and billed at the flat per-minute rate of "+q.xRate+" halalas per minute, including VAT. "+
+    "Usage charges are invoiced monthly after use, at the actual quantity, on the same invoice. Unused package AI minutes at the end of a billing month carry over to the next billing month. Carried minutes are used first. They stay valid for 15 days from the start of that billing month. After 15 days, any remaining carried minutes expire. Monthly charges (B) and usage charges (C) are due within 7 calendar days from the invoice date. Calendar days include weekends and public holidays. "+
+    "Usage beyond the allowance is agreed in advance and billed at the flat per-AI-minute rate of "+q.xRate+" halalas per minute, including VAT. "+
     "Prices in SAR"+(m.vatOn?", VAT included as shown":", excluding VAT")+". This offer is valid for thirty days from the issue date on the cover, and is subject to a signed service agreement. It may be extended for a further term by mutual written agreement, if requested at least one month before the end of the current term.";
   var mh = '<div class="line"><span class="n">700Apps cost over '+t+' months</span><span class="v">'+sar(q.cost)+'</span></div>';
   mh += '<div class="line"><span class="n">Customer price over '+t+' months, before VAT</span><span class="v">'+sar(q.contract)+'</span></div>';
@@ -4383,17 +4383,18 @@ var DL = (function(){
     m.R.forEach(function(x){ if(USAGE_RE.test(x[0])){
       var isIn = x[0]==="Inbound sentiment analysis", isOut = x[0]==="Outbound calls", calls = isIn ? Math.round(m.sentimentCalls||0) : isOut ? Math.round(m.outCalls||0) : 0;
       var rate = calls>0 ? rateFmt(x[1]/calls*mk) : "";
-      var note = isIn ? "Optional add-on, AI-handled calls only"+(calls?". "+nfmt(calls)+" calls a month × "+rate+" SAR per call":"") : isOut ? (calls?nfmt(calls)+" calls a month × "+rate+" SAR per call. Sentiment analysis is included.":"Sentiment analysis is included.") : custNote(x[2],mk);
+      var note = isIn ? "Optional add-on, AI-handled calls only"+(calls?". "+nfmt(calls)+" calls a month × "+rate+" SAR per call":"") : isOut ? (calls?nfmt(calls)+" calls a month × "+rate+" SAR per call. Sentiment analysis is included. ":"Sentiment analysis is included. ")+"Carrier charges not included." : custNote(x[2],mk);
       r.push({n:x[0],note:note,v:Math.round(x[1]*mk)}); } });
     return r;
   }
-  var DATA_REV = 8; /* raise this number whenever a pricing or scope rule changes */
+  var DATA_REV = 10; /* raise this number whenever a pricing or scope rule changes */
   function quoteSnap(m){ var qq = qxCalc(m); return { rev:DATA_REV, onePrice:Math.round(m.onePrice), recPrice:Math.round(qq.fixedNet), usagePrice:Math.round(qq.usageP), xRate:qq.xRate, term:qq.term, yearTotal:Math.round(qq.contract), pkg:m.voicePkg.name, flows:activeFlows().length, vatOn:!!m.vatOn,
       qlines:custLines(m),
       vlines:m.R.map(function(r){ return {n:r[0], v:Math.round(r[1]), k:(USAGE_RE.test(r[0])?"u":"m"), f:String(r[2]||"").slice(0,110)}; }).concat(m.O.map(function(o){ return {n:o[0], v:Math.round(o[1]), k:"o", f:String(o[2]||"").slice(0,110)}; })),
       scopeX:{ flows:(function(){ var o=[]; activeFlows().forEach(function(a){ o.push({c:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1), n:a.job.id==="other" ? (((a.f.name||"").trim())||"Custom flow") : (SHORT[a.job.id]||a.job.label), m:docMods(a,m).map(function(x){ return {n:x.n, x:x.native?1:0}; })}); }); return o; })(),
         native:docData(m).native.concat(m.kbOn?["Knowledge base"]:[]), ext:docData(m).systems.map(function(x){ return x.name; }).concat(m.waMode!=="none"?["WhatsApp Business"]:[]),
         lad:{ v:{ t:VOICE.map(function(x){ return {n:x.name,m:x.mins,s:x.sar}; }), p:m.vIdx, need:Math.round(m.totalMinsMonth) }, w:{ t:WMSGS.map(function(x,i){ return {n:VOICE_NAMES[i],m:x,s:WA.sar[i]}; }), p:m.wIdx, need:Math.round(m.msgs||0) } },
+        mn:{ ic:num("inCallsDay",0), sh:Math.round(m.aiShare*100), il:num("inCallLen",0), oc:num("outCallsDay",0), ol:num("outCallLen",0), dy:m.workDays, hi:m.hasInbound?1:0, ho:m.hasOutbound?1:0, i:Math.round(m.inMinsDay*m.workDays), o:Math.round(m.outMinsDay*m.workDays), t:Math.round(m.totalMinsMonth), p:m.voicePkg.mins, a:(m.vIdx===m.vRec)?1:0 },
         usageCalls:{ inb:Math.round(m.sentimentCalls||0), out:Math.round(m.outCalls||0) },
         eps:m.eps.map(function(e){ var fl = []; activeFlows().forEach(function(a){ if(flowSystems(a.f).some(function(x){ return x.key===e.key; })) fl.push((a.dir==="in"?"IN-":"OUT-")+(a.idx+1)); }); return { k:e.key, n:(SYS[e.key] && SYS[e.key].name) || e.name, c:e.charged?1:0, fl:fl }; }),
         ph:{ t:(m.isMobileOwn?"mobile":m.isSip?"sip":"line"), n:(m.isMobileOwn?m.mobileCount:m.isSip?1:m.landlines) }, mob:!!m.isMobileOwn, peakN:m.concurrentCalls||0, intro:(custData(m).desc||"").slice(0,400) } }; }
@@ -4903,7 +4904,10 @@ var DL = (function(){
     else if(z["in"]>0) out.push("Capacity. The quote reserves "+(sx.peakN||1)+" concurrent call"+((sx.peakN||1)>1?"s":"")+" for "+z["in"]+" inbound calls a day. Is this enough for the busiest hour?");
     if(cust.whatsapp) out.push("WhatsApp. Can the customer keep its current WhatsApp Business number? How many working days does activation take?");
     if(z.out>0) out.push("Outbound campaigns. Is there a daily limit or a time-of-day rule for "+z.out+" outbound calls a day"+(z.contacts?" to "+z.contacts+" different people":"")+"?");
-    return out.slice(0,8).join("\n");
+    if(sx.mn && sx.mn.t>0) out.push("AI minutes. How does the platform count an AI minute? Please confirm whether ringing time counts, whether a transfer to a human agent stops the count, and whether time is rounded per second or per minute.");
+    if(z.out>0 || sx.mob || (sx.ph||{}).t==="sip") out.push("Telecom charges. Are carrier charges for outbound calls paid by the customer to its own carrier? Does the same apply to inbound numbers and SIP trunks?");
+    if(cust.whatsapp) out.push("WhatsApp fees. Are there Meta conversation fees in addition to the "+"included messages? If yes, who bills them?");
+    return out.slice(0,10).join("\n");
   }
   function pxSumCheck(d){
     var rows = pxLines(d), bad = [], cur = null, sum = 0;
@@ -4929,7 +4933,7 @@ var DL = (function(){
       '.hd img{height:44px}.hd .r{text-align:right}.hd h1{margin:0;font-size:22px;letter-spacing:2px}.hd small{font-size:12px;font-weight:700;letter-spacing:1px}.in{padding:22px 32px 22mm}'+
       '.g{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0 0 14px}.g div{border-bottom:1px solid #D7E1D4;padding:3px 0;display:flex;gap:8px}.g b{flex:0 0 110px;color:#1B5E20}'+
       'table{width:100%;border-collapse:collapse;margin:6px 0 12px}td{padding:6px 8px;border-bottom:1px solid #E5ECE2;vertical-align:top}td.r{text-align:right;white-space:nowrap}small{display:block;color:#5F6F62;font-size:11px}'+
-      'tr.sec td{background:#E8F5E9;font-weight:700;color:#0D3B13;border-bottom:1px solid #C9DCC4}.tot td{font-weight:700;border-top:2px solid #1B5E20}.vt{break-inside:avoid;page-break-inside:avoid}.vt tr{break-inside:avoid}.vt th{background:#E8F5E9;color:#0D3B13;text-align:left;padding:6px 8px;font-size:11px}.vt th.r{text-align:right}.xr{margin:4px 0 0;font-size:12px;color:#0D3B13}.big td{background:#1B5E20;color:#fff;font-size:14px;font-weight:700}'+
+      'tr.sec td{background:#E8F5E9;font-weight:700;color:#0D3B13;border-bottom:1px solid #C9DCC4}.tot td{font-weight:700;border-top:2px solid #1B5E20}.vt{break-inside:avoid;page-break-inside:avoid}.vt tr{break-inside:avoid}.vt th{background:#E8F5E9;color:#0D3B13;text-align:left;padding:6px 8px;font-size:11px}.vt th.r{text-align:right}.xr{margin:4px 0 0;font-size:12px;color:#0D3B13}.why{margin:10px 0 0;border:1px solid #C9DCC4;border-left:4px solid #1B5E20;background:#F4F9F2;padding:8px 12px;font-size:12px;color:#0D3B13;break-inside:avoid;page-break-inside:avoid}.why b{display:block;margin-bottom:3px}.why ul{margin:3px 0 5px;padding-left:18px}.why li{margin:1px 0}.big td{background:#1B5E20;color:#fff;font-size:14px;font-weight:700}'+
       'h2{break-after:avoid;font-size:14px;color:#1B5E20;border-bottom:2px solid #7CB342;padding-bottom:3px;margin:16px 0 6px}.terms{font-size:11.5px;color:#333}.terms li{margin:2px 0}'+
       '.sig{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:22px;break-inside:avoid;page-break-inside:avoid}.sig .b{border:1px solid #D7E1D4;border-radius:8px;padding:12px 14px;min-height:250px;position:relative}.sig .b h3{margin:0 0 4px;font-size:12.5px;color:#1B5E20}'+
       '.ln{border-bottom:1px solid #888;height:22px;margin-top:10px;font-size:11px;color:#777}.stamp{position:absolute;right:10px;bottom:8px;opacity:.9}.sgn{position:absolute;right:34px;bottom:30px;width:118px;height:auto;z-index:2}'+
@@ -4939,11 +4943,14 @@ var DL = (function(){
     if(!sent) h += '<div class="dr">DRAFT PREVIEW. This quotation has not been issued yet. Mark it as sent to issue it.</div><div class="wm">DRAFT</div>';
     h += '<div class="hd"><img src="'+LOGO_WHITE+'" alt="SOE"><div class="r"><h1>QUOTATION</h1></div></div><table class="pgt"><tbody><tr><td><div class="in">';
     h += '<div class="pb">'+(d.logo ? '<div class="lg"><img src="'+d.logo+'" alt=""></div>' : '')+'<div><small>Prepared for</small><b>'+xesc(d.client)+'</b></div></div><div class="g"><div class="full qno"><b>Quotation no.</b><span>'+xesc(pxRef(d,n))+'</span></div><div><b>Quotation date</b>'+fdate(date)+'</div>'+((cname||(cp&&cp.mobile)) ? '<div><b>Attention</b>'+(cname?xesc(cname):'-')+'</div><div><b>Contact phone</b>'+((cp&&cp.mobile)?xesc(cp.mobile):'-')+'</div>' : '')+'<div><b>Solution</b>AI Contact Center, '+xesc((q.pkg||"")+" package")+'</div><div><b>Valid until</b>'+fdate(valid)+' (30 days)</div><div><b>Commitment term</b>'+T+' months</div><div class="full"><b>SOE presales</b>'+xesc(ln.n)+' &middot; '+pxPhone(ln.wa)+'</div></div>';
+    (function(){ var w = (q.scopeX||{}).mn; if(!w || !(w.t>0)) return;
+      var li = [], pad = w.p - w.t, pk = xesc(q.pkg||''), B = '<b style="display:inline;margin:0">';
+      if(w.hi && w.i>0) li.push('Inbound: '+nfmt(w.ic)+' calls a day &times; '+w.sh+'% handled by AI &times; '+w.il+' min &times; '+w.dy+' days = '+B+nfmt(w.i)+' AI minutes</b>');
+      if(w.ho && w.o>0) li.push('Outbound: '+nfmt(w.oc)+' calls a day &times; '+w.ol+' min &times; '+w.dy+' days = '+B+nfmt(w.o)+' AI minutes</b>');
+      var cy = (pad >= w.p*0.1) ? ' About '+nfmt(pad)+' AI minutes may stay unused in a month. They carry into the next billing month, are used first, and stay valid for 15 days.' : '';
+      var cl = pad>=0 ? (w.a ? 'Total '+nfmt(w.t)+' AI minutes a month. '+pk+' is the smallest package that covers this.' : 'Total '+nfmt(w.t)+' AI minutes a month. The '+pk+' package was selected and covers this.')+cy : 'Total '+nfmt(w.t)+' AI minutes a month. This is '+nfmt(-pad)+' above the package. The extra minutes are billed at the extra-minute rate below.';
+      h += '<div class="why"><b>Why the '+pk+' package ('+nfmt(w.p)+' AI minutes)</b>Based on the requirements confirmed by the customer:<ul>'+li.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>'+B+cl+'</b></div>'; })();
     h += '<h2>Charges (SAR'+(vat?', excluding VAT':', excluding VAT')+')</h2><table>'+body+'</table>';
-    (function(){ var z = cust.sz||{}, aiIn = Math.round((+z["in"]||0)*(+z.share||0)/100), o = +z.out||0, dy = +z.days||0, bits = [];
-      if(!(q.usagePrice>0) || !dy || (!aiIn && !o)) return;
-      if(aiIn) bits.push(aiIn+" AI-handled inbound call"+(aiIn>1?"s":"")); if(o) bits.push(o+" outbound call"+(o>1?"s":""));
-      h += '<p class="xr">Usage charges are an estimate based on the requirements confirmed by the customer: '+bits.join(" and ")+' a day, over '+dy+' working days. They are billed on actual use.</p>'; })();
     var qA = q.onePrice||0, qB = q.recPrice||0, qC = q.usagePrice||0, qM = qB+qC, qT = qA+qM*T;
     function vtr(lbl,x,cls){ var v = Math.round(x*0.15); return '<tr class="'+(cls||'')+'"><td>'+lbl+'</td><td class="r">'+sar2(x)+' SAR</td><td class="r">'+sar2(v)+' SAR</td><td class="r">'+sar2(x+v)+' SAR</td></tr>'; }
     h += '<h2>Summary and VAT</h2><table class="vt"><tr><th>Charge</th><th class="r">Excl. VAT</th><th class="r">VAT 15%</th><th class="r">Incl. VAT</th></tr>'+
@@ -4952,8 +4959,8 @@ var DL = (function(){
       vtr('C. Usage estimate per month, billed on actual use',qC,'tot')+
       vtr('Monthly bill estimate (B + C)',qM,'tot')+
       vtr('Estimated contract value, '+T+' months',qT,'big')+'</table>';
-    if(q.xRate) h += '<p class="xr">Extra minutes beyond the allowance: <b>'+q.xRate+' halalas per minute</b>, including VAT.</p>';
-    h += '<h2>Commercial and billing terms</h2><ul class="terms"><li>The contract is between the customer and SOE. Minimum commitment is 3 months.</li><li>Commitment discount on monthly charges: 6 months 5%, 12 months 10%. This quotation is for '+T+' months.</li><li>One-time charges (A) are due immediately after contract signing.</li><li>Monthly charges are invoiced in advance each month from the go-live date.</li><li>Usage charges are invoiced after use, at the actual quantity, on the same monthly invoice.</li><li>Package minutes do not roll over to the next month.</li><li>Monthly charges (B) and usage charges (C) are due within 7 calendar days from the invoice date. Calendar days include weekends and public holidays.</li>'+(q.xRate?'<li>Usage beyond the allowance is agreed in advance and billed at the flat per-minute rate of '+q.xRate+' halalas per minute, including VAT.</li>':'')+'<li>This offer is valid for thirty days from the issue date on the cover, and is subject to a signed service agreement.</li><li>This agreement may be extended for a further term by mutual written agreement of both parties. Either party may request the extension at least one month before the end of the current term. The charges for the extension term will be agreed at that time.</li></ul>';
+    if(q.xRate) h += '<p class="xr">Extra AI minutes beyond the allowance: <b>'+q.xRate+' halalas per minute</b>, including VAT. AI minutes are the minutes the AI agent spends on calls.</p>';
+    h += '<h2>Commercial and billing terms</h2><ul class="terms"><li>The contract is between the customer and SOE. Minimum commitment is 3 months.</li><li>Commitment discount on monthly charges: 6 months 5%, 12 months 10%. This quotation is for '+T+' months.</li><li>One-time charges (A) are due immediately after contract signing.</li><li>Monthly charges are invoiced in advance each month from the go-live date.</li><li>Usage charges are invoiced after use, at the actual quantity, on the same monthly invoice.</li><li>Unused package AI minutes at the end of a billing month carry over to the next billing month. Carried minutes are used first. They stay valid for 15 days from the start of that billing month. After 15 days, any remaining carried minutes expire.</li>'+(((q.scopeX||{}).mn||{}).ho ? '<li>Telecom carrier charges for outbound calls are not included in this quotation. The customer pays them directly to its own carrier.</li>' : '')+'<li>Monthly charges (B) and usage charges (C) are due within 7 calendar days from the invoice date. Calendar days include weekends and public holidays.</li>'+(q.xRate?'<li>Usage beyond the allowance is agreed in advance and billed at the flat per-minute rate of '+q.xRate+' halalas per minute, including VAT.</li>':'')+'<li>This offer is valid for thirty days from the issue date on the cover, and is subject to a signed service agreement.</li><li>This agreement may be extended for a further term by mutual written agreement of both parties. Either party may request the extension at least one month before the end of the current term. The charges for the extension term will be agreed at that time.</li></ul>';
     h += '<div class="sig"><div class="b"><h3>For SOE</h3><div class="ln">Hassan Pervaiz</div><div class="ln">Senior Manager - Enterprise Solutions &amp; Implementation</div><div class="ln">Date: '+fdate(date)+'</div><div class="stamp">'+pxStamp(fdate(date))+'</div><img class="sgn" src="'+SIG_PNG+'" alt="Signature"></div><div class="b"><h3>Accepted for '+xesc(d.client)+'</h3><div class="ln">Name and title</div><div class="ln">Signature</div><div class="ln">Date and company stamp</div></div></div>';
     h += '</div></td></tr></tbody><tfoot><tr><td><div class="ft"><b>Quotation No. '+xesc(pxRef(d,n))+'</b> &middot; SOE, Smart Orientation for Communications and Information Technology, Riyadh, Kingdom of Saudi Arabia. This quotation is confidential and prepared for '+xesc(d.client)+'.</div></td></tr></tfoot></table></div></body></html>';
     return h;
