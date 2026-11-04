@@ -1848,7 +1848,7 @@ function model(){
   var mk = 1 + num("mkRec",0)/100;
   var mk1 = 1 + num("mkOne",0)/100;
   var recPrice = recList * mk;
-  var onePrice = oneList * mk1;
+  var onePrice = O.reduce(function(t,o){ return t + Math.round((o[1]||0)*mk1); }, 0);
   var billed = 12 - monthsFree;
   var recYearList = recPrice * 12;
   var recYearNet  = recPrice * billed;
@@ -2236,7 +2236,9 @@ function qxCalc(m){
   m.R.forEach(function(r){ if(USAGE_RE.test(r[0])) uL += r[1]; else fL += r[1]; });
   var std = STD_DISC[commitTerm], ov = (document.getElementById("discOverride")||{}).value;
   var disc = (ov!=="" && ov!=null && !isNaN(parseFloat(ov))) ? parseFloat(ov) : std;
-  var fixedP = fL*mkv, usageP = uL*mkv, discAmt = fixedP*disc/100, fixedNet = fixedP-discAmt;
+  var fixedP = 0, usageP = 0;
+  m.R.forEach(function(r){ var v = Math.round(r[1]*mkv); if(USAGE_RE.test(r[0])) usageP += v; else fixedP += v; });
+  var discAmt = Math.round(fixedP*disc/100), fixedNet = fixedP-discAmt;
   var eff = fL>0 ? (fixedNet-fL)/fL*100 : 0, min = num("minMargin",10);
   var refFee = num("refFee",0), vat = m.vatOn ? (m.onePrice+fixedNet)*VAT_RATE : 0;
   var contract = m.onePrice + (fixedNet+usageP)*commitTerm, cost = m.oneList + (fL+uL)*commitTerm;
@@ -2252,12 +2254,12 @@ function qxRender(m){
   $("yearTotal").textContent = sar(q.contract + q.vat*t);
   $("yearSave").textContent = q.disc>0 ? q.disc+"% commitment discount on monthly charges: client saves "+sar(q.discAmt*t)+" over "+t+" months" : "No commitment discount";
   $("moOne").textContent = m.onePrice>0 ? nfmt(m.onePrice) : "0"; $("moMonth").textContent = nfmt(q.fixedNet); $("moYear").textContent = nfmt(q.contract);
-  var mk = 1+num("mkRec",0)/100, h = "";
+  var mk = 1+num("mkRec",0)/100, mk1 = 1+num("mkOne",0)/100, h = "";
   h += '<div class="line sec"><span class="n">A. One-time charges, payable upfront</span><span class="v">'+sar(m.onePrice)+'</span></div>';
-  m.O.forEach(function(o){ var w = o[1]===0; h += '<div class="line'+(w?' waived':'')+'"><span class="n">'+esc(o[0])+(o[2]?'<small>'+esc(o[2])+'</small>':'')+'</span><span class="v">'+sar(m.implWaived && o[0].indexOf("Implementation")>=0 ? IMPL_FEE : o[1])+'</span></div>'; });
+  m.O.forEach(function(o){ var w = o[1]===0; h += '<div class="line'+(w?' waived':'')+'"><span class="n">'+esc(o[0])+(o[2]?'<small>'+esc(o[2])+'</small>':'')+'</span><span class="v">'+sar(Math.round((m.implWaived && o[0].indexOf("Implementation")>=0 ? IMPL_FEE : o[1])*mk1))+'</span></div>'; });
   if(!m.O.length) h += '<div class="line"><span class="n">None</span><span class="v">—</span></div>';
   h += '<div class="line sec"><span class="n">B. Monthly charges, billed in advance</span><span class="v">'+sar(q.fixedNet)+'</span></div>';
-  m.R.forEach(function(r){ if(!USAGE_RE.test(r[0])) h += '<div class="line"><span class="n">'+esc(r[0])+(r[2]?'<small>'+esc(r[2])+'</small>':'')+'</span><span class="v">'+sar(r[1]*mk)+'</span></div>'; });
+  m.R.forEach(function(r){ if(!USAGE_RE.test(r[0])) h += '<div class="line"><span class="n">'+esc(r[0])+(r[2]?'<small>'+esc(r[2])+'</small>':'')+'</span><span class="v">'+sar(Math.round(r[1]*mk))+'</span></div>'; });
   if(q.disc>0) h += '<div class="line"><span class="n">Commitment discount, '+q.disc+'% ('+t+" months)"+'</span><span class="v">− '+sar(q.discAmt)+'</span></div>';
   h += '<div class="line sec"><span class="n">C. Usage charges, billed on actual usage</span><span class="v">'+sar(q.usageP)+' est.</span></div>';
   var nu = 0;
@@ -2274,7 +2276,7 @@ function qxRender(m){
     "One-time charges (A) are due immediately after contract signing. Monthly charges are invoiced in advance each month from go-live; billing cycles run from the go-live date. "+
     "Usage charges are invoiced monthly after use, at the actual quantity, on the same invoice. Package minutes do not roll over. Monthly charges (B) and usage charges (C) are due within 7 calendar days from the invoice date. Calendar days include weekends and public holidays. "+
     "Usage beyond the allowance is agreed in advance and billed at the flat per-minute rate of "+q.xRate+" halalas per minute, including VAT. "+
-    "Prices in SAR"+(m.vatOn?", VAT included as shown":", excluding VAT")+". This offer is valid for thirty days from the issue date on the cover, and is subject to a signed service agreement.";
+    "Prices in SAR"+(m.vatOn?", VAT included as shown":", excluding VAT")+". This offer is valid for thirty days from the issue date on the cover, and is subject to a signed service agreement. It may be extended for a further term by mutual written agreement, if requested at least one month before the end of the current term.";
   var mh = '<div class="line"><span class="n">700Apps cost over '+t+' months</span><span class="v">'+sar(q.cost)+'</span></div>';
   mh += '<div class="line"><span class="n">Customer price over '+t+' months, before VAT</span><span class="v">'+sar(q.contract)+'</span></div>';
   if(q.refFee>0) mh += '<div class="line"><span class="n">Referral fee paid out</span><span class="v">− '+sar(q.refFee)+'</span></div>';
@@ -2804,7 +2806,112 @@ var ARCH = (function(){
     out += text(W-28,H-20,"Prepared by SOE Presales",10,700,C.deep,"end");
     return { body:out, h:H };
   }
-  function svg(D){ var r = render(D); return '<svg viewBox="0 0 1123 '+r.h+'" xmlns="http://www.w3.org/2000/svg" font-family="Cairo, Arial, sans-serif">'+r.body+'</svg>'; }
+  /* ---- customer-view architecture, drawn as SVG (same three columns as the customer page) ---- */
+  function renderC(D){
+    var W = 1123, out = "", human = D.human || {on:false};
+    var extHuman = human.on && (human.where==="external" || human.where==="both");
+    out += rect(0,0,W,68,0,C.deep) + rect(0,68,W,4,0,C.lime);
+    out += '<image href="'+LOGO_WHITE+'" x="28" y="14" height="40" width="'+(40*480/205)+'" preserveAspectRatio="xMidYMid meet"/>';
+    out += '<line x1="136" y1="16" x2="136" y2="52" stroke="rgba(255,255,255,.3)"/>';
+    out += text(152,32,"AI Contact Center — Solution Architecture",17,700,"#fff");
+    out += text(152,52,"The same design the customer sees",11.5,400,"#C6E2CB");
+    out += text(W-28,32,D.client,12.5,700,"#fff","end");
+    out += text(W-28,52,D.date,11,400,"#C6E2CB","end");
+    var ax = 28, aw = 230, bx = ax+aw+22, cx = W-28-aw, bw = cx-22-bx, topY = 104;
+    var ph = D.phone || {}, noun = "customers";
+    var phLabel = ph.type==="mobile" ? "Your mobile numbers" : ph.type==="sip" ? "Your SIP lines" : "SOE phone lines";
+    var phSub = (ph.lines||1)+" connected";
+    /* middle column geometry */
+    var MAXR = 7, padd = 14, agH = 62, rowH = 31, fw = (bw-2*padd-10)/2;
+    function cap(list){ return list.length>MAXR ? list.slice(0,MAXR-1) : list; }
+    var inL = cap(D.inbound), outL = cap(D.outbound);
+    var inX = D.inbound.length-inL.length, outX = D.outbound.length-outL.length;
+    var rows = Math.max(inL.length+(inX?1:0), outL.length+(outX?1:0), 1);
+    var flH = 32 + rows*rowH + 6;
+    var tiles = [];
+    if(D.native && D.native.length) tiles.push({ic:"database", t:D.native.join(", "), s:"Built into the platform. Nothing to connect", c:C.rule, bg:C.soft, fg:C.deep});
+    if(D.kb) tiles.push({ic:"book", t:"Knowledge base", s:"The customer's approved answers", c:C.rule, bg:C.soft, fg:C.deep});
+    if(D.whatsapp) tiles.push({ic:"chat", t:"WhatsApp messaging", s:D.waMsgs>0 ? "About "+D.waMsgs.toLocaleString("en-US")+" messages a month" : "Customer's own account", c:"#25D36688", bg:"#DCFCE7", fg:"#15803D"});
+    tiles.push({ic:"layers", t:"Dashboard: "+(ph.dashUsers||1)+" user"+((ph.dashUsers||1)>1?"s":""), s:ph.dashCustom ? "Standard view, plus up to 7 custom charts" : "Standard view", c:"#2563EB88", bg:"#DBEAFE", fg:"#2563EB"});
+    if(human.on) tiles.push({ic:"users", t:(human.agents||0)+" of their staff", s:"Receive handovers with the full call context", c:"#F59E0B99", bg:"#FEF3C7", fg:"#B45309"});
+    var tw = (bw-2*padd-10)/2, th = 52, trows = Math.ceil(tiles.length/2);
+    var tilesH = trows*th + (trows-1)*8;
+    var boxH = padd + agH + 10 + flH + 10 + tilesH + padd;
+    /* right column */
+    var rt = [];
+    D.systems.forEach(function(s){ rt.push({ic:SYS_ICON[s.key]||"plug", t:s.name, s:s.custom?"Custom integration to confirm":"Secure API connection", c:"#2563EB55"}); });
+    if(D.whatsapp) rt.push({ic:"chat", t:"WhatsApp Business", s:"Send and receive messages", c:"#25D36688", wa:true});
+    if(extHuman) rt.push({ic:"users", t:human.extName||"Contact center system", s:"Escalation to the customer's agents", c:"#F59E0B99", am:true});
+    var rtH = rt.length ? rt.length*62 : 62;
+    var leftH = 3*62 + 2*24 - (D.whatsapp?0:86);
+    var mainH = Math.max(boxH, rtH, leftH);
+    var mainY = topY + 14;
+    out += text(ax,topY,"1   CUSTOMER CALLS",10.5,800,C.deep,"start",'letter-spacing="1.2"');
+    out += text(bx,topY,"2   YOUR AI CONTACT CENTER",10.5,800,C.deep,"start",'letter-spacing="1.2"');
+    out += text(cx,topY,"3   YOUR BUSINESS SYSTEMS",10.5,800,C.deep,"start",'letter-spacing="1.2"');
+    /* left */
+    var lt = mainY + (mainH-leftH)/2, ly = lt;
+    function node(x,y,w,h,ic,t,s,o){ o = o||{}; var r = rect(x,y,w,h,12,"#fff",o.c||C.rule,1.5);
+      r += rect(x+10,y+(h-34)/2,34,34,9,o.bg||C.soft) + icon(ic,x+10+8,y+(h-34)/2+8,18,o.fg||C.deep,1.8);
+      r += text(x+54,y+h/2-2,trunc(t,Math.floor((w-64)/6.4)),12.5,700,C.ink) + text(x+54,y+h/2+13,trunc(s,Math.floor((w-64)/5.2)),9.5,400,C.mute); return r; }
+    out += node(ax,ly,aw,62,"users","Their "+noun,"Call by phone"+(D.whatsapp?" or WhatsApp":"")); ly += 62;
+    out += text(ax+aw/2,ly+17,"↕",16,700,C.lime,"middle"); ly += 24;
+    out += node(ax,ly,aw,62,"phone",phLabel,phSub); ly += 62;
+    if(D.whatsapp){ out += text(ax+aw/2,ly+17,"↕",16,700,C.lime,"middle"); ly += 24; out += node(ax,ly,aw,62,"chat","WhatsApp","Customers message the business"); }
+    /* middle */
+    var by = mainY + (mainH-boxH)/2;
+    out += rect(bx,by,bw,boxH,16,C.soft,"#A5D6A7",2);
+    var y = by + padd;
+    out += rect(bx+padd,y,bw-2*padd,agH,12,"#fff") + '<circle cx="'+(bx+padd+32)+'" cy="'+(y+agH/2)+'" r="19" fill="'+C.deep+'"/>' + icon("ai",bx+padd+32-11,y+agH/2-11,22,"#fff",1.8);
+    out += text(bx+padd+62,y+27,"AI Voice Agent for "+trunc(D.client,34),14,700,C.ink) + text(bx+padd+62,y+45,"Answers calls in Arabic and English, and works with the systems",10.5,400,C.mute);
+    y += agH + 10;
+    function flowBox(x,label,ic,list,extra){
+      var s = rect(x,y,fw,flH,10,"#fff") + icon(ic,x+10,y+9,13,C.deep,2) + text(x+28,y+19,label,9.5,800,C.deep,"start",'letter-spacing=".8"');
+      list.forEach(function(f,i){
+        var fy = y+32+i*rowH, mods = (f.mods||[]).map(function(m){ return m.n; }).join(", ");
+        s += '<circle cx="'+(x+16)+'" cy="'+(fy+7)+'" r="3" fill="'+C.deep+'"/>' + text(x+26,fy+11,trunc(f.code+": "+f.label,Math.floor((fw-36)/5.6)),11,600,C.ink);
+        s += text(x+26,fy+23,mods ? "→ "+trunc(mods,Math.floor((fw-40)/4.9)) : "Handled by the Voice Agent",9,400,mods?C.deep:C.mute,"start",mods?'font-weight="600"':'');
+      });
+      if(extra>0) s += text(x+26,y+32+list.length*rowH+11,"+ "+extra+" more flow"+(extra>1?"s":""),10,700,C.deep);
+      return s;
+    }
+    out += flowBox(bx+padd,"INBOUND FLOWS","arrowin",inL,inX) + flowBox(bx+padd+fw+10,"OUTBOUND FLOWS","arrowout",outL,outX);
+    y += flH + 10;
+    tiles.forEach(function(t,i){
+      var tx = bx+padd+(i%2)*(tw+10), ty = y + Math.floor(i/2)*(th+8);
+      out += node(tx,ty,tw,th,t.ic,t.t,t.s,{c:t.c,bg:t.bg,fg:t.fg});
+    });
+    /* right */
+    var rtop = mainY + (mainH-rtH)/2;
+    if(rt.length){
+      rt.forEach(function(t,i){ out += node(cx,rtop+i*62,aw,56,t.ic,t.t,t.s,{c:t.c, bg:t.wa?"#DCFCE7":t.am?"#FEF3C7":"#DBEAFE", fg:t.wa?"#15803D":t.am?"#B45309":"#2563EB"}); });
+    } else out += node(cx,rtop,aw,56,"checkc","No outside system needed","Everything runs inside the platform");
+    /* arrows between columns */
+    var midY = by + boxH/2;
+    out += '<path d="M'+(ax+aw)+' '+midY+'H'+bx+'" stroke="'+C.lime+'" stroke-width="2.5"/>' + '<path d="M'+(bx+bw)+' '+midY+'H'+cx+'" stroke="'+C.lime+'" stroke-width="2.5"/>';
+    /* banner and metrics */
+    var sy = mainY + mainH + 16, conn = D.systems.length + (D.whatsapp?1:0) + (extHuman?1:0);
+    var names = D.systems.map(function(s){return s.name;}).concat(D.whatsapp?["WhatsApp"]:[]).concat(extHuman?[human.extName||"Contact center system"]:[]);
+    out += rect(ax,sy,W-2*ax,48,12,C.soft) + text(ax+22,sy+34,String(conn),28,800,C.deep) + text(ax+60,sy+20,"Outside systems connected",12.5,700,C.ink) +
+      text(ax+60,sy+36,trunc((names.join(", ")||"None")+(D.native&&D.native.length?". Built in, nothing to connect: "+D.native.join(", "):""),170),10.5,400,C.mute);
+    var nflows = D.inbound.length + D.outbound.length;
+    var mets = [
+      { n:"~"+Math.round(D.metrics.callsAI).toLocaleString("en-US"), l:"calls handled by the Voice Agent a month" },
+      { n:"~"+Math.round(D.metrics.minutes).toLocaleString("en-US"), l:"voice minutes a month" },
+      { n:D.metrics.peak>0 ? String(D.metrics.peak) : "—", l:D.metrics.peak>0 ? "calls at the same time, busiest hour" : "calls at the same time: not entered" },
+      { n:String(ph.lines||1), l:"phone lines" },
+      { n:D.waMsgs>0 ? "~"+Math.round(D.waMsgs).toLocaleString("en-US") : String(nflows), l:D.waMsgs>0 ? "WhatsApp messages a month" : "call flows" },
+      { n:String(nflows), l:"call flows in one platform" }
+    ];
+    var mw = (W-2*ax-5*10)/6, my = sy + 62;
+    mets.forEach(function(m,i){ var x = ax+i*(mw+10);
+      out += rect(x,my,mw,62,10,C.deep) + rect(x,my,5,62,2,C.lime) + text(x+16,my+28,m.n,19,800,"#fff");
+      wrap(m.l,Math.floor((mw-26)/5.2),2).forEach(function(l,li){ out += text(x+16,my+43+li*11,l,9.5,400,"#DCEFD9"); });
+    });
+    return { body:out, h:my+62+22 };
+  }
+
+  function svg(D){ var r = renderC(D); return '<svg viewBox="0 0 1123 '+r.h+'" xmlns="http://www.w3.org/2000/svg" font-family="Cairo, Arial, sans-serif">'+r.body+'</svg>'; }
   /* ---------- vertical (portrait) version for the internal brief ---------- */
   function renderV(D){
     var W = 700, y = 0, out = "";
@@ -2939,10 +3046,21 @@ var ARCH = (function(){
 })();
 
 /* ---------- data for the documents, taken from the current answers ---------- */
+var MOD_LABEL = { booking:"Booking", crm:"CRM", ticketing:"Ticketing", erp:"ERP", billing:"Billing", payment:"Payment gateway", core:"Core system", sms:"SMS gateway", field:"Field service", esign:"E-signature", hr:"HR system", whatsapp:"WhatsApp" };
+function docMods(a, m){
+  var out = [];
+  flowSystems(a.f).forEach(function(x){
+    var ep = m.eps.filter(function(e){ return e.key===x.key; })[0];
+    out.push({ n: MOD_LABEL[x.key] || x.name, native: !!(ep && !ep.charged) });
+  });
+  if(a.job.kb) out.push({ n:"Knowledge base", native:true });
+  return out;
+}
 function docData(m){
   var inb = [], out = [], systems = [], native = [];
   activeFlows().forEach(function(a){
     var o = { code:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1), id:a.job.id, label: a.job.id==="other" ? (((a.f.name||"").trim()) || "Custom flow") : (SHORT[a.job.id] || a.job.label) };
+    o.mods = docMods(a, m);
     (a.dir==="in" ? inb : out).push(o);
   });
   m.eps.forEach(function(ep){
@@ -3276,7 +3394,7 @@ function briefHtml(m){
     '</div>';
   // Main content starts after page break
   h += '<div class="b-head"><img src="'+LOGO_WHITE+'" alt="SOE"><div><h1>Internal Requirements Brief</h1><p>AI Contact Center — scope and pricing validation</p></div><div class="b-meta"><b>'+esc(D.client)+'</b><br>'+esc(D.date)+'<br>Prepared by: '+esc(plLine)+'</div></div>';
-  h += '<div class="b-intro"><b>Audience:</b> the 700Apps technical team, supported by SOE Presales, who collect the customer inputs listed below. <b>Purpose:</b> confirm that this scope can be delivered, and validate the pricing against it. <b>Accuracy:</b> this estimate is based on high-level requirements. After detailed requirements, the final cost may differ by up to 15 to 20%.</div>';
+  h += '<div class="b-intro"><b>Audience:</b> the 700Apps technical team, supported by SOE Presales, who collect the customer inputs listed below. <b>Purpose:</b> confirm that this scope can be delivered, and validate the pricing against it.</div>';
 
   // Executive summary (industry + goal + context)
   var execSum = briefSummary(m, D);
@@ -3286,16 +3404,17 @@ function briefHtml(m){
     h += '<h2>1. Executive summary</h2><p class="b-note">No industry selected — executive summary will appear here when an industry is chosen in the calculator.</p>';
   }
 
-  h += '<h2>2. Pricing summary</h2><div class="b-kpis">'+
+  h += '<h2>2. Solution design</h2><p class="b-note">This is the same drawing the customer sees. Under each flow, the arrow shows which module it uses.</p><div class="b-arch">'+ARCH.svg(D)+'</div>';
+
+  h += '<h2>3. Pricing summary</h2><div class="b-kpis">'+
     '<div><span>'+sar(m.recList)+'</span>Monthly, vendor list</div>'+
     '<div><span>'+sar(m.oneList)+'</span>One-time, vendor list</div>'+
     '<div><span>'+esc(m.voicePkg.name)+'</span>Voice package ('+nfmt(m.voicePkg.mins)+' min)</div>'+
     '<div><span>'+m.endpoints+'</span>Endpoint connections</div>'+
     '<div><span>'+(D.inbound.length+D.outbound.length)+'</span>Call flows</div></div>';
 
-  h += '<div class="b-arch">'+ARCH.svg(D)+'</div>';
 
-  h += '<h2>3. Telephony and volumes</h2>'+tbl(["Item","Requirement"],[
+  h += '<h2>4. Telephony and volumes</h2>'+tbl(["Item","Requirement"],[
     ["Call direction", dirName],
     ["Phone setup", m.isSip ? "Customer's own digital telephony (SIP). 1 Grandstream device per deployment."
       : m.isMobileOwn ? "Customer's own mobile numbers: "+m.mobileCount+" number"+(m.mobileCount>1?"s":"")+". 1 Grandstream device per deployment. No concurrent calls."
@@ -3314,18 +3433,19 @@ function briefHtml(m){
   var fr = [];
   activeFlows().forEach(function(a, i){
     var n = (a.dir==="in"?"IN-":"OUT-") + (a.idx+1);
-    var syss = flowSystems(a.f).map(function(x){ return esc(x.name)+(x.custom?" (custom)":""); });
-    if(a.job.kb) syss.push("Knowledge base");
-    fr.push([n, a.dir==="in"?"Inbound":"Outbound", esc(a.job.id==="other" ? (((a.f.name||"").trim())||"Custom flow") : a.job.label), syss.length ? syss.join("<br>") : "No external system"]);
+    var syss = docMods(a, m).map(function(x){ return esc(x.n)+(x.native?" (built in)":" (connect)"); });
+    fr.push([n, a.dir==="in"?"Inbound":"Outbound", esc(a.job.id==="other" ? (((a.f.name||"").trim())||"Custom flow") : a.job.label), syss.length ? syss.join("<br>") : "Voice Agent only"]);
   });
-  h += '<h2>4. Flow register</h2>'+(fr.length ? tbl(["ID","Direction","Flow","Systems used"],fr,["9%","14%","37%","40%"]) : '<p class="b-note">No flows entered.</p>');
+  h += '<h2>5. Flow register</h2>'+(fr.length ? tbl(["ID","Direction","Flow","Modules used"],fr,["9%","14%","37%","40%"]) : '<p class="b-note">No flows entered.</p>');
 
   var er = m.eps.map(function(ep){
     var type = ep.key==="whatsapp" ? "WhatsApp connection" : ep.custom ? "Custom integration" : ep.mode==="native" ? "700Apps built-in" : ep.mode==="acquire" ? "External, customer must acquire" : "External, customer's own";
     return [esc(ep.name), type, esc(ep.uses.join("; ")), ep.charged ? "250" : "0"];
   });
-  h += '<h2>5. Endpoint register</h2>'+(er.length ? tbl(["System","Type","Used by","SAR a month"],er,["27%","22%","41%","10%"]) : '<p class="b-note">No endpoints.</p>')+
-    '<p class="b-note">A system used by several flows is one endpoint. Unlimited workflows per endpoint.</p>';
+  if(m.kbOn){ var kbU = activeFlows().filter(function(a){ return a.job.kb; }).map(function(a){ return (a.dir==="in"?"IN-":"OUT-")+(a.idx+1)+" "+(a.job.id==="other"?"Custom flow":(SHORT[a.job.id]||a.job.label)); }); er.push(["Knowledge base","700Apps built-in",esc(kbU.length ? kbU.join("; ") : "Answers from the customer's documents"),"0"]); }
+  if(m.hOn) er.push(["Handover to staff","700Apps built-in",esc(m.hWhere==="external" ? "Escalation in "+humanExtName() : m.agents+" agent"+(m.agents!==1?"s":"")+" on the platform"),"0"]);
+  h += '<h2>6. Built in or connected</h2>'+(er.length ? tbl(["System","Type","Used by","SAR a month"],er,["27%","22%","41%","10%"]) : '<p class="b-note">Nothing to connect.</p>')+
+    '<p class="b-note">Only the rows with 250 are endpoint connections. A system used by several flows is one endpoint. Unlimited workflows per endpoint. Rows marked built-in need no connection.</p>';
 
   var sv = [];
   sv.push(["Knowledge base", m.kbOn ? "1 knowledge base" : "Not included"]);
@@ -3348,13 +3468,13 @@ function briefHtml(m){
     }
   }
   sv.push(["CRM", crmDesc]);
-  h += '<h2>6. Services and add-ons</h2>'+tbl(["Service","Requirement"],sv,["28%","72%"]);
+  h += '<h2>7. Services and add-ons</h2>'+tbl(["Service","Requirement"],sv,["28%","72%"]);
 
   var pr = [];
   m.R.forEach(function(r){ pr.push([esc(r[0]), esc(r[2]||""), sar(r[1]), ""]); });
   m.O.forEach(function(r){ var amt = (r[1]===0 && r[0].indexOf("Implementation")>=0) ? IMPL_FEE : r[1]; pr.push([esc(r[0]), esc(r[2]||""), "", sar(amt)]); });
   pr.push(['<b>Total, vendor list</b>', '', '<b>'+sar(m.recList)+'</b>', '<b>'+sar(m.oneList + (m.implWaived ? IMPL_FEE : 0))+'</b>']);
-  h += '<h2>7. Pricing to validate</h2>'+tbl(["Line","Basis","Monthly","One-time"],pr,["30%","40%","15%","15%"])+
+  h += '<h2>8. Pricing to validate</h2>'+tbl(["Line","How the rate is built","Monthly","One-time"],pr,["30%","40%","15%","15%"])+
     '<p class="b-note">Vendor list prices before any partner markup. VAT excluded. Commercial concessions and margin are handled separately by SOE.</p>';
 
   // Additional usage minutes explanation
@@ -3391,10 +3511,10 @@ function briefHtml(m){
     var box = checked ? '☑' : '<input type="checkbox" class="b-chk" onclick="this.previousValue=this.checked">';
     return [String(i+1), esc(p.pt), esc(p.why), esc(p.owner), esc(p.cust), box];
   });
-  h += '<h2>8. Open points for technical input</h2>'+tbl(["#","Question or validation","Why it matters","Owner","Info required from customer","Done"],op,["4%","29%","22%","9%","30%","6%"])+
+  h += '<h2>9. Open points for technical input</h2>'+tbl(["#","Question or validation","Why it matters","Owner","Info required from customer","Done"],op,["4%","29%","22%","9%","30%","6%"])+
     '<p class="b-note">Owner is the party who answers. For every point, SOE Presales collects the information in the right-hand column from the customer. ☑ = already addressed by this estimate; unchecked boxes are clickable.</p>';
 
-  h += '<h2>9. Assumptions in this estimate</h2><ul class="b-list">'+m.A.map(function(a){ return '<li>'+esc(a)+'</li>'; }).join("")+'</ul>';
+  h += '<h2>10. Assumptions in this estimate</h2><ul class="b-list">'+m.A.map(function(a){ return '<li>'+esc(a)+'</li>'; }).join("")+'</ul>';
 
   // 10. Next steps
   var respBy = D.responseBy || "TBD";
@@ -4079,6 +4199,21 @@ var DL = (function(){
       if(verPatch){ (o._vers||[]).forEach(function(v){ if(v.n===verPatch.n) Object.assign(v, verPatch.data); }); }
       o.ms = Date.now(); lsPut(all); return Promise.resolve();
     },
+    /* delete one unsent version; later versions move down by one number */
+    delVersion: function(id, n, vs){
+      var asc = vs.slice().sort(function(a,b){ return a.n-b.n; }), max = asc[asc.length-1].n;
+      var later = asc.filter(function(v){ return v.n>n; });
+      if(live){
+        var ref = db.collection("deals").doc(id), b = db.batch();
+        later.forEach(function(v){ b.set(ref.collection("versions").doc(String(v.n-1)), Object.assign({}, v, {n:v.n-1})); });
+        b.delete(ref.collection("versions").doc(String(max)));
+        b.update(ref, {version:max-1, updatedAt:TS()});
+        return b.commit();
+      }
+      var all = lsAll(), o = all[id]; if(!o) return Promise.reject(new Error("Deal not found"));
+      o._vers = (o._vers||[]).filter(function(v){ return v.n!==n; }).map(function(v){ return v.n>n ? Object.assign({}, v, {n:v.n-1}) : v; });
+      o.version = max-1; o.ms = Date.now(); lsPut(all); return Promise.resolve();
+    },
     /* new link code: move the customer link to a new address */
     moveShare: function(id, oldSlug, newSlug, share, patch){
       if(live){
@@ -4208,6 +4343,7 @@ var DL = (function(){
       var o = { id:a.job.id==="other" ? (a.dir==="in"?"other":"other_out") : a.job.id, code:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1),
         label:a.job.id==="other" ? (((a.f.name||"").trim()) || "Custom flow") : (SHORT[a.job.id] || a.job.label), sys:sy };
       var ov = ((($("cwf_"+a.dir+"_"+a.idx)||{}).value)||"").trim(); if(ov) o.label = ov;
+      o.mods = docMods(a, m);
       (a.dir==="in" ? inb : out).push(o);
     });
     var sysNames = [], nativeNames = [];
@@ -4234,19 +4370,23 @@ var DL = (function(){
       ovrWhy:(($("ovrWhy")||{}).value||"").trim(), discWhy:(($("discWhy")||{}).value||"").trim(), vendorYear1:Math.round(qq.cost), soeMarginYear1:Math.round(qq.margin) };
   }
   function custLines(m){
-    var q = qxCalc(m), mk = 1+num("mkRec",0)/100, r = [];
+    var q = qxCalc(m), mk = 1+num("mkRec",0)/100, mk1 = 1+num("mkOne",0)/100, r = [];
     r.push({s:1,n:"A. One-time charges, payable upfront",v:Math.round(m.onePrice)});
-    m.O.forEach(function(o){ r.push({n:o[0],note:o[2]||"",v:Math.round(m.implWaived && o[0].indexOf("Implementation")>=0 ? IMPL_FEE : o[1])}); });
+    m.O.forEach(function(o){ r.push({n:o[0],note:(m.implWaived && o[0].indexOf("Implementation")>=0) ? "Waived by SOE" : (o[2]||""),v:Math.round((o[1]||0)*mk1)}); });
     r.push({s:1,n:"B. Monthly charges, billed in advance",v:Math.round(q.fixedNet)});
     m.R.forEach(function(x){ if(!USAGE_RE.test(x[0])) r.push({n:x[0],note:x[2]||"",v:Math.round(x[1]*mk)}); });
-    if(q.disc>0) r.push({n:"Commitment discount, "+q.disc+"% ("+q.term+" months)",note:"",v:-Math.round(q.discAmt)});
+    if(q.disc>0) r.push({n:"Commitment discount, "+q.disc+"% ("+q.term+" months)",note:"",v:-q.discAmt});
     r.push({s:1,n:"C. Usage charges, billed on actual usage",v:Math.round(q.usageP)});
     m.R.forEach(function(x){ if(USAGE_RE.test(x[0])){ var note = x[0]==="Inbound sentiment analysis" ? "Optional add-on, AI-handled calls only" : x[0]==="Outbound calls" ? "Includes sentiment analysis. "+(x[2]||"") : (x[2]||""); r.push({n:x[0],note:note,v:Math.round(x[1]*mk)}); } });
     return r;
   }
   function quoteSnap(m){ var qq = qxCalc(m); return { onePrice:Math.round(m.onePrice), recPrice:Math.round(qq.fixedNet), usagePrice:Math.round(qq.usageP), xRate:qq.xRate, term:qq.term, yearTotal:Math.round(qq.contract), pkg:m.voicePkg.name, flows:activeFlows().length, vatOn:!!m.vatOn,
       qlines:custLines(m),
-      vlines:m.R.map(function(r){ return {n:r[0], v:Math.round(r[1]), k:(USAGE_RE.test(r[0])?"u":"m")}; }).concat(m.O.map(function(o){ return {n:o[0], v:Math.round(o[1]), k:"o"}; })) }; }
+      vlines:m.R.map(function(r){ return {n:r[0], v:Math.round(r[1]), k:(USAGE_RE.test(r[0])?"u":"m"), f:String(r[2]||"").slice(0,110)}; }).concat(m.O.map(function(o){ return {n:o[0], v:Math.round(o[1]), k:"o", f:String(o[2]||"").slice(0,110)}; })),
+      scopeX:{ flows:(function(){ var o=[]; activeFlows().forEach(function(a){ o.push({c:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1), n:a.job.id==="other" ? (((a.f.name||"").trim())||"Custom flow") : (SHORT[a.job.id]||a.job.label), m:docMods(a,m).map(function(x){ return {n:x.n, x:x.native?1:0}; })}); }); return o; })(),
+        native:docData(m).native.concat(m.kbOn?["Knowledge base"]:[]), ext:docData(m).systems.map(function(x){ return x.name; }).concat(m.waMode!=="none"?["WhatsApp Business"]:[]),
+        lad:{ v:{ t:VOICE.map(function(x){ return {n:x.name,m:x.mins,s:x.sar}; }), p:m.vIdx, need:Math.round(m.totalMinsMonth) }, w:{ t:WMSGS.map(function(x,i){ return {n:VOICE_NAMES[i],m:x,s:WA.sar[i]}; }), p:m.wIdx, need:Math.round(m.msgs||0) } },
+        usageCalls:{ inb:Math.round(m.sentimentCalls||0), out:Math.round(m.outCalls||0) } } }; }
 
   /* ---------- state ---------- */
   var deals = [], events = [], view = "list", curId = null, tab = "ov", filt = "all", lf = "all", q = "";
@@ -4378,15 +4518,16 @@ var DL = (function(){
     if(p.status==="sent"){
       var lk = p.key ? pxBase()+"#"+p.key : "";
       h += '<div class="act-sug" style="background:#EDE9FE;border-color:#C4B5FD"><b>'+(d._reply?'700Apps replied':'Waiting for 700Apps')+'</b> &middot; round R'+p.round+' sent '+fdate(p.sentAt)+'.</div>';
-      if(lk) h += '<div class="dl-meta" style="margin-top:8px">Partner link: <span class="act-link" style="display:inline-block">'+xesc(lk)+'</span></div><div style="margin-top:6px"><button type="button" class="sm" data-pmsg="1">Show the message again (copy, email, WhatsApp)</button></div>';
+      if(lk) h += '<div class="dl-meta" style="margin-top:8px">Partner link: <span class="act-link" style="display:inline-block">'+xesc(lk)+'</span></div><div style="margin-top:6px"><button type="button" class="sm" data-pmsg="1">Show the message again (copy, email, WhatsApp)</button> <button type="button" class="sm pri" data-psend="1">Regenerate the link</button></div><div class="dl-meta" style="margin-top:4px">Regenerate makes a new link (round R'+(p.round+1)+') with the current scope and rates. The old link stops working.</div>';
       if(d._reply){
         var pr = d._reply.p||{}, ans = pr.answers||[], chg = ans.filter(function(a){ return a.v==="chg"; });
-        h += '<div class="act-sug"><b>Reply from '+xesc(pr.by||"700Apps")+'</b> &middot; valid until '+(pr.valid?fdate(pr.valid):"not set")+'<br>'+(ans.length-chg.length)+' line(s) confirmed, '+chg.length+' change(s) proposed.'+chg.map(function(a){ return '<br>'+xesc(a.n)+': '+xesc(a.from)+' to '+xesc(a.to)+' SAR. '+xesc(a.why||""); }).join("")+(pr.note?'<br>Note: '+xesc(pr.note):'')+'<br><button type="button" class="sm pri" data-px="pacc">Accept the reply and move to Partner validated</button></div>';
+        h += '<div class="act-sug"><b>Reply from '+xesc(pr.by||"700Apps")+'</b> &middot; valid until '+(pr.valid?fdate(pr.valid):"not set")+'<br>'+(ans.length-chg.length)+' line(s) confirmed, '+chg.length+' change(s) proposed.'+chg.map(function(a){ return '<br>'+xesc(a.n)+': '+xesc(a.from)+' to '+xesc(a.to)+' SAR. '+xesc(a.why||""); }).join("")+(pr.note?'<br>Note: '+xesc(pr.note):'')+(pr.qa&&pr.qa.length ? '<br><b>Answers to your questions</b>'+pr.qa.map(function(x){ return '<br>'+xesc(x.q)+': '+xesc(x.a||'no answer'); }).join('') : '')+'<br><button type="button" class="sm pri" data-px="pacc">Accept the reply and move to Partner validated</button></div>';
       }
     }
-    if(p.status==="validated") h += '<div class="act-lock"><b>Validated by 700Apps</b> &middot; round R'+p.round+' &middot; valid until '+fdate(p.valid)+'. Pricing is confirmed for the scope as it stands.</div><div style="margin-top:8px"><button type="button" class="sm" data-psend="1">Send a new round (R'+(p.round+1)+') if the scope changed</button></div>';
+    if(p.status==="validated") h += '<div class="act-lock"><b>Validated by 700Apps</b> &middot; round R'+p.round+' &middot; valid until '+fdate(p.valid)+'. Pricing is confirmed for the scope as it stands.'+(p.qa&&p.qa.length ? '<br><b>Answers to your questions</b>'+p.qa.map(function(x){ return '<br>'+xesc(x.q)+': '+xesc(x.a||'no answer'); }).join('') : '')+'</div><div style="margin-top:8px"><button type="button" class="sm" data-psend="1">Send a new round (R'+(p.round+1)+') if the scope changed</button></div>';
     if(p.props && p.props.length) h += '<div class="act-sug"><b>700Apps proposes '+p.props.length+' change'+(p.props.length>1?'s':'')+'</b><br>'+p.props.map(function(x){ return xesc(x.name)+': '+xesc(x.from)+' to '+xesc(x.to)+' SAR. '+xesc(x.why); }).join('<br>')+'<br>They change nothing until you act. Update the calculator, then send a new round if needed.<br><button type="button" class="sm pri" data-pres="1">Mark as handled</button></div>';
     if(p.prop && !p.props) h += '<div class="act-sug"><b>700Apps proposes a change</b><br>'+xesc(p.prop.name)+': '+xesc(p.prop.from)+' to '+xesc(p.prop.to)+' SAR. Comment: '+xesc(p.prop.why)+'<br>It changes nothing until you act. Update the calculator, then send a new round if needed.<br><button type="button" class="sm pri" data-pres="1">Mark as handled</button></div>';
+    h += '<div class="act-h" style="margin-top:14px">Questions for 700Apps (optional)</div><div class="dl-meta">One question per line, up to 8. 700Apps sees them on their page and types an answer for each. The questions are sent when you press Send or Regenerate.</div><textarea id="px_qs" rows="3" maxlength="1200" style="width:100%;padding:8px;font:inherit;margin-top:6px" placeholder="For example: Can the customer keep its current WhatsApp number?">'+xesc(p.qs||"")+'</textarea>';
     h += '<div class="act-h" style="margin-top:14px">What 700Apps sees on their page</div><div class="dl-meta">The scope (flows, systems, channels, sizing), then their own rates. Each line: Confirm or Propose a change. At the end: their name, a valid-until date and one button to send the answer. The page has no SOE margin and no customer price.</div>';
     h += '<table class="act-t" style="margin-top:8px"><thead><tr><th>Line</th><th>700Apps rate, SAR</th></tr></thead><tbody>'+(ql.length ? ql.map(function(l){ if(Array.isArray(l)) l = {n:l[0], v:l[1]}; return '<tr><td>'+xesc(l.n)+'</td><td>'+sar2(l.v)+'</td></tr>'; }).join("") : '<tr><td colspan="2">Save the deal in the calculator to list the lines.</td></tr>')+'</tbody></table>';
     h += '<div class="dl-meta" style="margin-top:8px"><b>Never shown to 700Apps:</b> SOE margin, discounts and customer prices.</div></div>';
@@ -4464,17 +4605,18 @@ var DL = (function(){
     var sent = vs.filter(function(v){ return v.sent; })[0], cv = vs[0];
     var h = '<div class="act-box">'+(sent ? '<div class="act-lock"><b>Sent version (locked): v'+sent.n+'</b> &middot; SAR '+sar2(sent.rec)+' / month &middot; SAR '+sar2(sent.one)+' one-time &middot; sent '+fdate(sent.sentDate)+'. The customer was quoted this version.</div>' : '<div class="dl-meta">No version has been sent to the customer yet.</div>');
     h += '<table class="act-t" style="margin-top:10px"><thead><tr><th>Version</th><th>Date</th><th>Monthly</th><th>One-time</th><th>Margin and term (internal)</th><th>SOE margin over term (internal)</th><th>Note</th><th></th></tr></thead><tbody>';
+    var sentMax = Math.max.apply(null, vs.filter(function(x){ return x.sent; }).map(function(x){ return x.n; }).concat([0]));
     vs.forEach(function(v,i){
       var mg = v.margin || {}, zero = v.margin && !mg.mkRec && !mg.mkOne;
       h += '<tr><td><b>v'+v.n+'</b> '+(i===0?'<span class="bdg done">CURRENT</span>':'')+(v.sent?' <span class="bdg prog">SENT &middot; LOCKED</span>':'')+'</td><td>'+fdate(v.date)+'</td><td>SAR '+sar2(v.rec)+'</td><td>SAR '+sar2(v.one)+'</td>'+
         '<td'+(zero?' class="act-warn"':'')+'>'+(v.margin ? mg.mkRec+'% / '+mg.mkOne+'% &middot; '+(mg.term||12)+'m, discount '+(mg.disc==null?'-':mg.disc+'%')+(mg.eff!=null?', after discount '+mg.eff+'%':'') : '-')+'</td><td>'+(v.margin ? 'SAR '+sar2(mg.soeMarginYear1) : '-')+'</td><td>'+xesc(v.why||"")+'</td>'+
-        '<td><div style="display:flex;gap:4px;flex-wrap:wrap"><button type="button" class="sm pri" data-px="qprev" data-n="'+v.n+'">Preview official quotation</button><button type="button" class="sm" data-openv="'+v.n+'">Open in calculator</button>'+(!v.sent&&i===0?'<button type="button" class="sm pri" data-sent="'+v.n+'">Mark v'+v.n+' as sent</button>':'')+'</div></td></tr>';
+        '<td><div style="display:flex;gap:4px;flex-wrap:wrap"><button type="button" class="sm pri" data-px="qprev" data-n="'+v.n+'">Preview official quotation</button><button type="button" class="sm" data-openv="'+v.n+'">Open in calculator</button>'+(!v.sent && i>0 && v.n>sentMax ? '<button type="button" class="sm" data-px="vdel" data-n="'+v.n+'">Delete</button>' : '')+(!v.sent&&i===0?'<button type="button" class="sm pri" data-sent="'+v.n+'">Mark v'+v.n+' as sent</button>':'')+'</div></td></tr>';
     });
     h += '</tbody></table>';
     if(cv && !sent) h += '<div class="dl-meta" style="margin-top:8px">Sent on: <input type="date" id="act_sentdate" value="'+todayISO()+'" max="'+todayISO()+'"> (change it if you sent the quote earlier)</div>';
     if(sent && cv && cv.n!==sent.n) h += '<div class="act-diff"><b>Change since the sent version</b><br>Monthly price: SAR '+sar2(sent.rec)+' &rarr; SAR '+sar2(cv.rec)+' ('+(cv.rec>=sent.rec?"+":"")+sar2(cv.rec-sent.rec)+')</div>';
     if(d.stage>=3 && d.stage<5) h += '<div style="margin-top:10px"><button type="button" class="sm" data-prep="1">Show "In preparation" on the customer page</button></div>';
-    h += '<div class="dl-meta" style="margin-top:10px">The final quote must carry an SOE margin. Saving in the calculator updates the working draft and never creates a version number. A new version is created only after the current one is sent, and a sent version is never changed.</div></div>';
+    h += '<div class="dl-meta" style="margin-top:10px">The final quote must carry an SOE margin. Saving in the calculator updates the working draft and never creates a version number. A new version is created only after the current one is sent, and a sent version is never changed. You can delete an older version that was never sent: the later versions move down by one number. The current version and sent versions cannot be deleted.</div></div>';
     return h;
   }
 
@@ -4506,9 +4648,9 @@ var DL = (function(){
     h += '<h2>Customer</h2><table><tr><th>Customer</th><td>'+xesc(d.client)+'</td><th>Industry</th><td>'+xesc(d.industryLabel||"")+'</td></tr>';
     if(kind==="hand") h += '<tr><th>Started as</th><td>'+xesc(w.type==="pilot"?"Pilot":w.type==="golive"?"Go live":"To be confirmed")+'</td><th>Start date</th><td>'+xesc(w.start?fdate(w.start):"To be confirmed")+'</td></tr><tr><th>Contract reference</th><td colspan="3">'+xesc(w.ref||"To be confirmed")+'</td></tr>';
     var rq = ev[0]; if(rq) h += '<tr><th>Customer contact</th><td colspan="3">'+xesc(rq.p.name+", "+rq.p.dg+", "+rq.p.mobile)+'</td></tr>';
-    h += '</table><h2>Call flows</h2><table><tr><th>Code</th><th>Flow</th><th>Connected system</th></tr>';
-    (cust.inbound||[]).concat(cust.outbound||[]).forEach(function(f){ h += '<tr><td>'+xesc(f.code)+'</td><td>'+xesc(f.label)+'</td><td>'+xesc(f.sys||"-")+'</td></tr>'; });
-    h += '</table><h2>Systems and channels</h2><p><b>Systems to connect:</b></p>'+ul(cust.systems)+'<p><b>Channels:</b> Voice'+(cust.whatsapp?', WhatsApp':'')+(cust.kb?', knowledge base answers':'')+(cust.human?', handover to staff':'')+'</p>';
+    h += '</table><h2>Call flows</h2><table><tr><th>Code</th><th>Flow</th><th>Modules used</th></tr>';
+    (cust.inbound||[]).concat(cust.outbound||[]).forEach(function(f){ var md = (f.mods||[]).map(function(x){ return xesc(x.n)+(x.native?' (built in)':' (connect)'); }); h += '<tr><td>'+xesc(f.code)+'</td><td>'+xesc(f.label)+'</td><td>'+(md.length ? md.join(', ') : (f.sys ? xesc(f.sys) : 'Voice Agent only'))+'</td></tr>'; });
+    h += '</table><h2>Systems and channels</h2><p><b>Built into the platform (nothing to connect):</b></p>'+ul((cust.native||[]).concat(cust.kb?['Knowledge base']:[]))+'<p><b>Outside systems to connect:</b></p>'+ul((cust.systems||[]).filter(function(x){ return (cust.native||[]).indexOf(x)<0; }).concat(cust.whatsapp?['WhatsApp Business (endpoint connection)']:[]))+'<p><b>Channels:</b> Voice'+(cust.whatsapp?', WhatsApp':'')+(cust.kb?', knowledge base answers':'')+(cust.human?', handover to staff':'')+'</p>';
     h += '<h2>Sizing</h2><table>'+Object.keys(SZL).map(function(k){ return z[k]!=null ? '<tr><th>'+SZL[k]+'</th><td>'+xesc(z[k])+'</td></tr>' : ''; }).join("")+'</table>';
     var sz = szEvents(d), ch = Object.keys(sz).filter(function(k){ return !sz[k].ok && sz[k].nv; });
     if(ch.length) h += '<p class="m">Customer asked to change: '+ch.map(function(k){ return xesc(SZL[k])+' to '+xesc(sz[k].nv); }).join("; ")+'</p>';
@@ -4667,25 +4809,32 @@ var DL = (function(){
       if(r.s) body += '<tr class="sec"><td>'+xesc(r.n)+'</td><td class="r">'+sar2(r.v)+' SAR'+(r.n.charAt(0)==="C"?' (estimate)':'')+'</td></tr>';
       else body += '<tr><td>'+xesc(r.n)+(r.note?'<small>'+xesc(r.note)+'</small>':'')+'</td><td class="r">'+(r.v<0?'&minus; '+sar2(-r.v):sar2(r.v))+' SAR</td></tr>';
     });
-    var css = '@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font:12.5px/1.5 Arial,Helvetica,sans-serif;color:#1A1A1A;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+    var css = '@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font:12px/1.5 Cairo,Arial,Helvetica,sans-serif;color:#1A1A1A;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
       '.pg{width:210mm;margin:0 auto;position:relative;background:#fff}.hd{background:#1B5E20;color:#fff;padding:20px 32px;display:flex;justify-content:space-between;align-items:center;border-bottom:5px solid #7CB342}'+
       '.hd img{height:44px}.hd .r{text-align:right}.hd h1{margin:0;font-size:22px;letter-spacing:2px}.hd small{font-size:12px;font-weight:700;letter-spacing:1px}.in{padding:22px 32px 22mm}'+
       '.g{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0 0 14px}.g div{border-bottom:1px solid #D7E1D4;padding:3px 0}.g b{display:inline-block;min-width:110px;color:#1B5E20}'+
       'table{width:100%;border-collapse:collapse;margin:6px 0 12px}td{padding:6px 8px;border-bottom:1px solid #E5ECE2;vertical-align:top}td.r{text-align:right;white-space:nowrap}small{display:block;color:#5F6F62;font-size:11px}'+
-      'tr.sec td{background:#E8F5E9;font-weight:700;color:#0D3B13;border-bottom:1px solid #C9DCC4}.tot td{font-weight:700;border-top:2px solid #1B5E20}.big td{background:#1B5E20;color:#fff;font-size:14px;font-weight:700}'+
+      'tr.sec td{background:#E8F5E9;font-weight:700;color:#0D3B13;border-bottom:1px solid #C9DCC4}.tot td{font-weight:700;border-top:2px solid #1B5E20}.vt{break-inside:avoid;page-break-inside:avoid}.vt tr{break-inside:avoid}.vt th{background:#E8F5E9;color:#0D3B13;text-align:left;padding:6px 8px;font-size:11px}.vt th.r{text-align:right}.xr{margin:4px 0 0;font-size:12px;color:#0D3B13}.big td{background:#1B5E20;color:#fff;font-size:14px;font-weight:700}'+
       'h2{break-after:avoid;font-size:14px;color:#1B5E20;border-bottom:2px solid #7CB342;padding-bottom:3px;margin:16px 0 6px}.terms{font-size:11.5px;color:#333}.terms li{margin:2px 0}'+
       '.sig{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:22px;break-inside:avoid;page-break-inside:avoid}.sig .b{border:1px solid #D7E1D4;border-radius:8px;padding:12px 14px;min-height:250px;position:relative}.sig .b h3{margin:0 0 4px;font-size:12.5px;color:#1B5E20}'+
       '.ln{border-bottom:1px solid #888;height:22px;margin-top:10px;font-size:11px;color:#777}.stamp{position:absolute;right:10px;bottom:8px;opacity:.9}'+
       '.ft{position:fixed;left:0;right:0;bottom:0;padding:8px 32px;font-size:10.5px;color:#5F6F62;border-top:1px solid #D7E1D4;background:#fff}'+
       '.wm{position:absolute;top:44%;left:0;right:0;text-align:center;font-size:110px;font-weight:800;color:rgba(200,30,30,.13);transform:rotate(-24deg);pointer-events:none;letter-spacing:10px}.dr{background:#FEE2E2;color:#991B1B;padding:6px 32px;font-weight:700;font-size:12px}';
-    var h = '<!doctype html><html><head><meta charset="utf-8"><title>Quotation '+xesc(pxRef(d,n))+'</title><style>'+css+'</style></head><body><div class="pg">';
+    var h = '<!doctype html><html><head><meta charset="utf-8"><title>Quotation '+xesc(pxRef(d,n))+'</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"><style>'+css+'</style></head><body><div class="pg">';
     if(!sent) h += '<div class="dr">DRAFT PREVIEW. This quotation has not been issued yet. Mark it as sent to issue it.</div><div class="wm">DRAFT</div>';
     h += '<div class="hd"><img src="'+LOGO_WHITE+'" alt="SOE"><div class="r"><h1>QUOTATION</h1><small>'+xesc(pxRef(d,n))+'</small></div></div><div class="in">';
     h += '<div class="g"><div><b>Prepared for</b>'+xesc(d.client)+'</div><div><b>Quotation date</b>'+fdate(date)+'</div><div><b>Solution</b>AI Contact Center, '+xesc((q.pkg||"")+" package")+'</div><div><b>Valid until</b>'+fdate(valid)+' (30 days)</div><div><b>Commitment term</b>'+T+' months</div><div><b>SOE contact</b>'+xesc(ln.n)+', WhatsApp +'+ln.wa+'</div></div>';
     h += '<h2>Charges (SAR'+(vat?', excluding VAT':', excluding VAT')+')</h2><table>'+body+'</table>';
-    h += '<table><tr class="tot"><td>Payable on signing, one-time (A)'+(vat?' incl. VAT':'')+'</td><td class="r">'+sar2(Math.round((q.onePrice||0)*k))+' SAR</td></tr><tr class="tot"><td>Monthly from go-live, billed in advance (B)'+(vat?' incl. VAT':'')+'</td><td class="r">'+sar2(Math.round((q.recPrice||0)*k))+' SAR</td></tr><tr class="tot"><td>Usage estimate per month (C), billed on actual use'+(vat?' incl. VAT':'')+'</td><td class="r">'+sar2(Math.round((q.usagePrice||0)*k))+' SAR</td></tr><tr class="big"><td>Estimated contract value, '+T+' months'+(vat?' incl. VAT':'')+'</td><td class="r">'+sar2(Math.round((q.yearTotal||0)*k))+' SAR</td></tr></table>';
-    if(!vat) h += '<small>Prices exclude VAT. VAT at 15% is added to every invoice.</small>';
-    h += '<h2>Commercial and billing terms</h2><ul class="terms"><li>The contract is between the customer and SOE. Minimum commitment is 3 months.</li><li>Commitment discount on monthly charges: 6 months 5%, 12 months 10%. This quotation is for '+T+' months.</li><li>One-time charges (A) are due immediately after contract signing.</li><li>Monthly charges are invoiced in advance each month from the go-live date.</li><li>Usage charges are invoiced after use, at the actual quantity, on the same monthly invoice.</li><li>Package minutes do not roll over to the next month.</li><li>Monthly charges (B) and usage charges (C) are due within 7 calendar days from the invoice date. Calendar days include weekends and public holidays.</li>'+(q.xRate?'<li>Usage beyond the allowance is agreed in advance and billed at the flat per-minute rate of '+q.xRate+' halalas per minute, including VAT.</li>':'')+'<li>This offer is valid for thirty days from the issue date on the cover, and is subject to a signed service agreement.</li></ul>';
+    var qA = q.onePrice||0, qB = q.recPrice||0, qC = q.usagePrice||0, qM = qB+qC, qT = qA+qM*T;
+    function vtr(lbl,x,cls){ var v = Math.round(x*0.15); return '<tr class="'+(cls||'')+'"><td>'+lbl+'</td><td class="r">'+sar2(x)+' SAR</td><td class="r">'+sar2(v)+' SAR</td><td class="r">'+sar2(x+v)+' SAR</td></tr>'; }
+    h += '<h2>Summary and VAT</h2><table class="vt"><tr><th>Charge</th><th class="r">Excl. VAT</th><th class="r">VAT 15%</th><th class="r">Incl. VAT</th></tr>'+
+      vtr('A. One-time, due immediately after contract signing',qA,'tot')+
+      vtr('B. Monthly, billed in advance from go-live',qB,'tot')+
+      vtr('C. Usage estimate per month, billed on actual use',qC,'tot')+
+      vtr('Monthly bill estimate (B + C)',qM,'tot')+
+      vtr('Estimated contract value, '+T+' months',qT,'big')+'</table>';
+    if(q.xRate) h += '<p class="xr">Extra minutes beyond the allowance: <b>'+q.xRate+' halalas per minute</b>, including VAT.</p>';
+    h += '<h2>Commercial and billing terms</h2><ul class="terms"><li>The contract is between the customer and SOE. Minimum commitment is 3 months.</li><li>Commitment discount on monthly charges: 6 months 5%, 12 months 10%. This quotation is for '+T+' months.</li><li>One-time charges (A) are due immediately after contract signing.</li><li>Monthly charges are invoiced in advance each month from the go-live date.</li><li>Usage charges are invoiced after use, at the actual quantity, on the same monthly invoice.</li><li>Package minutes do not roll over to the next month.</li><li>Monthly charges (B) and usage charges (C) are due within 7 calendar days from the invoice date. Calendar days include weekends and public holidays.</li>'+(q.xRate?'<li>Usage beyond the allowance is agreed in advance and billed at the flat per-minute rate of '+q.xRate+' halalas per minute, including VAT.</li>':'')+'<li>This offer is valid for thirty days from the issue date on the cover, and is subject to a signed service agreement.</li><li>This agreement may be extended for a further term by mutual written agreement of both parties. Either party may request the extension at least one month before the end of the current term. The charges for the extension term will be agreed at that time.</li></ul>';
     h += '<div class="sig"><div class="b"><h3>For SOE</h3><div class="ln">Authorised signatory: Hassan Pervaiz</div><div class="ln">Senior Manager - Enterprise Solutions &amp; Implementation</div><div class="ln">Date: '+fdate(date)+'</div><div class="stamp">'+pxStamp(fdate(date))+'</div></div><div class="b"><h3>Accepted for '+xesc(d.client)+'</h3><div class="ln">Name and title</div><div class="ln">Signature</div><div class="ln">Date and company stamp</div></div></div>';
     h += '</div><div class="ft">SOE, Smart Orientation for Communications and Information Technology, Riyadh, Kingdom of Saudi Arabia. This quotation is confidential and prepared for '+xesc(d.client)+'.</div></div></body></html>';
     return h;
@@ -4705,7 +4854,7 @@ var DL = (function(){
     o.addEventListener("click", function(e){
       var b = e.target.closest("[data-pq]"); if(!b) return;
       if(b.dataset.pq==="close") o.remove();
-      if(b.dataset.pq==="print"){ try{ o.querySelector("iframe").contentWindow.print(); }catch(x){} }
+      if(b.dataset.pq==="print"){ try{ var w=o.querySelector("iframe").contentWindow; (w.document.fonts&&w.document.fonts.ready?w.document.fonts.ready:Promise.resolve()).then(function(){ w.print(); }); }catch(x){} }
       if(b.dataset.pq==="sent"){ o.remove(); tab = "qt"; draw(); var sb = document.querySelector('[data-sent="'+v.n+'"]'); if(sb) sb.click(); }
     });
   }
@@ -4734,20 +4883,24 @@ var DL = (function(){
     var lines = (q.vlines||[]).map(function(l){ return Array.isArray(l) ? {n:l[0], v:l[1], k:"m"} : l; });
     if(!lines.length){ toast("Open the deal in the calculator and save it first, so the pricing lines exist."); return; }
     var rnd = (p.round||0)+1, key = d.slug+"-r"+rnd, z = cust.sz || {}, ln = LEADS[leadKey(d.lead)];
-    var scope = { flows:(cust.inbound||[]).concat(cust.outbound||[]).map(function(f){ return f.label; }), systems:cust.systems||[],
+    var qsText = ((document.getElementById("px_qs")||{}).value || p.qs || "").slice(0,1200), qsArr = qsText.split(/\n/).map(function(x){ return x.trim().slice(0,200); }).filter(function(x){ return x; }).slice(0,8);
+    var sx = q.scopeX || {};
+    var scope = { flows:sx.flows || (cust.inbound||[]).concat(cust.outbound||[]).map(function(f){ return f.label; }), systems:cust.systems||[], native:sx.native||[], ext:sx.ext||[], lad:sx.lad||null, usageCalls:sx.usageCalls||null, qs:qsArr, ph:{ t:(cust.phone&&cust.phone.type)||"ourLine", n:(cust.sz&&cust.sz.lines)||1 }, wa:!!cust.whatsapp, sz:{in:z['in'],share:z.share,inlen:z.inlen,out:z.out,outlen:z.outlen,days:z.days},
       channels:["Voice"].concat(cust.whatsapp?["WhatsApp"]:[], cust.kb?["Knowledge base"]:[], cust.human?["Handover to staff"]:[]),
       sizing:Object.keys(SZL).filter(function(k){ return z[k]!=null; }).map(function(k){ return SZL[k]+": "+z[k]; }) };
     var doc = { client:d.client, dealId:d.id, round:rnd, active:true, expiresAt:Date.now()+30*DAY, scope:JSON.stringify(scope), lines:lines, lead:ln.n, createdAt:TS() };
     status("Creating the 700Apps link...");
     db.collection("partnerShares").doc(key).set(doc).then(function(){
-      return store.patch(d.id, { partner:{ status:"sent", round:rnd, key:key, sentAt:todayISO(), valid:"", prop:null, props:[] } });
+      if(p.status==="sent" && p.key && p.key!==key){ return db.collection("partnerShares").doc(p.key).update({active:false}).catch(function(){}); }
+    }).then(function(){
+      return store.patch(d.id, { partner:{ status:"sent", round:rnd, key:key, sentAt:todayISO(), valid:"", prop:null, props:[], qs:qsText } });
     }).then(function(){ return refresh2(d.id); }).then(function(){ status(""); pxPartnerModal(find(d.id)||d, rnd, pxBase()+"#"+key); })
     .catch(function(e){ status("Could not create the link: "+(e.message||e), true); });
   }
   function pxPartnerAccept(d){
     var p = d.partner||{}, r = d._reply; if(!r) return;
     var pr = r.p||{}, props = (pr.answers||[]).filter(function(a){ return a.v==="chg"; }).map(function(a){ return { name:a.n, from:a.from, to:+a.to, why:a.why||"" }; });
-    var pt = { partner:{ status:"validated", round:p.round||1, key:p.key, sentAt:p.sentAt||todayISO(), valid:pr.valid||"", prop:props[0]||null, props:props, by:pr.by||"", note:pr.note||"" } };
+    var pt = { partner:{ status:"validated", round:p.round||1, key:p.key, sentAt:p.sentAt||todayISO(), valid:pr.valid||"", prop:props[0]||null, props:props, by:pr.by||"", note:pr.note||"", qa:(pr.qa||[]).slice(0,8), qs:p.qs||"" } };
     if(d.stage<4){ pt.stage = 4; pt["stageDates.4"] = todayISO(); }
     store.patch(d.id, pt).then(function(){ try{ return db.collection("partnerShares").doc(p.key).update({active:false}); }catch(e){} }).then(function(){ return refresh2(d.id); })
       .then(function(){ toast("700Apps reply accepted. Stage: Partner validated."+(props.length?" "+props.length+" proposed change(s) are listed in Partner review.":"")); });
@@ -4792,13 +4945,19 @@ var DL = (function(){
     if(k==="qprev") pxQuotePreview(d, +b.dataset.n);
     if(k==="revise") editDeal(d.id, +b.dataset.n);
     if(k==="pacc") pxPartnerAccept(d);
+    if(k==="vdel"){
+      var dn = +b.dataset.n, dvs = verCache[d.id]||[], nl = dvs.filter(function(x){ return x.n>dn; }).length;
+      if(!confirm("Delete v"+dn+"?"+(nl ? " The later versions move down by one number: v"+(dn+1)+" becomes v"+dn+"." : "")+" This cannot be undone.")) return;
+      store.delVersion(d.id, dn, dvs).then(function(){ return refresh2(d.id); }).then(function(){ draw(); toast("Deleted v"+dn+"."+(nl ? " Later versions were renumbered." : "")); })
+        .catch(function(e){ toast("Could not delete: "+(e.message||e)); });
+    }
   });
   window.px_calcQuote = function(){
     var m = model(), qs = quoteSnap(m), cn = ($("clientName")||{}).value || "Customer";
     var d = { client:cn, slug:"preview-"+Date.now().toString(36).slice(-4), lead:($("presalesLead")||{}).value||"", quote:qs, cust:"{}" };
     var o = pxModal('<div class="pxq-h"><b>Official quotation preview (from the calculator)</b><span><button type="button" class="sm pri" data-pq="print">Print or save as PDF</button> <button type="button" class="sm" data-pq="close">Close</button></span></div><iframe class="pxq-f" title="Quotation"></iframe><div class="pxq-n">This preview uses the numbers on screen. The issued version is created from Quote versions.</div>', 1000);
     o.querySelector("iframe").srcdoc = pxQuoteHtml(d, (edit && edit.n) || 1, false, null);
-    o.addEventListener("click", function(e){ var bb = e.target.closest("[data-pq]"); if(!bb) return; if(bb.dataset.pq==="close") o.remove(); if(bb.dataset.pq==="print"){ try{ o.querySelector("iframe").contentWindow.print(); }catch(x){} } });
+    o.addEventListener("click", function(e){ var bb = e.target.closest("[data-pq]"); if(!bb) return; if(bb.dataset.pq==="close") o.remove(); if(bb.dataset.pq==="print"){ try{ var w=o.querySelector("iframe").contentWindow; (w.document.fonts&&w.document.fonts.ready?w.document.fonts.ready:Promise.resolve()).then(function(){ w.print(); }); }catch(x){} } });
   };
 
   /* one-time update of deals saved before the 8-stage flow: stages 4 and above move up by one */
