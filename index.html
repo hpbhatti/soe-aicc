@@ -4503,10 +4503,10 @@ var DL = (function(){
     var cust = {}; try{ cust = JSON.parse(d.cust||"{}"); }catch(e){}
     if(tab==="ov"){
       h += lostBox(d);
-      var rq = ev.filter(function(e){ return e.type==="request"; })[0], ct = rq ? (rq.p.name+", "+rq.p.dg+" - "+rq.p.mobile) : (d.contact||"Not given yet");
+      var rq = ev.filter(function(e){ return e.type==="request"; })[0], ccv = d.cc || (rq ? { name:rq.p.name, title:rq.p.dg, mobile:rq.p.mobile } : {});
       h += '<div class="act-cards"><div class="act-k"><small>Current quote (v'+(d.version||1)+(cv.sent?', sent':', working draft')+')</small><b>SAR '+sar2(qt.recPrice)+'</b><em>per month</em></div><div class="act-k"><small>One-time</small><b>SAR '+sar2(qt.onePrice)+'</b></div><div class="act-k"><small>Presales lead</small><b style="font-size:16px">'+ln.s+'</b><em>main contact on customer page</em></div><div class="act-k"><small>SOE margin over the term (internal)</small><b style="font-size:18px">'+(cv.margin?'SAR '+sar2(cv.margin.soeMarginYear1):'-')+'</b><em>'+(cv.margin?cv.margin.mkRec+'% added, '+(cv.margin.eff!=null?cv.margin.eff+'% after discount, ':'')+(cv.margin.term||12)+' months':'')+'</em></div></div>';
       h += '<div class="act-g"><div class="act-box"><div class="act-h">Deal details</div><table class="act-t"><tr><td>Customer</td><td>'+xesc(d.client)+'</td></tr><tr><td>Industry</td><td>'+xesc(d.industryLabel||"")+'</td></tr><tr><td>Deal date</td><td>'+fdate(d.dealDate)+'</td></tr><tr><td>Package and flows</td><td>'+xesc(qt.pkg||"")+' &middot; '+(qt.flows||0)+' flows</td></tr><tr><td>Systems</td><td>'+xesc((cust.systems||[]).join(", ")||"None")+'</td></tr>'+
-        '<tr><td>Presales lead</td><td><select id="act_lead"><option value="hp"'+(leadKey(d.lead)==="hp"?" selected":"")+'>'+LEADS.hp.n+'</option><option value="hany"'+(leadKey(d.lead)==="hany"?" selected":"")+'>'+LEADS.hany.n+'</option></select></td></tr><tr><td>Customer contact</td><td>'+xesc(ct)+'</td></tr></table></div>'+
+        '<tr><td>Presales lead</td><td><select id="act_lead"><option value="hp"'+(leadKey(d.lead)==="hp"?" selected":"")+'>'+LEADS.hp.n+'</option><option value="hany"'+(leadKey(d.lead)==="hany"?" selected":"")+'>'+LEADS.hany.n+'</option></select></td></tr><tr><td>Customer contact</td><td><input id="cc_n" type="text" maxlength="80" placeholder="Name" value="'+xesc(ccv.name||"")+'" style="width:100%;margin-bottom:4px"><input id="cc_t" type="text" maxlength="80" placeholder="Job title (optional)" value="'+xesc(ccv.title||"")+'" style="width:100%;margin-bottom:4px"><input id="cc_m" type="text" maxlength="30" placeholder="Mobile number, for example +966 5X XXX XXXX" value="'+xesc(ccv.mobile||"")+'" style="width:100%;margin-bottom:6px"><button type="button" class="sm pri" data-cc="1">Save contact</button> <span class="dl-meta" id="cc_ok">'+(d.cc?'':(rq?'Filled from the customer\'s request. Save to keep it.':'Shown on the quotation.'))+'</span></td></tr></table></div>'+
         '<div class="act-box"><div class="act-h">Customer link</div><div class="act-link">'+xesc(lurl(d))+'</div><div class="dl-meta" style="margin:6px 0">'+lchip(d)+'. No prices on this page. The WhatsApp button goes to '+ln.s+'.</div><button type="button" class="sm pri" data-t2="lk">Manage links</button><div class="act-h" style="margin-top:14px">Your notes (private)</div><textarea id="act_note">'+xesc(d.notes||"")+'</textarea><button type="button" class="sm pri" data-sn="1" style="margin-top:6px">Save note</button> <span class="dl-meta" id="act_ok"></span></div></div>';
       if(d.stage>=7) h += wonV(d, vs);
       h += '<div style="margin-top:6px"><button type="button" class="sm danger" data-del="1">Delete this deal</button></div>';
@@ -4860,7 +4860,14 @@ var DL = (function(){
   /* ===================== PROTOTYPE 4 additions ===================== */
   var pxFlags = {};
   function pxAddDays(iso, n){ return isoOf(new Date(iso+"T12:00:00").getTime()+n*DAY); }
-  function pxRef(d, n){ return "SOE-AICC-"+String(d.slug||"").split("-").pop().toUpperCase()+"-V"+n; }
+  function pxRef(d, n){
+    var v = (verCache[d.id]||[]).filter(function(x){ return x.n===n; })[0], code = String(d.slug||"").split("-").pop().toUpperCase();
+    if(v && v.ref) return v.ref;
+    if(v && v.sent) return "SOE-AICC-"+code+"-V"+n; /* issued before the new format: keep the number the customer already has */
+    var nm = String(d.client||"").replace(/[^A-Za-z0-9]/g,"").toUpperCase().slice(0,4) || code.slice(0,4);
+    return "SOE-AICC-"+nm+"-"+String(d.dealDate||todayISO()).replace(/-/g,"").slice(2)+"-V"+n;
+  }
+  function pxPhone(w){ var x = String(w||"").replace(/\D/g,""); return x.length===12 && x.indexOf("966")===0 ? "+966 "+x.slice(3,5)+" "+x.slice(5,8)+" "+x.slice(8) : (x ? "+"+x : ""); }
   function pxLines(d){
     var q = d.quote||{};
     if(q.qlines && q.qlines.length) return q.qlines;
@@ -4910,7 +4917,7 @@ var DL = (function(){
   function pxQuoteHtml(d, n, sent, sdate){
     var q = d.quote||{}, ln = LEADS[leadKey(d.lead)], date = sdate||todayISO(), valid = pxAddDays(date, 30), rows = pxLines(d), vat = !!q.vatOn, k = vat ? 1.15 : 1, T = q.term||12;
     var cust = {}; try{ cust = JSON.parse(d.cust||"{}"); }catch(e){}
-    var rq0 = evOf(d).filter(function(e){ return e.type==="request"; })[0], cp = rq0 ? rq0.p : null;
+    var rq0 = evOf(d).filter(function(e){ return e.type==="request"; })[0], cc0 = d.cc||{}, cp = (cc0.name||cc0.mobile) ? { name:cc0.name, dg:cc0.title, mobile:cc0.mobile } : (rq0 ? rq0.p : null);
     var cname = cp && cp.name ? cp.name + (cp.dg ? ", " + cp.dg : "") : (d.contact||"");
     var body = "";
     rows.forEach(function(r){
@@ -4926,12 +4933,12 @@ var DL = (function(){
       'h2{break-after:avoid;font-size:14px;color:#1B5E20;border-bottom:2px solid #7CB342;padding-bottom:3px;margin:16px 0 6px}.terms{font-size:11.5px;color:#333}.terms li{margin:2px 0}'+
       '.sig{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:22px;break-inside:avoid;page-break-inside:avoid}.sig .b{border:1px solid #D7E1D4;border-radius:8px;padding:12px 14px;min-height:250px;position:relative}.sig .b h3{margin:0 0 4px;font-size:12.5px;color:#1B5E20}'+
       '.ln{border-bottom:1px solid #888;height:22px;margin-top:10px;font-size:11px;color:#777}.stamp{position:absolute;right:10px;bottom:8px;opacity:.9}.sgn{position:absolute;right:34px;bottom:30px;width:118px;height:auto;z-index:2}'+
-      '.ft{padding:8px 32px;font-size:10.5px;color:#5F6F62;border-top:1px solid #D7E1D4;background:#fff}.pgt{width:100%;border-collapse:collapse;margin:0}.pgt>tbody>tr>td,.pgt>tfoot>tr>td{padding:0;border:0}'+
+      '.ft{padding:8px 32px;font-size:10.5px;color:#5F6F62;border-top:1px solid #D7E1D4;background:#fff}.pb{display:flex;align-items:center;gap:18px;border:1px solid #D7E1D4;border-radius:12px;padding:12px 16px;margin:0 0 14px;background:#fff}.pb .lg{flex:0 0 auto;border:1px solid #D7E1D4;border-radius:10px;padding:6px 12px;background:#fff}.pb .lg img{height:48px;max-width:190px;object-fit:contain;display:block}.pb small{display:block;color:#1B5E20;font-weight:800;letter-spacing:.12em;font-size:10.5px;text-transform:uppercase}.pb b{font-size:20px;color:#0D3B13}.g .full{grid-column:1/-1}.g .qno{background:#E8F5E9;border:0;padding:6px 10px;border-radius:6px}.g .qno span{font-weight:800;color:#0D3B13;letter-spacing:.5px}.pgt{width:100%;border-collapse:collapse;margin:0}.pgt>tbody>tr>td,.pgt>tfoot>tr>td{padding:0;border:0}'+
       '.wm{position:absolute;top:44%;left:0;right:0;text-align:center;font-size:110px;font-weight:800;color:rgba(200,30,30,.13);transform:rotate(-24deg);pointer-events:none;letter-spacing:10px}.dr{background:#FEE2E2;color:#991B1B;padding:6px 32px;font-weight:700;font-size:12px}';
     var h = '<!doctype html><html><head><meta charset="utf-8"><title>Quotation '+xesc(pxRef(d,n))+'</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"><style>'+css+'</style></head><body><div class="pg">';
     if(!sent) h += '<div class="dr">DRAFT PREVIEW. This quotation has not been issued yet. Mark it as sent to issue it.</div><div class="wm">DRAFT</div>';
-    h += '<div class="hd"><img src="'+LOGO_WHITE+'" alt="SOE"><div class="r"><h1>QUOTATION</h1><small>'+xesc(pxRef(d,n))+'</small></div></div><table class="pgt"><tbody><tr><td><div class="in">';
-    h += '<div class="g"><div><b>Prepared for</b>'+xesc(d.client)+'</div><div><b>Quotation date</b>'+fdate(date)+'</div>'+((cname||(cp&&cp.mobile)) ? '<div><b>Attention</b>'+(cname?xesc(cname):'-')+'</div><div><b>Contact phone</b>'+((cp&&cp.mobile)?xesc(cp.mobile):'-')+'</div>' : '')+'<div><b>Solution</b>AI Contact Center, '+xesc((q.pkg||"")+" package")+'</div><div><b>Valid until</b>'+fdate(valid)+' (30 days)</div><div><b>Commitment term</b>'+T+' months</div><div><b>SOE contact</b>'+xesc(ln.n)+', WhatsApp +'+ln.wa+'</div></div>';
+    h += '<div class="hd"><img src="'+LOGO_WHITE+'" alt="SOE"><div class="r"><h1>QUOTATION</h1></div></div><table class="pgt"><tbody><tr><td><div class="in">';
+    h += '<div class="pb">'+(d.logo ? '<div class="lg"><img src="'+d.logo+'" alt=""></div>' : '')+'<div><small>Prepared for</small><b>'+xesc(d.client)+'</b></div></div><div class="g"><div class="full qno"><b>Quotation no.</b><span>'+xesc(pxRef(d,n))+'</span></div><div><b>Quotation date</b>'+fdate(date)+'</div>'+((cname||(cp&&cp.mobile)) ? '<div><b>Attention</b>'+(cname?xesc(cname):'-')+'</div><div><b>Contact phone</b>'+((cp&&cp.mobile)?xesc(cp.mobile):'-')+'</div>' : '')+'<div><b>Solution</b>AI Contact Center, '+xesc((q.pkg||"")+" package")+'</div><div><b>Valid until</b>'+fdate(valid)+' (30 days)</div><div><b>Commitment term</b>'+T+' months</div><div class="full"><b>SOE presales</b>'+xesc(ln.n)+' &middot; '+pxPhone(ln.wa)+'</div></div>';
     h += '<h2>Charges (SAR'+(vat?', excluding VAT':', excluding VAT')+')</h2><table>'+body+'</table>';
     (function(){ var z = cust.sz||{}, aiIn = Math.round((+z["in"]||0)*(+z.share||0)/100), o = +z.out||0, dy = +z.days||0, bits = [];
       if(!(q.usagePrice>0) || !dy || (!aiIn && !o)) return;
@@ -4947,8 +4954,8 @@ var DL = (function(){
       vtr('Estimated contract value, '+T+' months',qT,'big')+'</table>';
     if(q.xRate) h += '<p class="xr">Extra minutes beyond the allowance: <b>'+q.xRate+' halalas per minute</b>, including VAT.</p>';
     h += '<h2>Commercial and billing terms</h2><ul class="terms"><li>The contract is between the customer and SOE. Minimum commitment is 3 months.</li><li>Commitment discount on monthly charges: 6 months 5%, 12 months 10%. This quotation is for '+T+' months.</li><li>One-time charges (A) are due immediately after contract signing.</li><li>Monthly charges are invoiced in advance each month from the go-live date.</li><li>Usage charges are invoiced after use, at the actual quantity, on the same monthly invoice.</li><li>Package minutes do not roll over to the next month.</li><li>Monthly charges (B) and usage charges (C) are due within 7 calendar days from the invoice date. Calendar days include weekends and public holidays.</li>'+(q.xRate?'<li>Usage beyond the allowance is agreed in advance and billed at the flat per-minute rate of '+q.xRate+' halalas per minute, including VAT.</li>':'')+'<li>This offer is valid for thirty days from the issue date on the cover, and is subject to a signed service agreement.</li><li>This agreement may be extended for a further term by mutual written agreement of both parties. Either party may request the extension at least one month before the end of the current term. The charges for the extension term will be agreed at that time.</li></ul>';
-    h += '<div class="sig"><div class="b"><h3>For SOE</h3><div class="ln">Authorised signatory: Hassan Pervaiz</div><div class="ln">Senior Manager - Enterprise Solutions &amp; Implementation</div><div class="ln">Date: '+fdate(date)+'</div><div class="stamp">'+pxStamp(fdate(date))+'</div><img class="sgn" src="'+SIG_PNG+'" alt="Signature"></div><div class="b"><h3>Accepted for '+xesc(d.client)+'</h3><div class="ln">Name and title</div><div class="ln">Signature</div><div class="ln">Date and company stamp</div></div></div>';
-    h += '</div></td></tr></tbody><tfoot><tr><td><div class="ft">SOE, Smart Orientation for Communications and Information Technology, Riyadh, Kingdom of Saudi Arabia. This quotation is confidential and prepared for '+xesc(d.client)+'.</div></td></tr></tfoot></table></div></body></html>';
+    h += '<div class="sig"><div class="b"><h3>For SOE</h3><div class="ln">Hassan Pervaiz</div><div class="ln">Senior Manager - Enterprise Solutions &amp; Implementation</div><div class="ln">Date: '+fdate(date)+'</div><div class="stamp">'+pxStamp(fdate(date))+'</div><img class="sgn" src="'+SIG_PNG+'" alt="Signature"></div><div class="b"><h3>Accepted for '+xesc(d.client)+'</h3><div class="ln">Name and title</div><div class="ln">Signature</div><div class="ln">Date and company stamp</div></div></div>';
+    h += '</div></td></tr></tbody><tfoot><tr><td><div class="ft"><b>Quotation No. '+xesc(pxRef(d,n))+'</b> &middot; SOE, Smart Orientation for Communications and Information Technology, Riyadh, Kingdom of Saudi Arabia. This quotation is confidential and prepared for '+xesc(d.client)+'.</div></td></tr></tfoot></table></div></body></html>';
     return h;
   }
   function pxModal(inner, w){
@@ -5066,7 +5073,7 @@ var DL = (function(){
   });
   window.px_calcQuote = function(){
     var m = model(), qs = quoteSnap(m), cn = ($("clientName")||{}).value || "Customer";
-    var d = { client:cn, slug:"preview-"+Date.now().toString(36).slice(-4), lead:($("presalesLead")||{}).value||"", quote:qs, cust:"{}" };
+    var d = { client:cn, slug:"preview-"+Date.now().toString(36).slice(-4), lead:($("presalesLead")||{}).value||"", quote:qs, cust:"{}", logo:CUST_LOGO, dealDate:($("dealDate")||{}).value||todayISO() };
     var o = pxModal('<div class="pxq-h"><b>Official quotation preview (from the calculator)</b><span><button type="button" class="sm pri" data-pq="print">Print or save as PDF</button> <button type="button" class="sm" data-pq="close">Close</button></span></div><iframe class="pxq-f" title="Quotation"></iframe><div class="pxq-n">This preview uses the numbers on screen. The issued version is created from Quote versions.</div>', 1000);
     o.querySelector("iframe").srcdoc = pxQuoteHtml(d, (edit && edit.n) || 1, false, null);
     o.addEventListener("click", function(e){ var bb = e.target.closest("[data-pq]"); if(!bb) return; if(bb.dataset.pq==="close") o.remove(); if(bb.dataset.pq==="print"){ try{ var w=o.querySelector("iframe").contentWindow; (w.document.fonts&&w.document.fonts.ready?w.document.fonts.ready:Promise.resolve()).then(function(){ w.print(); }); }catch(x){} } });
@@ -5128,6 +5135,12 @@ var DL = (function(){
     if((tt = t.closest("[data-dis]"))){ dismissed[tt.dataset.dis] = 1; draw(); return; }
     if((tt = t.closest("[data-side]"))){ var sv = d.side===tt.dataset.side ? "" : tt.dataset.side; if(sv==="lost"){ askLost(function(r){ store.patch(d.id, { side:"lost", lost:r }).then(function(){ return refresh2(); }).then(function(){ toast("Marked as Lost: "+r.why+"."); }); }); return; } store.patch(d.id, { side:sv }).then(function(){ return refresh2(); }); return; }
     if(t.closest("[data-seen]")){ store.patch(d.id, { lastSeenMs:Date.now() }).then(function(){ return refresh2(); }).then(function(){ toast("Marked as seen."); }); return; }
+    if(t.closest("[data-cc]")){
+      var ccn = $("cc_n").value.trim(), cct = $("cc_t").value.trim(), ccm = $("cc_m").value.trim();
+      if(!ccn || !ccm){ toast("Enter the contact name and the mobile number. The job title is optional."); return; }
+      if(!/^[+0-9][0-9 ()-]{6,}$/.test(ccm)){ toast("The mobile number looks incomplete. Use digits, and a + for the country code."); return; }
+      store.patch(d.id, { cc:{ name:ccn.slice(0,80), title:cct.slice(0,80), mobile:ccm.slice(0,30) } }).then(function(){ return refresh2(d.id); }).then(function(){ toast("Customer contact saved. The quotation now shows it."); }); return;
+    }
     if(t.closest("[data-sn]")){ store.patch(d.id, { notes:$("act_note").value }).then(function(){ d.notes = $("act_note").value; $("act_ok").textContent = "Note saved."; }); return; }
     if(t.closest("[data-ld]")){ editDeal(d.id); return; }
     if((tt = t.closest("[data-openv]"))){ editDeal(d.id, +tt.dataset.openv); return; }
@@ -5166,7 +5179,7 @@ var DL = (function(){
       if(!mg.mkRec && !mg.mkOne && !confirm("Version v"+vn+" has a 0% margin, so this quote carries no SOE margin. Mark it as sent anyway?")) return;
       var sd = ($("act_sentdate")&&$("act_sentdate").value) || todayISO();
       var p = { sentVersion:vn, stage:Math.max(d.stage,5), quoteStatus:"sent" }; p["stageDates.5"] = sd;
-      store.patch(d.id, p, { quoteStatus:"sent" }, d.slug, { n:vn, data:{ sent:true, sentDate:sd } }).then(function(){ return refresh2(d.id); }).then(function(){ toast("v"+vn+" marked as sent and locked. The customer page now shows: Your quote has been sent."); pxCustMsg(find(d.id), vn); }); return;
+      store.patch(d.id, p, { quoteStatus:"sent" }, d.slug, { n:vn, data:{ sent:true, sentDate:sd, ref:pxRef(d,vn) } }).then(function(){ return refresh2(d.id); }).then(function(){ toast("v"+vn+" marked as sent and locked. The customer page now shows: Your quote has been sent."); pxCustMsg(find(d.id), vn); }); return;
     }
     if(t.closest("[data-apply]")){
       var s = szEvents(d);
