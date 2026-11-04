@@ -1754,7 +1754,7 @@ function model(){
   var R = [], O = [], W = [], A = [];
 
   R.push(["Voice AI — "+voicePkg.name+" package", voicePkg.sar,
-    nfmt(voicePkg.mins)+" AI minutes included. Unused minutes carry over for 15 days."]);
+    nfmt(voicePkg.mins)+" AI minutes included"]);
   if(vOverCost>0) R.push(["Additional usage minutes", vOverCost,
     nfmt(vOver)+" min × "+OVERAGE_RATE.toFixed(2)+" SAR per minute"]);
 
@@ -4924,17 +4924,29 @@ var DL = (function(){
     var cust = {}; try{ cust = JSON.parse(d.cust||"{}"); }catch(e){}
     var rq0 = evOf(d).filter(function(e){ return e.type==="request"; })[0], cc0 = d.cc||{}, cp = (cc0.name||cc0.mobile) ? { name:cc0.name, dg:cc0.title, mobile:cc0.mobile } : (rq0 ? rq0.p : null);
     var cname = cp && cp.name ? cp.name + (cp.dg ? ", " + cp.dg : "") : (d.contact||"");
-    var body = "";
+    var body = "", opened = false;
+    function voiceNote(){ var w = (q.scopeX||{}).mn; if(!w || !(w.t>0)) return "";
+      var pad = w.p - w.t, pk = xesc(q.pkg||''), parts = [];
+      if(w.hi && w.i>0) parts.push('inbound <b>'+nfmt(w.i)+'</b> AI minutes ('+nfmt(w.ic)+' calls a day)');
+      if(w.ho && w.o>0) parts.push('outbound <b>'+nfmt(w.o)+'</b> AI minutes ('+nfmt(w.oc)+' calls a day)');
+      if(!parts.length) return "";
+      var t = 'Based on your requirements: '+parts.join(' + ')+(parts.length>1 ? ' = <b>'+nfmt(w.t)+' AI minutes a month</b>.' : '. Total <b>'+nfmt(w.t)+' AI minutes a month</b>.');
+      if(pad>=0) t += (w.a ? ' '+pk+' is the smallest package that covers this.' : ' The '+pk+' package was selected and covers this.') + (pad>0 ? ' Unused minutes carry over to the next billing month and can be used in its first 15 days.' : '');
+      else t += ' This is '+nfmt(-pad)+' AI minutes above the package. The extra minutes are billed at the extra-minute rate below.';
+      return '<div class="vn">'+t+'</div>'; }
     rows.forEach(function(r){
-      if(r.s) body += '<tr class="sec"><td>'+xesc(r.n)+'</td><td class="r">'+sar2(r.v)+' SAR'+(r.n.charAt(0)==="C"?' (estimate)':'')+'</td></tr>';
-      else body += '<tr><td>'+xesc(r.n)+(r.note?'<small>'+xesc(r.note)+'</small>':'')+'</td><td class="r">'+(r.v<0?'&minus; '+sar2(-r.v):sar2(r.v))+' SAR</td></tr>';
+      if(r.s){ body += (opened?'</tbody>':'')+'<tbody class="blk"><tr class="sec"><td>'+xesc(r.n)+'</td><td class="r">'+sar2(r.v)+' SAR'+(r.n.charAt(0)==="C"?' (estimate)':'')+'</td></tr>'; opened = true; }
+      else { var nt = /^Voice AI/.test(r.n) ? String(r.note||"").replace(/\. Unused minutes carry over for 15 days\.$/,"") : r.note;
+        body += '<tr><td>'+xesc(r.n)+(nt?'<small>'+xesc(nt)+'</small>':'')+(/^Voice AI/.test(r.n)?voiceNote():'')+'</td><td class="r">'+(r.v<0?'&minus; '+sar2(-r.v):sar2(r.v))+' SAR</td></tr>'; }
     });
+    if(opened) body += '</tbody>';
+    body = body.replace(/<tbody class="blk">([\s\S]*?)<\/tbody>/g, function(m, inner){ return (inner.match(/<tr/g)||[]).length <= 6 ? m : '<tbody>'+inner+'</tbody>'; }); /* short blocks stay together on one page; long blocks may split between rows */
     var css = '@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font:12px/1.5 Cairo,Arial,Helvetica,sans-serif;color:#1A1A1A;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
       '.pg{width:210mm;margin:0 auto;position:relative;background:#fff}.hd{background:#1B5E20;color:#fff;padding:20px 32px;display:flex;justify-content:space-between;align-items:center;border-bottom:5px solid #7CB342}'+
-      '.hd img{height:44px}.hd .r{text-align:right}.hd h1{margin:0;font-size:22px;letter-spacing:2px}.hd small{font-size:12px;font-weight:700;letter-spacing:1px}.in{padding:22px 32px 22mm}'+
+      '.hd img{height:44px}.hd .r{text-align:right}.hd h1{margin:0;font-size:22px;letter-spacing:2px}.hd small{font-size:12px;font-weight:700;letter-spacing:1px}.in{padding:0 32px 22mm}'+
       '.g{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0 0 14px}.g div{border-bottom:1px solid #D7E1D4;padding:3px 0;display:flex;gap:8px}.g b{flex:0 0 110px;color:#1B5E20}'+
       'table{width:100%;border-collapse:collapse;margin:6px 0 12px}td{padding:6px 8px;border-bottom:1px solid #E5ECE2;vertical-align:top}td.r{text-align:right;white-space:nowrap}small{display:block;color:#5F6F62;font-size:11px}'+
-      'tr.sec td{background:#E8F5E9;font-weight:700;color:#0D3B13;border-bottom:1px solid #C9DCC4}.tot td{font-weight:700;border-top:2px solid #1B5E20}.vt{break-inside:avoid;page-break-inside:avoid}.vt tr{break-inside:avoid}.vt th{background:#E8F5E9;color:#0D3B13;text-align:left;padding:6px 8px;font-size:11px}.vt th.r{text-align:right}.xr{margin:4px 0 0;font-size:12px;color:#0D3B13}.why{margin:10px 0 0;border:1px solid #C9DCC4;border-left:4px solid #1B5E20;background:#F4F9F2;padding:8px 12px;font-size:12px;color:#0D3B13;break-inside:avoid;page-break-inside:avoid}.why b{display:block;margin-bottom:3px}.why ul{margin:3px 0 5px;padding-left:18px}.why li{margin:1px 0}.big td{background:#1B5E20;color:#fff;font-size:14px;font-weight:700}'+
+      'tr.sec td{background:#E8F5E9;font-weight:700;color:#0D3B13;border-bottom:1px solid #C9DCC4}.tot td{font-weight:700;border-top:2px solid #1B5E20}.vt{break-inside:avoid;page-break-inside:avoid}.vt tr{break-inside:avoid}.vt th{background:#E8F5E9;color:#0D3B13;text-align:left;padding:6px 8px;font-size:11px}.vt th.r{text-align:right}.xr{margin:4px 0 0;font-size:12px;color:#0D3B13}.vn{margin:4px 0 2px;padding:3px 0 3px 9px;border-left:3px solid #7CB342;font-size:11px;line-height:1.45;color:#0D3B13;max-width:92%}.blk{break-inside:avoid;page-break-inside:avoid}tr.sec{break-after:avoid;page-break-after:avoid}.pgt>thead>tr>td{padding:0;border:0}.pgt table tr{break-inside:avoid;page-break-inside:avoid}.hd{padding:15px 32px}.hd img{height:40px}.pb{padding:9px 15px;margin:0 0 11px}.pb .lg img{height:42px}.g{gap:4px 24px;margin:0 0 10px}td{padding:4px 8px}h2{margin:11px 0 5px}.why{margin:10px 0 0;border:1px solid #C9DCC4;border-left:4px solid #1B5E20;background:#F4F9F2;padding:8px 12px;font-size:12px;color:#0D3B13;break-inside:avoid;page-break-inside:avoid}.why b{display:block;margin-bottom:3px}.why ul{margin:3px 0 5px;padding-left:18px}.why li{margin:1px 0}.big td{background:#1B5E20;color:#fff;font-size:14px;font-weight:700}'+
       'h2{break-after:avoid;font-size:14px;color:#1B5E20;border-bottom:2px solid #7CB342;padding-bottom:3px;margin:16px 0 6px}.terms{font-size:11.5px;color:#333}.terms li{margin:2px 0}'+
       '.sig{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:22px;break-inside:avoid;page-break-inside:avoid}.sig .b{border:1px solid #D7E1D4;border-radius:8px;padding:12px 14px;min-height:250px;position:relative}.sig .b h3{margin:0 0 4px;font-size:12.5px;color:#1B5E20}'+
       '.ln{border-bottom:1px solid #888;height:22px;margin-top:10px;font-size:11px;color:#777}.stamp{position:absolute;right:10px;bottom:8px;opacity:.9}.sgn{position:absolute;right:34px;bottom:30px;width:118px;height:auto;z-index:2}'+
@@ -4942,15 +4954,8 @@ var DL = (function(){
       '.wm{position:absolute;top:44%;left:0;right:0;text-align:center;font-size:110px;font-weight:800;color:rgba(200,30,30,.13);transform:rotate(-24deg);pointer-events:none;letter-spacing:10px}.dr{background:#FEE2E2;color:#991B1B;padding:6px 32px;font-weight:700;font-size:12px}';
     var h = '<!doctype html><html><head><meta charset="utf-8"><title>Quotation '+xesc(pxRef(d,n))+'</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"><style>'+css+'</style></head><body><div class="pg">';
     if(!sent) h += '<div class="dr">DRAFT PREVIEW. This quotation has not been issued yet. Mark it as sent to issue it.</div><div class="wm">DRAFT</div>';
-    h += '<div class="hd"><img src="'+LOGO_WHITE+'" alt="SOE"><div class="r"><h1>QUOTATION</h1></div></div><table class="pgt"><tbody><tr><td><div class="in">';
+    h += '<div class="hd"><img src="'+LOGO_WHITE+'" alt="SOE"><div class="r"><h1>QUOTATION</h1></div></div><table class="pgt"><thead><tr><td><div style="height:5mm"></div></td></tr></thead><tbody><tr><td><div class="in">';
     h += '<div class="pb">'+(d.logo ? '<div class="lg"><img src="'+d.logo+'" alt=""></div>' : '')+'<div><small>Prepared for</small><b>'+xesc(d.client)+'</b></div></div><div class="g"><div class="full qno"><b>Quotation no.</b><span>'+xesc(pxRef(d,n))+'</span></div><div><b>Quotation date</b>'+fdate(date)+'</div>'+((cname||(cp&&cp.mobile)) ? '<div><b>Attention</b>'+(cname?xesc(cname):'-')+'</div><div><b>Contact phone</b>'+((cp&&cp.mobile)?xesc(cp.mobile):'-')+'</div>' : '')+'<div><b>Solution</b>AI Contact Center, '+xesc((q.pkg||"")+" package")+'</div><div><b>Valid until</b>'+fdate(valid)+' ('+vd+' days)</div><div><b>Commitment term</b>'+T+' months</div><div class="full"><b>SOE presales</b>'+xesc(ln.n)+' &middot; '+pxPhone(ln.wa)+'</div></div>';
-    (function(){ var w = (q.scopeX||{}).mn; if(!w || !(w.t>0)) return;
-      var li = [], pad = w.p - w.t, pk = xesc(q.pkg||''), B = '<b style="display:inline;margin:0">';
-      if(w.hi && w.i>0) li.push('Inbound: '+nfmt(w.ic)+' calls a day &times; '+w.sh+'% handled by AI &times; '+w.il+' min &times; '+w.dy+' days = '+B+nfmt(w.i)+' AI minutes</b>');
-      if(w.ho && w.o>0) li.push('Outbound: '+nfmt(w.oc)+' calls a day &times; '+w.ol+' min &times; '+w.dy+' days = '+B+nfmt(w.o)+' AI minutes</b>');
-      var cy = (pad >= w.p*0.1) ? ' About '+nfmt(pad)+' AI minutes may stay unused in a month. They carry into the next billing month, are used first, and stay valid for 15 days.' : '';
-      var cl = pad>=0 ? (w.a ? 'Total '+nfmt(w.t)+' AI minutes a month. '+pk+' is the smallest package that covers this.' : 'Total '+nfmt(w.t)+' AI minutes a month. The '+pk+' package was selected and covers this.')+cy : 'Total '+nfmt(w.t)+' AI minutes a month. This is '+nfmt(-pad)+' above the package. The extra minutes are billed at the extra-minute rate below.';
-      h += '<div class="why"><b>Why the '+pk+' package ('+nfmt(w.p)+' AI minutes)</b>Based on the requirements confirmed by the customer:<ul>'+li.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>'+B+cl+'</b></div>'; })();
     h += '<h2>Charges (SAR'+(vat?', excluding VAT':', excluding VAT')+')</h2><table>'+body+'</table>';
     var qA = q.onePrice||0, qB = q.recPrice||0, qC = q.usagePrice||0, qM = qB+qC, qT = qA+qM*T;
     function vtr(lbl,x,cls){ var v = Math.round(x*0.15); return '<tr class="'+(cls||'')+'"><td>'+lbl+'</td><td class="r">'+sar2(x)+' SAR</td><td class="r">'+sar2(v)+' SAR</td><td class="r">'+sar2(x+v)+' SAR</td></tr>'; }
