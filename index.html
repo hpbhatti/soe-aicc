@@ -4107,7 +4107,7 @@ var DL = (function(){
 
   /* ---------- helpers ---------- */
   var LEADS = { hp:{n:"Hassan Pervaiz (HP) Bhatty", s:"Hassan", wa:"966591822663"}, hany:{n:"Hany Enam", s:"Hany", wa:"966568986308"} };
-  var STAGES = ["Draft","Link shared","Customer engaged","Quote requested","Partner validated","Quote sent","Pilot or Go live","Won"];
+  var STAGES = ["Draft","Link shared","Customer engaged","Quote requested","Partner validated","Quote sent","Go live","Won"];
   var SIDE = { lost:"Lost", hold:"On hold" };
   var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var DAY = 864e5;
@@ -4187,6 +4187,11 @@ var DL = (function(){
       Object.keys(patch).forEach(function(k){ setPath(o, k, patch[k]); });
       if(verPatch){ (o._vers||[]).forEach(function(v){ if(v.n===verPatch.n) Object.assign(v, verPatch.data); }); }
       o.ms = Date.now(); lsPut(all); return Promise.resolve();
+    },
+    /* the issued quotation, readable on the customer page (shares/{slug}/quote/current) */
+    putQuote: function(slug, doc){
+      if(live) return db.collection("shares").doc(slug).collection("quote").doc("current").set(doc);
+      return Promise.resolve();
     },
     /* delete one unsent version; later versions move down by one number */
     delVersion: function(id, n, vs){
@@ -4470,8 +4475,8 @@ var DL = (function(){
     var ev = evOf(d), want = -1, why = "", when = 0;
     var req = ev.filter(function(e){ return e.type==="request"; }).sort(function(a,b){ return a.ms-b.ms; });
     var opens = ev.filter(function(e){ return e.type==="open"; }).sort(function(a,b){ return a.ms-b.ms; });
-    var qr = req.filter(function(e){ return e.p.kind==="quote"; })[0], pg = req.filter(function(e){ return e.p.kind==="pilot"||e.p.kind==="golive"; })[0];
-    if(pg && d.stage<6){ want = 6; why = "The customer chose "+(pg.p.kind==="pilot"?"a pilot":"to go live")+"."; when = pg.ms; }
+    var qr = req.filter(function(e){ return e.p.kind==="quote"; })[0], pg = req.filter(function(e){ return e.p.kind==="pilot"||e.p.kind==="golive"||e.p.kind==="kickoff"; })[0];
+    if(pg && d.stage<6){ want = 6; why = "The customer chose "+(pg.p.kind==="pilot"?"a pilot":pg.p.kind==="kickoff"?"a kick-off date":"to go live")+"."; when = pg.ms; }
     else if(qr && d.stage<3){ want = 3; why = "The customer asked for a quote."; when = qr.ms; }
     else if(opens.length && d.stage<2 && lstate(d)!=="draft"){ want = 2; why = "The customer opened the link."; when = opens[0].ms; }
     if(want<0) return "";
@@ -4570,7 +4575,7 @@ var DL = (function(){
     return h + '</div></div>';
   }
 
-  var KIND = { ask:"Asked a question", call:"Requested a call back", meet:"Requested an online meeting", quote:"Requested a quote", pilot:"Chose a pilot", golive:"Chose to go live", discuss:"Asked to discuss" };
+  var KIND = { ask:"Asked a question", call:"Requested a call back", meet:"Requested an online meeting", quote:"Requested a quote", pilot:"Chose a pilot", golive:"Chose to go live", discuss:"Asked to discuss", accept:"Accepted the quotation", change:"Asked to change the requirements", kickoff:"Chose a kick-off date" };
   function actV(d, ev, un){
     if(!ev.length) return '<div class="act-box">The customer has not opened the link yet. Share it by WhatsApp or email from the Links tab.'+(live?'':' Customer activity needs the shared Firebase mode.')+'</div>';
     var seen = d.lastSeenMs||0, items = [], sess = {};
@@ -4845,7 +4850,7 @@ var DL = (function(){
   /* ---------- actions on a deal ---------- */
   function setStage(d, i, iso){
     var p = { stage:i, side:"" }; p["stageDates."+i] = iso || todayISO();
-    var qs = i===3 ? "req" : i===5 ? "sent" : null, sp = null;
+    var qs = i===3 ? "req" : i===5 ? "sent" : i===6 ? "sig" : null, sp = null;
     if(qs && d.quoteStatus!==qs){ p.quoteStatus = qs; sp = { quoteStatus:qs }; }
     if(i<3 && d.quoteStatus!=="none"){ p.quoteStatus = "none"; sp = { quoteStatus:"none" }; }
     return store.patch(d.id, p, sp, d.slug).then(function(){ return refresh2(); }).then(function(){ toast("Stage set to "+STAGES[i]+". Date recorded: "+fdate(p["stageDates."+i])+"."); });
@@ -5037,11 +5042,20 @@ var DL = (function(){
     store.patch(d.id, pt).then(function(){ try{ return db.collection("partnerShares").doc(p.key).update({active:false}); }catch(e){} }).then(function(){ return refresh2(d.id); })
       .then(function(){ toast("700Apps reply accepted. Stage: Partner validated."+(props.length?" "+props.length+" proposed change(s) are listed in Partner review.":"")); });
   }
+  function pxPublishQuote(d, n){
+    var vs = verCache[d.id]||[], v = vs.filter(function(x){ return x.n===n; })[0];
+    if(!d || !d.slug || !v || !v.sent || !vs[0] || vs[0].n!==n) return Promise.resolve();
+    var q = d.quote||{}, vd = v.vd||15, html = pxQuoteHtml(d, n, true, v.sentDate), ref = pxRef(d,n);
+    if(html.length > 900000 && d.logo) html = html.split(d.logo).join("");
+    html = html.replace("<head>", "<head><title>"+xesc(ref)+"</title>");
+    var doc = { html:html, ref:ref, n:n, sentDate:v.sentDate||todayISO(), valid:pxAddDays(v.sentDate||todayISO(), vd), vd:vd, oneTime:q.onePrice||0, monthly:(q.recPrice||0)+(q.usagePrice||0), term:q.term||12, vatOn:!!q.vatOn, createdAt:TS() };
+    return store.putQuote(d.slug, doc);
+  }
   function pxCustMsg(d, n){
     var ln = LEADS[leadKey(d.lead)], vs = verCache[d.id]||[], v = vs.filter(function(x){ return x.n===n; })[0] || {}, date = v.sentDate||todayISO();
     var rq = evOf(d).filter(function(e){ return e.type==="request"; })[0], who = rq ? rq.p.name : "Sir or Madam";
     var msg = "Dear "+who+",\nThank you for your time. Please find attached the SOE quotation "+pxRef(d,n)+" for the AI Contact Center.\nIt is valid until "+fdate(pxAddDays(date,pxVD(d,n)))+". Monthly charges start from go-live.\nPlease reply to confirm, or tell us what you would like to change.\nBest regards,\n"+ln.n+"\nSOE";
-    var o = pxModal('<h3 style="margin:0 0 6px">Quotation '+xesc(pxRef(d,n))+' is issued and locked</h3><p class="dl-meta">Step 1: press Preview, then Print or save as PDF. Step 2: send the PDF with this message. The customer page now shows: Your quote has been sent.</p><textarea readonly rows="8" style="width:100%;padding:8px;font:inherit">'+xesc(msg)+'</textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap"><button type="button" class="sm" data-cm="x">Close</button><button type="button" class="sm" data-cm="copy">Copy message</button><button type="button" class="sm" data-cm="mail">Open email</button><button type="button" class="sm" data-cm="prev">Preview the PDF</button><button type="button" class="sm pri" data-cm="wa">Open WhatsApp</button></div>', 580);
+    var o = pxModal('<h3 style="margin:0 0 6px">Quotation '+xesc(pxRef(d,n))+' is issued and locked</h3><p class="dl-meta">Step 1: press Preview, then Print or save as PDF. Step 2: send the PDF with this message. The customer can now read the quotation on their page and download it.</p><textarea readonly rows="8" style="width:100%;padding:8px;font:inherit">'+xesc(msg)+'</textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap"><button type="button" class="sm" data-cm="x">Close</button><button type="button" class="sm" data-cm="copy">Copy message</button><button type="button" class="sm" data-cm="mail">Open email</button><button type="button" class="sm" data-cm="prev">Preview the PDF</button><button type="button" class="sm pri" data-cm="wa">Open WhatsApp</button></div>', 580);
     o.addEventListener("click", function(e){
       var b = e.target.closest("[data-cm]"); if(!b) return;
       if(b.dataset.cm==="x") o.remove();
@@ -5057,9 +5071,9 @@ var DL = (function(){
     function btn(l, a, pri){ return '<button type="button" class="sm'+(pri?' pri':'')+'" '+a+'>'+l+'</button>'; }
     if(d.side==="hold"){ T = "On hold"; X = "The deal is paused. Press On hold again in the stage bar to resume."; }
     else if(st>=7){ T = "Won"; X = "The deal is won. The handover brief is in the Overview tab below."; }
-    else if(st===6){ T = "Pilot or go live"; X = "The customer started. When the contract is signed, mark the deal as Won."; B = [btn("Mark as Won",'data-sg="7"',1), btn("Mark as Lost",'data-side="lost"')]; }
+    else if(st===6){ T = "Go live"; X = "The agreement is signed. The customer page shows the Go live step and asks for a kick-off date. Go-live usually takes about 20 days after kick-off. When the solution is live, mark the deal as Won."; B = [btn("Mark as Won",'data-sg="7"',1), btn("Mark as Lost",'data-side="lost"')]; }
     else if(p.status==="sent"){ T = "Waiting for 700Apps"; X = "The pricing review was sent on "+fdate(p.sentAt)+". 700Apps confirms each line or proposes a change on their own page."; B = d._reply ? [btn("Review the 700Apps reply",'data-px="tab" data-v="pt"',1)] : [btn("Send the message again",'data-pmsg="1"',1), btn("Open Partner review",'data-px="tab" data-v="pt"')]; if(d._reply){ T = "700Apps replied"; X = "Review the answer and accept it. The deal then moves to Partner validated."; } }
-    else if(cv.sent){ T = "Quote v"+cv.n+" sent. Waiting for the customer"; X = "Sent "+fdate(cv.sentDate)+". Valid for "+(cv.vd||30)+" days. The sent version is locked. If the customer asks for a change, revise it: you will be asked why."; B = [btn("Customer asked for a change: revise",'data-px="revise" data-n="'+cv.n+'"',1), btn("Mark as Won",'data-sg="6"'), btn("Mark as Lost",'data-side="lost"'), btn("Preview the quotation",'data-px="qprev" data-n="'+cv.n+'"')]; }
+    else if(cv.sent){ T = "Quote v"+cv.n+" sent. Waiting for the customer"; X = "Sent "+fdate(cv.sentDate)+". Valid for "+(cv.vd||30)+" days. The sent version is locked. If the customer asks for a change, revise it: you will be asked why."; B = [btn("Customer asked for a change: revise",'data-px="revise" data-n="'+cv.n+'"',1), btn("Mark agreement signed",'data-sig="1"'), btn("Mark as Lost",'data-side="lost"'), btn("Preview the quotation",'data-px="qprev" data-n="'+cv.n+'"')]; var acc = evOf(d).filter(function(e){ return e.type==="request" && e.p.kind==="accept"; })[0]; if(acc){ if(d.quoteStatus!=="acc"){ T = "The customer accepted quote v"+cv.n; X = "Confirm it so the customer page shows Accepted. Then send the service agreement. When it is signed, press Mark agreement signed."; B.unshift(btn("Confirm acceptance",'data-setq="acc"',1)); } else { T = "Quote v"+cv.n+" accepted. Send the service agreement"; X = "The customer page shows: Waiting for the service agreement. When the agreement is signed, press Mark agreement signed."; B = [btn("Mark agreement signed",'data-sig="1"',1), btn("Customer asked for a change: revise",'data-px="revise" data-n="'+cv.n+'"'), btn("Mark as Lost",'data-side="lost"'), btn("Preview the quotation",'data-px="qprev" data-n="'+cv.n+'"')]; } } }
     else if(sent && !cv.sent){ T = "Revision v"+cv.n+" in progress"; X = "Reason: "+xesc(cv.why||"")+". "+(p.status==="validated" ? "700Apps pricing is still valid." : "This revision goes back to 700Apps first.")+" Edit, save the draft, preview, then mark it as sent."; B = [btn("Edit in calculator",'data-ld="1"',1), btn("Preview the quotation",'data-px="qprev" data-n="'+cv.n+'"'), btn("Go to Quote versions",'data-px="tab" data-v="qt"')]; if(p.status!=="validated") B.unshift(btn("Send to 700Apps again",'data-psend="1"',1)); }
     else if(st===0){ T = "Share the customer link"; X = "The customer sees the scope with no prices and confirms it."; B = [btn("Go to Links",'data-px="tab" data-v="lk"',1)]; }
     else if(st===1){ T = "Waiting for the customer"; X = "The link is shared. The customer opens it, checks the scope and asks for a quote. You see it in Customer activity."; B = [btn("Customer activity",'data-px="tab" data-v="act"',1)]; }
@@ -5069,6 +5083,16 @@ var DL = (function(){
     else { T = "Quote stage"; X = ""; }
     return '<div class="px-next"><div class="px-nx-l"><small>NEXT STEP</small><b>'+T+'</b><p>'+X+'</p></div><div class="px-nx-r">'+B.join("")+'</div></div>';
   }
+  document.addEventListener("click", function(e){
+    var q2 = e.target.closest("[data-setq],[data-sig]"); if(!q2 || !$("dl_panel") || !$("dl_panel").contains(q2)) return;
+    var d2 = curId ? find(curId) : null; if(!d2) return;
+    if(q2.dataset.setq==="acc"){ store.patch(d2.id, { quoteStatus:"acc" }, { quoteStatus:"acc" }, d2.slug).then(function(){ return refresh2(d2.id); }).then(function(){ toast("Acceptance confirmed. The customer page shows: Waiting for the service agreement."); }); return; }
+    if(q2.dataset.sig){
+      if(!confirm("Mark the agreement as signed? The customer page will show the Go live step.")) return;
+      var tdy = todayISO(), pp = { quoteStatus:"sig", stage:Math.max(d2.stage,6), side:"" }; pp["stageDates.6"] = (d2.stageDates&&d2.stageDates[6]) || tdy;
+      store.patch(d2.id, pp, { quoteStatus:"sig" }, d2.slug).then(function(){ return refresh2(d2.id); }).then(function(){ toast("Agreement marked as signed. The customer page shows the Go live step."); }); return;
+    }
+  });
   document.addEventListener("click", function(e){
     var b = e.target.closest("[data-px]"); if(!b || !$("dl_panel") || !$("dl_panel").contains(b)) return;
     var d = curId ? find(curId) : null; if(!d) return;
@@ -5175,7 +5199,7 @@ var DL = (function(){
     if(t.closest("[data-regen]")){
       if(!confirm("Create a new link? The old link will stop working straight away.")) return;
       var ns = slugify(d.client)+"-"+rcode(4), sh = { client:d.client, logo:d.logo||"", industry:d.industry, lead:leadKey(d.lead), active:(d.link.state==="active"), expiresAt:(d.link.expiresAt||0), quoteStatus:d.quoteStatus||"none", customerJson:d.cust, slug:ns };
-      store.moveShare(d.id, d.slug, ns, sh, { slug:ns }).then(function(){ return refresh2(); }).then(function(){ toast("New link created. The old link stopped working."); }); return;
+      store.moveShare(d.id, d.slug, ns, sh, { slug:ns }).then(function(){ return refresh2(d.id); }).then(function(){ var d2 = find(d.id); return d2 && d2.sentVersion ? pxPublishQuote(d2, d2.sentVersion).catch(function(){}) : null; }).then(function(){ toast("New link created. The old link stopped working."); }); return;
     }
     if(t.closest("[data-rqseen]")){ store.patch(d.id, { rqSeenMs:Date.now() }).then(function(){ return refresh2(d.id); }); return; }
     if(t.closest("[data-psend]")){ if(pxStale(d)){ toast("This quote was issued with older rules. Edit it in the calculator and save first."); return; } pxPartnerSend(d); return; }
@@ -5192,7 +5216,7 @@ var DL = (function(){
       if(!mg.mkRec && !mg.mkOne && !confirm("Version v"+vn+" has a 0% margin, so this quote carries no SOE margin. Mark it as sent anyway?")) return;
       var sd = ($("act_sentdate")&&$("act_sentdate").value) || todayISO();
       var p = { sentVersion:vn, stage:Math.max(d.stage,5), quoteStatus:"sent" }; p["stageDates.5"] = sd;
-      store.patch(d.id, p, { quoteStatus:"sent" }, d.slug, { n:vn, data:{ sent:true, sentDate:sd, ref:pxRef(d,vn), vd:15 } }).then(function(){ return refresh2(d.id); }).then(function(){ toast("v"+vn+" marked as sent and locked. The customer page now shows: Your quote has been sent."); pxCustMsg(find(d.id), vn); }); return;
+      store.patch(d.id, p, { quoteStatus:"sent" }, d.slug, { n:vn, data:{ sent:true, sentDate:sd, ref:pxRef(d,vn), vd:15 } }).then(function(){ return refresh2(d.id); }).then(function(){ return pxPublishQuote(find(d.id), vn).then(function(){ return ""; }, function(er){ return " The quotation could not be published to the customer page: "+(er.message||er)+". Press Mark as sent again after you fix the connection."; }); }).then(function(warn){ toast("v"+vn+" marked as sent and locked. The customer can now read the quotation on their page."+(warn||"")); pxCustMsg(find(d.id), vn); }); return;
     }
     if(t.closest("[data-apply]")){
       var s = szEvents(d);
