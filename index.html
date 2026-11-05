@@ -374,7 +374,7 @@ body.locked{overflow:hidden}
 .act-sd{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}.act-sd button{border:1px solid var(--rule);background:#fff;border-radius:20px;padding:3px 12px;font-size:11.5px;font-weight:700;color:#5F6F62;cursor:pointer}.act-sd button.on{background:#FEE2E2;color:#B91C1C;border-color:#FCA5A5}
 .act-sug{background:#FFF7E0;border:1px solid #F5DD9A;border-radius:8px;padding:9px 12px;font-size:12.5px;margin-top:10px}
 .act-k em{display:block;font-style:normal;font-size:11px;color:#5F6F62}
-.act-lock{background:#FEF3C7;border:1px solid #F5DD9A;border-radius:8px;padding:9px 12px;font-size:12.5px}
+.act-ok{background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:10px 12px;font-size:13px;color:#1A1A1A}.act-ok b{color:#0D3B13}.st-ok{color:#1B5E20;font-weight:700}.st-chg{color:#B45309;font-weight:700}.act-lock{background:#FEF3C7;border:1px solid #F5DD9A;border-radius:8px;padding:9px 12px;font-size:12.5px}
 .act-diff{background:#F3F7F1;border:1px solid var(--rule);border-radius:8px;padding:9px 12px;font-size:12.5px;margin-top:10px}
 #act_pvw{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9998;overflow:auto;padding:24px 12px}
 .act-pv{max-width:760px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden}
@@ -4544,9 +4544,21 @@ var DL = (function(){
         h += '<div class="act-sug"><b>Reply from '+xesc(pr.by||"700Apps")+'</b> &middot; valid until '+(pr.valid?fdate(pr.valid):"not set")+'<br>'+(ans.length-chg.length)+' line(s) confirmed, '+chg.length+' change(s) proposed.'+chg.map(function(a){ return '<br>'+xesc(a.n)+': '+xesc(a.from)+' to '+xesc(a.to)+' SAR. '+xesc(a.why||""); }).join("")+(pr.note?'<br>Note: '+xesc(pr.note):'')+(pr.qa&&pr.qa.length ? '<br><b>Answers to your questions</b>'+pr.qa.map(function(x){ return '<br>'+xesc(x.q)+': '+xesc(x.a||'no answer'); }).join('') : '')+'<br><button type="button" class="sm pri" data-px="pacc">Accept the reply and move to Partner validated</button></div>';
       }
     }
-    if(p.status==="validated") h += '<div class="act-lock"><b>Validated by 700Apps</b> &middot; round R'+p.round+' &middot; valid until '+fdate(p.valid)+'. Pricing is confirmed for the scope as it stands.'+(p.qa&&p.qa.length ? '<br><b>Answers to your questions</b>'+p.qa.map(function(x){ return '<br>'+xesc(x.q)+': '+xesc(x.a||'no answer'); }).join('') : '')+'</div><div style="margin-top:8px"><button type="button" class="sm" data-psend="1">Send a new round (R'+(p.round+1)+') if the scope changed</button></div>';
+    var pvl = p.status==="validated";
+    if(pvl){
+      var pps = p.props || (p.prop ? [p.prop] : []), chm = {}; pps.forEach(function(x){ chm[x.name] = x; });
+      var nl = ql.length, nch = pps.length;
+      h += '<div class="act-ok"><b>Validated by '+xesc(p.by||"700Apps")+'</b>'+(p.repliedAt ? ' on '+fdate(p.repliedAt) : '')+' &middot; round R'+p.round+'.<br>These rates are locked until <b>'+(p.valid?fdate(p.valid):"a date that was not set")+'</b>. You can build the quotation on them.<div style="margin-top:6px"><b>'+(nl-nch)+' of '+nl+' lines confirmed'+(nch ? ', '+nch+' change'+(nch>1?'s':'')+' proposed' : ', no changes')+'.</b></div>'+(p.note ? '<div style="margin-top:6px">Note from 700Apps: '+xesc(p.note)+'</div>' : '')+'</div>';
+      if(p.qa && p.qa.length) h += '<div class="act-h" style="margin-top:14px">Answers to your questions</div><table class="act-t" style="margin-top:6px"><tbody>'+p.qa.map(function(x){ return '<tr><td style="width:45%">'+xesc(x.q)+'</td><td>'+xesc(x.a||'No answer')+'</td></tr>'; }).join('')+'</tbody></table>';
+      h += '<div style="margin:12px 0 4px;display:flex;gap:6px;flex-wrap:wrap">'+(p.key ? '<button type="button" class="sm" data-pmsg="1">Show partner link</button>' : '')+'<button type="button" class="sm" data-psend="1">Send a new round (R'+(p.round+1)+') if the scope changed</button></div>';
+    }
     if(p.props && p.props.length) h += '<div class="act-sug"><b>700Apps proposes '+p.props.length+' change'+(p.props.length>1?'s':'')+'</b><br>'+p.props.map(function(x){ return xesc(x.name)+': '+xesc(x.from)+' to '+xesc(x.to)+' SAR. '+xesc(x.why); }).join('<br>')+'<br>They change nothing until you act. Update the calculator, then send a new round if needed.<br><button type="button" class="sm pri" data-pres="1">Mark as handled</button></div>';
     if(p.prop && !p.props) h += '<div class="act-sug"><b>700Apps proposes a change</b><br>'+xesc(p.prop.name)+': '+xesc(p.prop.from)+' to '+xesc(p.prop.to)+' SAR. Comment: '+xesc(p.prop.why)+'<br>It changes nothing until you act. Update the calculator, then send a new round if needed.<br><button type="button" class="sm pri" data-pres="1">Mark as handled</button></div>';
+    if(pvl){
+      h += '<div class="act-h" style="margin-top:14px">Confirmed rates, SAR</div><table class="act-t" style="margin-top:6px"><thead><tr><th>Line</th><th>Rate</th><th>Status</th></tr></thead><tbody>'+(ql.length ? ql.map(function(l){ if(Array.isArray(l)) l = {n:l[0], v:l[1]}; var c = chm[l.n]; return '<tr><td>'+xesc(l.n)+'</td><td>'+sar2(l.v)+'</td><td>'+(c ? '<span class="st-chg">Change proposed: '+xesc(c.from)+' to '+xesc(c.to)+' SAR</span>'+(c.why ? '<br><small>'+xesc(c.why)+'</small>' : '') : '<span class="st-ok">&#10003; Confirmed</span>')+'</td></tr>'; }).join("") : '<tr><td colspan="3">No lines stored.</td></tr>')+'</tbody></table>';
+      h += '<div class="dl-meta" style="margin-top:8px"><b>Never shown to 700Apps:</b> SOE margin, discounts and customer prices.</div></div>';
+      return h;
+    }
     h += '<div class="act-h" style="margin-top:14px">Questions for 700Apps (optional)</div><div class="dl-meta">One question per line, up to 8. 700Apps sees them on their page and types an answer for each. The questions are sent when you press Send or Regenerate.</div><textarea id="px_qs" rows="5" maxlength="1500" style="width:100%;padding:8px;font:inherit;margin-top:6px" placeholder="For example: Can the customer keep its current WhatsApp number?">'+xesc(p.qs!=null ? p.qs : pxSuggestQs(d))+'</textarea><div class="dl-meta" style="margin-top:4px">'+(p.qs!=null ? '' : 'These questions were written from the customer\'s choices. Edit or delete any line before you send.')+'</div>';
     h += '<div class="act-h" style="margin-top:14px">What 700Apps sees on their page</div><div class="dl-meta">The scope (flows, systems, channels, sizing), then their own rates. Each line: Confirm or Propose a change. At the end: their name, a valid-until date and one button to send the answer. The page has no SOE margin and no customer price.</div>';
     h += '<table class="act-t" style="margin-top:8px"><thead><tr><th>Line</th><th>700Apps rate, SAR</th></tr></thead><tbody>'+(ql.length ? ql.map(function(l){ if(Array.isArray(l)) l = {n:l[0], v:l[1]}; return '<tr><td>'+xesc(l.n)+'</td><td>'+sar2(l.v)+'</td></tr>'; }).join("") : '<tr><td colspan="2">Save the deal in the calculator to list the lines.</td></tr>')+'</tbody></table>';
@@ -4710,7 +4722,14 @@ var DL = (function(){
       h += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'+(s==="disabled" ? '<button type="button" class="sm pri" data-en="1">Enable link</button>' : '<button type="button" class="sm danger" data-dis2="1">Disable link now</button>')+'<button type="button" class="sm" data-regen="1">Create a new link (the old one stops working)</button></div>';
     }
     h += '<div class="dl-meta" style="margin-top:10px">Customers see no prices. The WhatsApp button on their page goes to '+ln.s+'. An expired or disabled link shows a friendly page with a WhatsApp button.</div></div>';
-    h += '<div class="act-box"><div class="act-h">Partner review link</div><div class="dl-meta">Coming in the next build. For now, use "Requirements brief" at the top of the deal to share the requirements with your partner as a PDF.</div></div>';
+    var pp = d.partner || {}, pst = pp.status;
+    h += '<div class="act-box"><div class="act-h">Partner review link</div>';
+    if(pp.key && (pst==="sent" || pst==="validated")){
+      var pl = pxBase()+"#"+pp.key;
+      h += '<div class="act-link">'+xesc(pl)+'</div><div class="dl-meta" style="margin:8px 0">Status: '+(pst==="validated" ? '<span class="bdg done">VALIDATED</span> &middot; round R'+pp.round+' &middot; rates valid until '+(pp.valid?fdate(pp.valid):'not set')+'. The link is closed after validation. Keep it as a record.' : '<span class="bdg none">WAITING FOR 700APPS</span> &middot; round R'+pp.round+' sent '+fdate(pp.sentAt)+'.')+'</div>';
+      h += '<div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="sm pri" data-pcp="c">Copy link</button><button type="button" class="sm act-wa" data-pcp="w">Send on WhatsApp</button><button type="button" class="sm" data-pmsg="1">Show the message (copy, email)</button></div>';
+    } else h += '<div class="dl-meta">No partner link yet. It is created when you press Send to 700Apps in the Partner review tab, after the customer confirms the scope.</div>';
+    h += '</div>';
     return h;
   }
 
@@ -5041,7 +5060,7 @@ var DL = (function(){
   function pxPartnerAccept(d){
     var p = d.partner||{}, r = d._reply; if(!r) return;
     var pr = r.p||{}, props = (pr.answers||[]).filter(function(a){ return a.v==="chg"; }).map(function(a){ return { name:a.n, from:a.from, to:+a.to, why:a.why||"" }; });
-    var pt = { partner:{ status:"validated", round:p.round||1, key:p.key, sentAt:p.sentAt||todayISO(), valid:pr.valid||"", prop:props[0]||null, props:props, by:pr.by||"", note:pr.note||"", qa:(pr.qa||[]).slice(0,8), qs:p.qs||"" } };
+    var pt = { partner:{ status:"validated", round:p.round||1, key:p.key, sentAt:p.sentAt||todayISO(), valid:pr.valid||"", prop:props[0]||null, props:props, by:pr.by||"", repliedAt:(r.ms ? new Date(r.ms).toISOString().slice(0,10) : todayISO()), note:pr.note||"", qa:(pr.qa||[]).slice(0,8), qs:p.qs||"" } };
     if(d.stage<4){ pt.stage = 4; pt["stageDates.4"] = todayISO(); }
     store.patch(d.id, pt).then(function(){ try{ return db.collection("partnerShares").doc(p.key).update({active:false}); }catch(e){} }).then(function(){ return refresh2(d.id); })
       .then(function(){ toast("700Apps reply accepted. Stage: Partner validated."+(props.length?" "+props.length+" proposed change(s) are listed in Partner review.":"")); });
@@ -5214,6 +5233,7 @@ var DL = (function(){
     }
     if(t.closest("[data-rqseen]")){ store.patch(d.id, { rqSeenMs:Date.now() }).then(function(){ return refresh2(d.id); }); return; }
     if(t.closest("[data-psend]")){ if(pxStale(d)){ toast("This quote was issued with older rules. Edit it in the calculator and save first."); return; } pxPartnerSend(d); return; }
+    if(t.closest("[data-pcp]")){ var pq = d.partner||{}; if(!pq.key) return; var plk = pxBase()+"#"+pq.key, bb2 = t.closest("[data-pcp]"); if(bb2.dataset.pcp==="w"){ try{ window.open("https://wa.me/?text="+encodeURIComponent(pxPartnerMsgText(d, pq.round, plk)), "_blank"); }catch(x){} } else pxCopy(plk, bb2); return; }
     if(t.closest("[data-pmsg]")){ var pm = d.partner||{}; if(pm.key) pxPartnerModal(d, pm.round, pxBase()+"#"+pm.key); return; }
     if(t.closest("[data-pres]")){ var p3 = Object.assign({}, d.partner, {prop:null, props:[]}); store.patch(d.id, { partner:p3 }).then(function(){ return refresh2(d.id); }); return; }
     if(t.closest("[data-prep]")){ store.patch(d.id, { quoteStatus:"prep" }, { quoteStatus:"prep" }, d.slug).then(function(){ return refresh2(); }).then(function(){ toast("The customer page now shows: Our team is preparing your quote."); }); return; }
