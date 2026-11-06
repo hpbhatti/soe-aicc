@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -4513,7 +4513,9 @@ var DL = (function(){
     var R = dashRange();
     function inR(iso){ return !!iso && (!R.f || iso>=R.f) && (!R.t || iso<=R.t); }
     var D = deals.filter(function(d){ return !d.test; });
-    function qm(d){ return +((d.quote||{}).recPrice)||0; }
+    function qf(d){ return +((d.quote||{}).recPrice)||0; }
+    function qu(d){ return +((d.quote||{}).usagePrice)||0; }
+    function qm(d){ return qf(d)+qu(d); }
     function y1(d){ var q = d.quote||{}; return qm(d)*(q.term||12)+(+q.onePrice||0); }
     function mg(d){ return +((d.quote||{}).soeMargin)||0; }
     function mm(d){ return +((d.quote||{}).soeMarginMonthly)||0; }
@@ -4526,7 +4528,7 @@ var DL = (function(){
         won = D.filter(function(d){ return !d.side && d.stage>=6 && inR(wonDate(d)); }), lost = D.filter(function(d){ return d.side==="lost" && inR(lostDate(d)); }),
         live = D.filter(function(d){ return !d.side && d.stage>=7 && inR(liveDate(d)); }), signedWait = D.filter(function(d){ return !d.side && d.stage===6; }), liveNow = D.filter(function(d){ return !d.side && d.stage>=7; }), signedAll = D.filter(function(d){ return !d.side && d.stage>=6; }),
         created = D.filter(function(d){ return inR(d.dealDate); }), newLeads = leads.filter(function(x){ return inR(isoOf(x.ms)); });
-    function tile(lab, a, cls, extra){ return '<div class="db-t '+(cls||"")+'"><small>'+lab+'</small><b>SAR '+sar2(sum(a,qm))+'<i> / month</i></b><em>'+a.length+(a.length===1?" deal":" deals")+' &middot; first year SAR '+sar2(sum(a,y1))+'</em>'+(extra?'<em>'+extra+'</em>':'')+'</div>'; }
+    function tile(lab, a, cls, extra){ return '<div class="db-t '+(cls||"")+'"><small>'+lab+'</small><b>SAR '+sar2(sum(a,qm))+'<i> / month</i></b><em>'+a.length+(a.length===1?" deal":" deals")+' &middot; contract value SAR '+sar2(sum(a,y1))+'</em><em>of which fixed SAR '+sar2(sum(a,qf))+', usage estimate SAR '+sar2(sum(a,qu))+' per month</em>'+(extra?'<em>'+extra+'</em>':'')+'</div>'; }
     function mtile(lab, a, note){ return '<div class="db-t soe"><small>'+lab+'</small><b>SAR '+sar2(sum(a,mm))+'<i> / month</i></b><em>One-time margin SAR '+sar2(sum(a,mo))+'</em><em>Over the contract term SAR '+sar2(sum(a,mg))+' &middot; '+note+'</em></div>'; }
     function ctile(lab, n, note){ return '<div class="db-t"><small>'+lab+'</small><b>'+n+'</b><em>'+note+'</em></div>'; }
     var share = sum(open,y1) ? Math.round(sum(open,mg)/sum(open,y1)*100) : 0;
@@ -4534,11 +4536,11 @@ var DL = (function(){
     var h = '<div class="db"><div class="db-p"><div class="pc"><label>Period <select id="db_k">'+opts.map(function(o){ return '<option value="'+o[0]+'"'+(dashP.k===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("")+'</select></label>'+
       (dashP.k==="custom" ? '<label>From <input type="date" id="db_f" value="'+xesc(dashP.from)+'"></label><label>To <input type="date" id="db_t" value="'+xesc(dashP.to)+'"></label>' : '')+'</div><div class="pl">'+xesc(R.txt)+'</div></div>'+
       '<div class="db-h">Activity in the period</div><div class="db-g">'+ctile("New leads", newLeads.length, "website and added by you")+ctile("New deals created", created.length, "by deal date")+ctile("Deals closed", won.length+lost.length, won.length+" won, "+lost.length+" lost")+'</div>'+
-      '<div class="db-h">Customer value <span>what the customer pays</span></div><div class="db-g">'+tile("Open pipeline, as of today", open)+tile("Signed (Won) in the period", won, "won")+tile("Lost in the period", lost, "lost", hold.length ? "Plus "+hold.length+(hold.length===1?" deal":" deals")+" on hold now" : "")+'</div>'+'<div class="db-g" style="margin-top:8px">'+tile("Went live in the period", live, "won")+tile("Signed, not yet live, as of today", signedWait, "", "Waiting for Go live")+tile("Live now, all time", liveNow, "won", "Customers running today")+'</div>'+
-      '<div class="db-h">SOE margin <span>your income (internal). Monthly is the average over the term, after any discount, with usage at estimate.</span></div><div class="db-g">'+mtile("In the open pipeline, as of today", open, "from "+open.length+" open deals")+mtile("On deals signed (won) in the period", won, "from "+won.length+(won.length===1?" signed deal":" signed deals"))+mtile("Live now, all time", liveNow, "from "+liveNow.length+" live. All signed deals: SAR "+sar2(sum(signedAll,mm))+" / month")+'</div><div class="db-g" style="margin-top:8px">'+mtile("Signed, not yet live, as of today", signedWait, "from "+signedWait.length+" waiting for Go live")+'<div class="db-t soe"><small>Margin share of open value</small><b>'+share+'%</b><em>Term margin divided by first-year customer value</em></div></div>';
+      '<div class="db-h">Customer value <span>what the customer pays, excluding VAT. Usage is an estimate.</span></div><div class="db-g">'+tile("Open pipeline, as of today", open)+tile("Signed (Won) in the period", won, "won")+tile("Lost in the period", lost, "lost", hold.length ? "Plus "+hold.length+(hold.length===1?" deal":" deals")+" on hold now" : "")+'</div>'+'<div class="db-g" style="margin-top:8px">'+tile("Went live in the period", live, "won")+tile("Signed, not yet live, as of today", signedWait, "", "Waiting for Go live")+tile("Live now, all time", liveNow, "won", "Customers running today")+'</div>'+
+      '<div class="db-h">SOE margin <span>your income (internal). Monthly is the average over the term, after any discount, with usage at estimate.</span></div><div class="db-g">'+mtile("In the open pipeline, as of today", open, "from "+open.length+(open.length===1?" open deal":" open deals"))+mtile("On deals signed (won) in the period", won, "from "+won.length+(won.length===1?" signed deal":" signed deals"))+mtile("Live now, all time", liveNow, "from "+liveNow.length+" live. All signed deals: SAR "+sar2(sum(signedAll,mm))+" / month")+'</div><div class="db-g" style="margin-top:8px">'+mtile("Signed, not yet live, as of today", signedWait, "from "+signedWait.length+" waiting for Go live")+'<div class="db-t soe"><small>Margin share of open value</small><b>'+share+'%</b><em>Term margin divided by contract value</em></div></div>';
     function rowSet(i){ return i<6 ? open.filter(function(d){ return d.stage===i; }) : i===6 ? won : live; }
     var mx = 1; STAGES.forEach(function(x,i){ var a = rowSet(i); mx = Math.max(mx, sum(a,qm)); });
-    h += '<div class="db-h">Pipeline by stage <span>open stages as of today. Signed (Won) and Go live are for the period. Lost and on hold deals are not included.</span></div><div class="db-st">';
+    h += '<div class="db-h">Pipeline by stage <span>SAR per month including usage estimate. Open stages as of today. Signed (Won) and Go live are for the period. Lost and on hold deals are not included.</span></div><div class="db-st">';
     STAGES.forEach(function(x,i){ var a = rowSet(i), v = sum(a,qm);
       h += '<div class="db-r"><span class="n">'+(i+1)+'. '+x+(i===6?" (Won)":"")+'</span><span class="bar"><i style="width:'+Math.round(v/mx*100)+'%" class="'+(i===6?"w":i===7?"g":"")+'"></i></span><span class="c">'+a.length+(a.length===1?" deal":" deals")+'</span><span class="v">SAR '+sar2(v)+'</span></div>'; });
     h += '</div>';
