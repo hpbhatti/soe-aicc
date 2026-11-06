@@ -4465,6 +4465,12 @@ var DL = (function(){
   }
   function withSoe(q, mg){ return Object.assign(q, soeParts(q, mg)); }
   var soeTried = false;
+  function srcFix(){
+    if(!canUse()) return Promise.resolve(0);
+    var bad = deals.filter(function(d){ return d.leadId && d.source==="inbound" && leads.some(function(x){ return x.id===d.leadId && x.src; }); });
+    if(!bad.length) return Promise.resolve(0);
+    return Promise.all(bad.map(function(d){ return soeSet(d.id, { source:"outbound" }).then(function(){ return 1; }).catch(function(){ return 0; }); })).then(function(a){ return a.reduce(function(t,x){ return t+x; },0); });
+  }
   function soeMigrate(){
     if(soeTried || !canUse()) return Promise.resolve(0); soeTried = true;
     var need = deals.filter(function(d){ return d.quote && d.quote.soeMargin==null; });
@@ -5019,7 +5025,7 @@ var DL = (function(){
     }
     /* new deal, or a new copy */
     var slug = slugify(name)+"-"+rcode(4), dd = c.dealDate;
-    var deal = { source:(edit&&edit.leadId?"inbound":"outbound"), leadId:(edit&&edit.leadId)||"", client:name, industry:c.ind, industryLabel:c.indLabel, lead:c.lead, dealDate:dd, schemaRev:2, stage:0, side:"", partner:{status:"none", round:0, sentAt:"", valid:"", prop:null}, stageDates:{0:dd}, link:{state:"draft", days:20, sharedAt:0, expiresAt:0}, slug:slug,
+    var deal = { source:(edit&&edit.leadId&&!(edit.leadObj&&edit.leadObj.src)?"inbound":"outbound"), leadId:(edit&&edit.leadId)||"", client:name, industry:c.ind, industryLabel:c.indLabel, lead:c.lead, dealDate:dd, schemaRev:2, stage:0, side:"", partner:{status:"none", round:0, sentAt:"", valid:"", prop:null}, stageDates:{0:dd}, link:{state:"draft", days:20, sharedAt:0, expiresAt:0}, slug:slug,
       version:1, sentVersion:0, quoteStatus:"none", quote:c.quote, stateJson:c.state, cust:custJson, logo:CUST_LOGO, notes:"", contact:"", lastSeenMs:0, won:{type:"",start:"",ref:""} };
     var ver = { n:1, date:dd, rec:c.quote.recPrice, one:c.quote.onePrice, why:kind==="copy" ? "Copy of "+((find(edit&&edit.id)||{}).client||"another deal") : "First draft", sent:false, sentDate:"", stateJson:c.state, margin:c.margin };
     var share = { client:name, logo:CUST_LOGO, industry:c.ind, lead:leadKey(c.lead), active:false, expiresAt:0, quoteStatus:"none", customerJson:custJson, slug:slug };
@@ -5041,7 +5047,7 @@ var DL = (function(){
       deals.forEach(function(d){ var p = d.partner||{}; d._reply = (p.status==="sent" && p.key) ? (r[2].filter(function(x){ return x.key===p.key; })[0] || null) : null; });
       var ids = openId ? [openId] : (curId && view==="detail" ? [curId] : []);
       return Promise.all(ids.map(function(id){ return store.versions(id).then(function(v){ verCache[id] = v; }); }));
-    }).then(draw).then(function(){ return soeMigrate().then(function(n){ if(n){ return refresh2().then(function(){ toast("Margin figures were added to "+n+" older "+(n===1?"deal":"deals")+" for the dashboard."); }); } }); }).catch(function(e){ status("Could not read deals: "+(e.message||e), true); });
+    }).then(draw).then(function(){ return srcFix().then(function(k){ if(k) return refresh2(); }); }).then(function(){ return soeMigrate().then(function(n){ if(n){ return refresh2().then(function(){ toast("Margin figures were added to "+n+" older "+(n===1?"deal":"deals")+" for the dashboard."); }); } }); }).catch(function(e){ status("Could not read deals: "+(e.message||e), true); });
   }
   function draw(){
     var box = $("dl_list"), bar = document.querySelector(".dl-bar");
@@ -5510,7 +5516,7 @@ var DL = (function(){
 
   drawAuth(); showLogo(); banner();
   try{ if(sessionStorage.getItem("aicc_newdeal")){ sessionStorage.removeItem("aicc_newdeal"); edit = { mode:"new" }; var fl = sessionStorage.getItem("aicc_fromlead"); sessionStorage.removeItem("aicc_fromlead");
-    if(fl){ var lo = null; try{ lo = JSON.parse(fl); }catch(x){} if(lo && lo.company){ edit.leadId = lo.id; edit.leadObj = lo; $("clientName").value = lo.company; setTimeout(function(){ toast("Started from the inbound lead from "+lo.company+". The company name is filled in. Contact: "+lo.name+", "+lo.mobile+"."); }, 400); } }
+    if(fl){ var lo = null; try{ lo = JSON.parse(fl); }catch(x){} if(lo && lo.company){ edit.leadId = lo.id; edit.leadObj = lo; $("clientName").value = lo.company; setTimeout(function(){ toast("Started from the "+(lo.src?"outbound":"inbound")+" lead from "+lo.company+". The company name is filled in. Contact: "+lo.name+", "+lo.mobile+"."); }, 400); } }
     banner(); } }catch(x){}
   if(live) auth.onAuthStateChanged(function(u){ user = u; drawAuth(); status(""); refresh2(); });
   else refresh2();
