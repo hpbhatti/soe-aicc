@@ -4146,6 +4146,7 @@ var DL = (function(){
   function pad(n){ return ("0"+n).slice(-2); }
   function isoOf(ms){ var d = new Date(ms); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
   function todayISO(){ return isoOf(Date.now()); }
+  function fdt(ms){ if(!ms) return "time not recorded"; var d = new Date(ms); return d.getDate()+" "+MON[d.getMonth()]+" "+d.getFullYear()+", "+pad(d.getHours())+":"+pad(d.getMinutes()); }
   function fdate(iso){ if(!iso) return ""; var p = String(iso).split("-"); return (+p[2])+" "+MON[(+p[1])-1]+" "+p[0]; }
   function fshort(iso){ if(!iso) return ""; var p = String(iso).split("-"); return (+p[2])+" "+MON[(+p[1])-1]; }
   function fms(ms){ return ms ? fdate(isoOf(ms)) : ""; }
@@ -4171,9 +4172,9 @@ var DL = (function(){
   var store = {
     list: function(){
       if(live) return db.collection("deals").orderBy("updatedAt","desc").limit(300).get().then(function(s){
-        return s.docs.map(function(x){ var o = x.data(); o.id = x.id; o.ms = (o.updatedAt && o.updatedAt.toMillis) ? o.updatedAt.toMillis() : Date.now(); return o; });
+        return s.docs.map(function(x){ var o = x.data(); o.id = x.id; o.ms = (o.updatedAt && o.updatedAt.toMillis) ? o.updatedAt.toMillis() : Date.now(); o.cms = (o.createdAt && o.createdAt.toMillis) ? o.createdAt.toMillis() : 0; return o; });
       });
-      var all = lsAll(); return Promise.resolve(Object.keys(all).map(function(k){ var o = Object.assign({}, all[k]); o.id = k; delete o._vers; return o; }).sort(function(a,b){ return b.ms-a.ms; }));
+      var all = lsAll(); return Promise.resolve(Object.keys(all).map(function(k){ var o = Object.assign({}, all[k]); o.id = k; o.cms = o.cms || o.ms; delete o._vers; return o; }).sort(function(a,b){ return b.ms-a.ms; }));
     },
     get: function(id){
       if(live) return db.collection("deals").doc(id).get().then(function(x){ if(!x.exists) throw new Error("Deal not found"); var o = x.data(); o.id = id; return o; });
@@ -4251,10 +4252,14 @@ var DL = (function(){
       }
       return store.patch(id, patch);
     },
-    remove: function(id, slug){
+    remove: function(id, slug, pkey){
       if(live){
-        return db.collection("deals").doc(id).collection("versions").get().then(function(s){
-          var b = db.batch(); s.docs.forEach(function(x){ b.delete(x.ref); });
+        var qs = [db.collection("deals").doc(id).collection("versions").get()];
+        qs.push(slug ? db.collection("shares").doc(slug).collection("quote").get().catch(function(){ return {docs:[]}; }) : Promise.resolve({docs:[]}));
+        qs.push(slug ? db.collection("responses").where("slug","==",slug).limit(400).get().catch(function(){ return {docs:[]}; }) : Promise.resolve({docs:[]}));
+        return Promise.all(qs).then(function(r){
+          var b = db.batch(); r[0].docs.concat(r[1].docs).concat(r[2].docs).forEach(function(x){ b.delete(x.ref); });
+          if(pkey) b.delete(db.collection("partnerShares").doc(pkey));
           b.delete(db.collection("deals").doc(id)); if(slug) b.delete(db.collection("shares").doc(slug)); return b.commit();
         });
       }
@@ -4451,6 +4456,25 @@ var DL = (function(){
     if(live) return db.collection("leads").add(Object.assign({}, o, { createdAt:TS(), by:(user&&user.email)||"" }));
     var a = lsLeads(); a.push(Object.assign({ id:"m"+Date.now().toString(36), ms:Date.now() }, o)); lsLeadsPut(a); return Promise.resolve();
   }
+  function leadNote(l){
+    if(!l || !l.company) return "";
+    var o = ["From the "+(l.src ? "outbound lead ("+l.src+")" : "website lead")+", received "+fdt(l.ms)+"."];
+    if(!l.src){ o.push("Biggest problem: "+(l.problem==="other" ? ("something else - "+(l.other||"")) : (PROB[l.problem]||l.problem))+"."); o.push("How they want us to follow up: "+(FUP[l.follow]||"")); if(l.example) o.push("Their example: "+l.example); }
+    else if(l.note) o.push("Note: "+l.note);
+    return o.join("\n");
+  }
+  var PAINMAP = { sales:"leadslost", team:"overwhelm", service:"holdtimes", visibility:"novisibility" };
+  function autoLead(){
+    if(!window.__autoLead || !canUse() || !edit || !edit.leadObj) return;
+    window.__autoLead = false;
+    var l = edit.leadObj, ind = $("industry"); ind.value = "other"; ind.dispatchEvent(new Event("change"));
+    var pid = PAINMAP[l.problem]; if(pid){ var cb = $("painPointsWrap").querySelector('input[value="'+pid+'"]'); if(cb && !cb.checked){ cb.checked = true; cb.dispatchEvent(new Event("change")); } }
+    doSave("new");
+  }
+  function leadDel(id){
+    if(live) return db.collection("leads").doc(id).delete();
+    lsLeadsPut(lsLeads().filter(function(x){ return x.id!==id; })); return Promise.resolve();
+  }
   function leadSet(id, p){
     if(live) return db.collection("leads").doc(id).update(p);
     var a = lsLeads(); a.forEach(function(x){ if(x.id===id) Object.assign(x, p); }); lsLeadsPut(a); return Promise.resolve();
@@ -4582,9 +4606,9 @@ var DL = (function(){
     L.sort(function(a,b){ var o = {hi:0,md:1,lo:2}; return (o[prio(a)[0]]-o[prio(b)[0]]) || (b.ms-a.ms); });
     L.forEach(function(l){
       var pr = prio(l), prob = l.problem==="other" ? ("Something else: "+xesc(l.other||"")) : xesc(PROB[l.problem]||l.problem);
-      h += '<div class="ld-row"><div><div class="nm">'+xesc(l.company)+(l.src ? ' <span class="bdg out">OUTBOUND</span>' : ' <span class="bdg in">INBOUND</span>')+'</div><div class="mt">'+xesc(l.name)+' &middot; <a href="tel:'+xesc(l.mobile)+'" dir="ltr">'+xesc(l.mobile)+'</a></div><div class="mt">Added '+ago(l.ms)+' &middot; '+(l.src ? 'source: '+xesc(l.src) : 'from the website, page language: '+(l.lang==="ar"?"Arabic":"English"))+'</div></div>'+
+      h += '<div class="ld-row"><div><div class="nm">'+xesc(l.company)+(l.src ? ' <span class="bdg out">OUTBOUND</span>' : ' <span class="bdg in">INBOUND</span>')+'</div><div class="mt">'+xesc(l.name)+' &middot; <a href="tel:'+xesc(l.mobile)+'" dir="ltr">'+xesc(l.mobile)+'</a></div><div class="mt"><b>'+fdt(l.ms)+'</b> &middot; added '+ago(l.ms)+' &middot; '+(l.src ? 'source: '+xesc(l.src) : 'from the website, page language: '+(l.lang==="ar"?"Arabic":"English"))+'</div></div>'+
         (l.src ? '<div class="q"><b>Source</b>'+xesc(l.src)+(l.note?'<b>Your note</b>'+xesc(l.note):'')+'</div>' : '<div class="q"><b>Biggest problem</b>'+prob+'<b>How they want us to follow up</b>'+xesc(FUP[l.follow]||"")+(l.example?'<b>Their example</b>'+xesc(l.example):'')+'</div>')+
-        '<div><div class="ld-pr '+pr[0]+'"><i></i>'+pr[1]+' priority</div><div class="mt" style="margin:-4px 0 8px">'+pr[2]+'</div><div class="ld-acts"><button type="button" class="sm pri" data-lc="'+l.id+'">Create deal</button><button type="button" class="sm" data-lskip="'+l.id+'">Not a fit</button></div></div></div>';
+        '<div><div class="ld-pr '+pr[0]+'"><i></i>'+pr[1]+' priority</div><div class="mt" style="margin:-4px 0 8px">'+pr[2]+'</div><div class="ld-acts"><button type="button" class="sm pri" data-lc="'+l.id+'">Create deal</button><button type="button" class="sm" data-lskip="'+l.id+'">Not a fit</button><button type="button" class="sm danger" data-ldel="'+l.id+'">Delete</button></div></div></div>';
     });
     return h;
   }
@@ -4653,8 +4677,8 @@ var DL = (function(){
         '<div class="dl-meta">'+xesc(d.industryLabel||"")+(d.side==='lost'&&d.lost?' &middot; <b>Lost: '+xesc(d.lost.why)+'</b>':'')+' &middot; '+(qt.flows||0)+' flows &middot; lead: '+LEADS[leadKey(d.lead)].s+' &middot; last activity: '+ago(la)+' &middot; <span class="'+(warn?'act-warn':'')+'">'+lchip(d)+'</span></div>'+
         '<div class="act-mini">'+STAGES.map(function(s,i){ return '<i class="'+(!d.side&&i<=d.stage?"on":"")+'"></i>'; }).join("")+'<span>'+stName(d)+'</span></div></div>'+
         '<div><div class="dl-q">SAR '+sar2(qt.recPrice)+' / month</div><div class="dl-meta">+ SAR '+sar2(qt.onePrice)+' one-time &middot; '+(qt.term||12)+' months &middot; v'+(d.version||1)+(d.sentVersion===d.version?" (sent)":" (working draft)")+'</div></div>'+
-        '<div class="dl-meta">Deal date '+fdate(d.dealDate)+'</div>'+
-        '<div class="dl-acts"><button type="button" class="sm" data-edit="'+d.id+'">Edit in calculator</button><button type="button" class="sm pri" data-open="'+d.id+'">Open deal &rarr;</button></div></div>';
+        '<div class="dl-meta">Deal date '+fdate(d.dealDate)+'<br>Created '+fdt(d.cms)+'</div>'+
+        '<div class="dl-acts"><button type="button" class="sm" data-edit="'+d.id+'">Edit in calculator</button><button type="button" class="sm pri" data-open="'+d.id+'">Open deal &rarr;</button><button type="button" class="sm danger" data-delrow="'+d.id+'">Delete</button></div></div>';
     });
     return h;
   }
@@ -5026,7 +5050,7 @@ var DL = (function(){
     /* new deal, or a new copy */
     var slug = slugify(name)+"-"+rcode(4), dd = c.dealDate;
     var deal = { source:(edit&&edit.leadId&&!(edit.leadObj&&edit.leadObj.src)?"inbound":"outbound"), leadId:(edit&&edit.leadId)||"", client:name, industry:c.ind, industryLabel:c.indLabel, lead:c.lead, dealDate:dd, schemaRev:2, stage:0, side:"", partner:{status:"none", round:0, sentAt:"", valid:"", prop:null}, stageDates:{0:dd}, link:{state:"draft", days:20, sharedAt:0, expiresAt:0}, slug:slug,
-      version:1, sentVersion:0, quoteStatus:"none", quote:c.quote, stateJson:c.state, cust:custJson, logo:CUST_LOGO, notes:"", contact:"", lastSeenMs:0, won:{type:"",start:"",ref:""} };
+      version:1, sentVersion:0, quoteStatus:"none", quote:c.quote, stateJson:c.state, cust:custJson, logo:CUST_LOGO, notes:leadNote(edit&&edit.leadObj), leadAtMs:(edit&&edit.leadObj&&edit.leadObj.ms)||0, cms:Date.now(), contact:"", lastSeenMs:0, won:{type:"",start:"",ref:""} };
     var ver = { n:1, date:dd, rec:c.quote.recPrice, one:c.quote.onePrice, why:kind==="copy" ? "Copy of "+((find(edit&&edit.id)||{}).client||"another deal") : "First draft", sent:false, sentDate:"", stateJson:c.state, margin:c.margin };
     var share = { client:name, logo:CUST_LOGO, industry:c.ind, lead:leadKey(c.lead), active:false, expiresAt:0, quoteStatus:"none", customerJson:custJson, slug:slug };
     if(edit&&edit.leadObj){ deal.cc = { name:edit.leadObj.name, title:"", mobile:edit.leadObj.mobile }; }
@@ -5400,6 +5424,7 @@ var DL = (function(){
     }
     var panel = $("dl_panel");
     var tt;
+    if((tt = t.closest("[data-delrow]"))){ e.stopPropagation(); var dr = find(tt.dataset.delrow); if(!dr) return; if(!confirm("Delete the deal for "+dr.client+"?\n\nIts customer and partner links stop working and its versions are removed. This cannot be undone."+(dr.leadId ? "\nThe lead it came from goes back to New leads." : ""))) return; store.remove(dr.id, dr.slug, dr.partner&&dr.partner.key).then(function(){ return dr.leadId ? leadSet(dr.leadId, {status:"new", dealId:""}).catch(function(){}) : null; }).then(function(){ return refresh2(); }).then(function(){ toast("Deal deleted."); }).catch(function(x){ toast("Could not delete the deal: "+(x.message||x)); }); return; }
     if((tt = t.closest("[data-edit]")) && panel.contains(tt)){ editDeal(tt.dataset.edit); return; }
     if((tt = t.closest("[data-open]")) && panel.contains(tt)){
       curId = tt.dataset.open; view = "detail"; var d0 = find(curId); tab = unseenOf(d0) ? "act" : "ov"; dates = false;
@@ -5412,6 +5437,7 @@ var DL = (function(){
     if(t.closest("[data-dpdf]")){ var pw = window.open("", "_blank"); if(!pw){ toast("Please allow pop-ups to download the PDF."); return; } pw.document.write(dashPdfHtml()); pw.document.close(); pw.focus(); var go = function(){ pw.print(); }; (pw.document.fonts && pw.document.fonts.ready ? pw.document.fonts.ready.then(function(){ setTimeout(go, 200); }) : setTimeout(go, 800)); setTimeout(function(){}, 0); return; }
     if(t.closest("[data-ladd]")){ addLead = true; draw(); return; }
     if(t.closest("[data-lcancel]")){ addLead = false; draw(); return; }
+    if((tt = t.closest("[data-ldel]"))){ var ldl = leads.filter(function(x){ return x.id===tt.dataset.ldel; })[0] || {}; if(!confirm("Delete the lead from "+(ldl.company||"this company")+"?\n\nThis removes it for good and cannot be undone.")) return; leadDel(tt.dataset.ldel).then(function(){ return refresh2(); }).then(function(){ toast("Lead deleted."); }).catch(function(e){ toast("Could not delete the lead: "+(e.message||e)); }); return; }
     if(t.closest("[data-lsave]")){ var c1 = $("la_c").value.trim(), n1 = $("la_n").value.trim(), m1 = $("la_m").value.trim();
       if(!c1 || !n1 || !m1){ toast("Enter the company, the contact name and the mobile number."); return; }
       if(!/^[+0-9][0-9 ()-]{6,}$/.test(m1)){ toast("The mobile number looks incomplete."); return; }
@@ -5447,7 +5473,7 @@ var DL = (function(){
     if((tt = t.closest("[data-openv]"))){ editDeal(d.id, +tt.dataset.openv); return; }
     if((tt = t.closest("[data-brief]"))){ openBrief(d, tt.dataset.brief); return; }
     if(t.closest("[data-wsave]")){ store.patch(d.id, { won:{ type:$("act_wtype").value, start:$("act_wstart").value, ref:$("act_wref").value.trim() } }).then(function(){ return refresh2(); }).then(function(){ toast("Won details saved."); }); return; }
-    if(t.closest("[data-del]")){ if(!confirm("Delete the deal for "+d.client+"? This also stops its customer link working. This cannot be undone.")) return; store.remove(d.id, d.slug).then(function(){ view = "list"; curId = null; return refresh2(); }).then(function(){ toast("Deleted."); }); return; }
+    if(t.closest("[data-del]")){ if(!confirm("Delete the deal for "+d.client+"? This also stops its customer link working. This cannot be undone.")) return; var dlid = d.leadId; store.remove(d.id, d.slug, d.partner&&d.partner.key).then(function(){ return dlid ? leadSet(dlid, {status:"new", dealId:""}).catch(function(){}) : null; }).then(function(){ view = "list"; curId = null; return refresh2(); }).then(function(){ toast("Deleted."+(dlid ? " The lead is back in New leads." : "")); }); return; }
     if(t.closest("[data-pvc]")){ window.open("c.html#"+d.slug+"~p", "_blank"); return; }
     if((tt = t.closest("[data-cp]"))){
       var u = lurl(d);
@@ -5516,10 +5542,10 @@ var DL = (function(){
 
   drawAuth(); showLogo(); banner();
   try{ if(sessionStorage.getItem("aicc_newdeal")){ sessionStorage.removeItem("aicc_newdeal"); edit = { mode:"new" }; var fl = sessionStorage.getItem("aicc_fromlead"); sessionStorage.removeItem("aicc_fromlead");
-    if(fl){ var lo = null; try{ lo = JSON.parse(fl); }catch(x){} if(lo && lo.company){ edit.leadId = lo.id; edit.leadObj = lo; $("clientName").value = lo.company; setTimeout(function(){ toast("Started from the "+(lo.src?"outbound":"inbound")+" lead from "+lo.company+". The company name is filled in. Contact: "+lo.name+", "+lo.mobile+"."); }, 400); } }
+    if(fl){ var lo = null; try{ lo = JSON.parse(fl); }catch(x){} if(lo && lo.company){ edit.leadId = lo.id; edit.leadObj = lo; $("clientName").value = lo.company; window.__autoLead = true; setTimeout(function(){ toast("Creating the deal for "+lo.company+" from the "+(lo.src?"outbound":"inbound")+" lead..."); }, 200); } }
     banner(); } }catch(x){}
-  if(live) auth.onAuthStateChanged(function(u){ user = u; drawAuth(); status(""); refresh2(); });
-  else refresh2();
+  if(live) auth.onAuthStateChanged(function(u){ user = u; drawAuth(); status(""); refresh2().then(autoLead); });
+  else refresh2().then(autoLead);
   return { captureState:captureState, applyState:applyState, store:store, isLive:function(){ return live; }, custData:custData };
 })();
 
