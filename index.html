@@ -1010,6 +1010,10 @@ body.locked{overflow:hidden}
       <button type="button" class="pri" id="dl_new">New deal</button>
       <button type="button" id="dl_save">Save deal</button>
       <button type="button" id="dl_savenew" style="display:none">Save as new copy</button>
+      <button type="button" id="dl_bk" title="Save all deals, versions and leads to a file on this computer">Download backup</button>
+      <button type="button" id="dl_rs" title="Add back deals and leads that are missing, from a backup file">Restore from backup</button>
+      <input type="file" id="dl_rsf" accept=".json,application/json" style="display:none">
+      <span class="dl-meta" id="dl_bkn"></span>
       <span class="dl-status" id="dl_status"></span>
       <input type="search" id="dl_search" placeholder="Search by client name">
     </div>
@@ -4169,6 +4173,10 @@ var DL = (function(){
   function setPath(o, path, v){ var p = path.split("."), c = o; for(var i=0;i<p.length-1;i++){ c[p[i]] = c[p[i]] || {}; c = c[p[i]]; } c[p[p.length-1]] = v; }
   var TS = function(){ return firebase.firestore.FieldValue.serverTimestamp(); };
 
+  /* Timestamps cannot be saved as plain text, so they are turned into {__ts:ms} and back */
+  function bkStr(o, sp){ return JSON.stringify(o, function(k, v){ var r = this[k]; if(r && typeof r==="object" && typeof r.toMillis==="function") return {__ts:r.toMillis()}; return v; }, sp); }
+  function bkParse(t){ return JSON.parse(t, function(k, v){ return (v && typeof v==="object" && v.__ts!=null) ? firebase.firestore.Timestamp.fromMillis(v.__ts) : v; }); }
+
   var store = {
     list: function(){
       if(live) return db.collection("deals").orderBy("updatedAt","desc").limit(300).get().then(function(s){
@@ -4264,6 +4272,40 @@ var DL = (function(){
         });
       }
       var all = lsAll(); delete all[id]; lsPut(all); return Promise.resolve();
+    },
+    /* Trash: the deal and its versions stay saved. Only the customer and partner links are switched off,
+       and a copy of them is kept inside the deal so Restore can switch them back on. */
+    trash: function(d){
+      var id = d.id, slug = d.slug, pkey = d.partner && d.partner.key;
+      if(live){
+        return Promise.all([
+          slug ? db.collection("shares").doc(slug).get() : Promise.resolve(null),
+          slug ? db.collection("shares").doc(slug).collection("quote").get() : Promise.resolve({docs:[]}),
+          pkey ? db.collection("partnerShares").doc(pkey).get() : Promise.resolve(null)
+        ]).then(function(r){
+          var bak = { share:(r[0] && r[0].exists) ? r[0].data() : null, quote:r[1].docs.map(function(x){ return {id:x.id, data:x.data()}; }), partner:(r[2] && r[2].exists) ? r[2].data() : null };
+          var txt = bkStr(bak);
+          if(txt.length > 600000) throw new Error("This deal is too large for the Trash. Download a backup first.");
+          var b = db.batch();
+          b.update(db.collection("deals").doc(id), {trashedAt:Date.now(), trashBak:txt, updatedAt:TS()});
+          if(slug){ r[1].docs.forEach(function(x){ b.delete(x.ref); }); b.delete(db.collection("shares").doc(slug)); }
+          if(pkey) b.delete(db.collection("partnerShares").doc(pkey));
+          return b.commit();
+        });
+      }
+      var all = lsAll(); if(all[id]){ all[id].trashedAt = Date.now(); lsPut(all); } return Promise.resolve();
+    },
+    restore: function(d){
+      if(live){
+        var bak = {}; try{ bak = bkParse(d.trashBak || "{}"); }catch(e){}
+        var b = db.batch(), t = TS();
+        if(d.slug && bak.share) b.set(db.collection("shares").doc(d.slug), Object.assign({}, bak.share, {updatedAt:t}));
+        (bak.quote || []).forEach(function(q){ if(d.slug) b.set(db.collection("shares").doc(d.slug).collection("quote").doc(q.id), q.data); });
+        if(bak.partner && d.partner && d.partner.key) b.set(db.collection("partnerShares").doc(d.partner.key), bak.partner);
+        b.update(db.collection("deals").doc(d.id), {trashedAt:firebase.firestore.FieldValue.delete(), trashBak:firebase.firestore.FieldValue.delete(), updatedAt:t});
+        return b.commit();
+      }
+      var all = lsAll(); if(all[d.id]){ delete all[d.id].trashedAt; lsPut(all); } return Promise.resolve();
     },
     /* customer activity: the latest 300 events, matched to deals by link address */
     partnerReplies: function(){
@@ -4442,7 +4484,7 @@ var DL = (function(){
         ph:{ t:(m.isMobileOwn?"mobile":m.isSip?"sip":"line"), n:(m.isMobileOwn?m.mobileCount:m.isSip?1:m.landlines) }, mob:!!m.isMobileOwn, peakN:m.concurrentCalls||0, intro:(custData(m).desc||"").slice(0,400) } }; }
 
   /* ---------- state ---------- */
-  var deals = [], events = [], view = "list", curId = null, tab = "ov", filt = "all", lf = "all", q = "";
+  var deals = [], trashed = [], events = [], view = "list", curId = null, tab = "ov", filt = "all", lf = "all", q = "";
   var leads = [], lastSaved = {}, addLead = false;
   function lsLeads(){ try{ return JSON.parse(localStorage.getItem("aicc_leads_v1")||"[]"); }catch(e){ return []; } }
   function lsLeadsPut(a){ localStorage.setItem("aicc_leads_v1", JSON.stringify(a)); }
@@ -4657,6 +4699,20 @@ var DL = (function(){
     else a.innerHTML = '<span>Sign in to see saved deals.</span>';
   }
 
+  function trashV(){
+    var rows = trashed.filter(function(d){ return !q || String(d.client||"").toLowerCase().indexOf(q)>-1; }).sort(function(a,b){ return b.trashedAt-a.trashedAt; });
+    var h = '<div class="ld-del"><span>Deleted deals stay here until you delete them forever. Their customer links do not work while they are here. Restore brings a deal back with all its versions.</span></div>';
+    if(!rows.length) return h + '<div class="dl-empty">The Trash is empty.</div>';
+    rows.forEach(function(d){
+      var qt = d.quote || {}, days = Math.floor((Date.now()-d.trashedAt)/DAY);
+      h += '<div class="dl-row act-r"><div><div class="dl-name">'+xesc(d.client)+'</div><div class="dl-meta">'+xesc(d.industryLabel||"")+' &middot; SAR '+sar2(qt.recPrice)+' / month &middot; v'+(d.version||1)+'</div></div>'+
+        '<div class="dl-meta">Deleted '+fdt(d.trashedAt)+'<br>'+(days<1 ? "today" : days+(days===1?" day":" days")+" ago")+'</div>'+
+        '<div class="dl-meta">Created '+fdt(d.cms)+'</div>'+
+        '<div class="dl-acts"><button type="button" class="sm pri" data-trestore="'+d.id+'">Restore</button><button type="button" class="sm danger" data-tforever="'+d.id+'">Delete forever</button></div></div>';
+    });
+    return h;
+  }
+
   function listV(){
     var rows00 = deals.filter(function(d){ return (lf==="all"||leadKey(d.lead)===lf) && (!q || String(d.client||"").toLowerCase().indexOf(q)>-1); });
     var tests = rows00.filter(function(d){ return d.test; }), rows0 = rows00.filter(function(d){ return !d.test; });
@@ -4665,10 +4721,12 @@ var DL = (function(){
     var h = '<div class="act-fl"><button type="button" data-f="dash" class="'+(filt==="dash"?"on":"")+'">Dashboard</button><button type="button" data-f="leads" class="nl '+(filt==="leads"?"on":"")+'">New leads <b>'+nl+'</b></button><span style="width:1px;height:20px;background:var(--rule);margin:0 4px"></span>';
     [["all","All deals"],["attn","Needs attention"],["open","In progress"],["won","Won (signed)"],["closed","Lost or on hold"]].forEach(function(f){ h += '<button type="button" data-f="'+f[0]+'" class="'+(filt===f[0]?"on":"")+'">'+f[1]+' <b>'+cnt[f[0]]+'</b></button>'; });
     if(tests.length) h += '<button type="button" data-f="test" class="'+(filt==="test"?"on":"")+'">Test deals <b>'+tests.length+'</b></button>';
+    h += '<button type="button" data-f="trash" class="'+(filt==="trash"?"on":"")+'">Trash <b>'+trashed.length+'</b></button>';
     h += '<span style="margin-left:auto" class="dl-meta">Presales lead: </span><select id="act_lf"><option value="all">All leads</option><option value="hp"'+(lf==="hp"?" selected":"")+'>Hassan</option><option value="hany"'+(lf==="hany"?" selected":"")+'>Hany</option></select></div>';
     if(filt==="dash") return h + '<div style="padding:12px 18px 0;display:flex;justify-content:flex-end"><button type="button" class="sm pri" data-dpdf="1">Download as PDF</button></div>' + dashV();
     if(filt==="leads") return h + leadsV();
-    if(filt==="test" && tests.length) h += '<div class="ld-del"><span>Test deals are left out of the counts above. Their customer links stop working when you delete them.</span><button type="button" class="sm danger" data-deltests="1">Delete all '+tests.length+' test deals</button></div>';
+    if(filt==="trash") return h + trashV();
+    if(filt==="test" && tests.length) h += '<div class="ld-del"><span>Test deals are left out of the counts above. Their customer links stop working when you move them to the Trash.</span><button type="button" class="sm danger" data-deltests="1">Move all '+tests.length+' test deals to the Trash</button></div>';
     var rows = filt==="test" ? tests : rows0.filter(function(d){ return filt==="all" || cat(d)===filt; });
     if(!rows.length) h += '<div class="dl-empty">'+(deals.length ? "No deals match." : "No saved deals yet. Press New deal, fill the calculator, then Save deal.")+'</div>';
     rows.forEach(function(d){
@@ -5067,7 +5125,7 @@ var DL = (function(){
     return Promise.all([store.list(), store.responses().catch(function(){ return []; }), store.partnerReplies().catch(function(){ return []; }), leadsAll().catch(function(){ return []; })]).then(function(r){
       return pxMigrate(r[0]).then(function(ch){ return ch ? store.list().then(function(l){ r[0] = l; return r; }) : r; });
     }).then(function(r){
-      deals = r[0]; events = r[1]; leads = r[3] || [];
+      trashed = r[0].filter(function(x){ return x.trashedAt; }); deals = r[0].filter(function(x){ return !x.trashedAt; }); events = r[1]; leads = r[3] || [];
       deals.forEach(function(d){ var p = d.partner||{}; d._reply = (p.status==="sent" && p.key) ? (r[2].filter(function(x){ return x.key===p.key; })[0] || null) : null; });
       var ids = openId ? [openId] : (curId && view==="detail" ? [curId] : []);
       return Promise.all(ids.map(function(id){ return store.versions(id).then(function(v){ verCache[id] = v; }); }));
@@ -5424,7 +5482,9 @@ var DL = (function(){
     }
     var panel = $("dl_panel");
     var tt;
-    if((tt = t.closest("[data-delrow]"))){ e.stopPropagation(); var dr = find(tt.dataset.delrow); if(!dr) return; if(!confirm("Delete the deal for "+dr.client+"?\n\nIts customer and partner links stop working and its versions are removed. This cannot be undone."+(dr.leadId ? "\nThe lead it came from goes back to New leads." : ""))) return; store.remove(dr.id, dr.slug, dr.partner&&dr.partner.key).then(function(){ return dr.leadId ? leadSet(dr.leadId, {status:"new", dealId:""}).catch(function(){}) : null; }).then(function(){ return refresh2(); }).then(function(){ toast("Deal deleted."); }).catch(function(x){ toast("Could not delete the deal: "+(x.message||x)); }); return; }
+    if((tt = t.closest("[data-trestore]"))){ var rd = trashed.filter(function(x){ return x.id===tt.dataset.trestore; })[0]; if(!rd) return; store.restore(rd).then(function(){ return rd.leadId ? leadSet(rd.leadId, {status:"converted", dealId:rd.id}).catch(function(){}) : null; }).then(function(){ return refresh2(); }).then(function(){ toast("Restored: "+rd.client+"."); }).catch(function(x){ toast("Could not restore the deal: "+(x.message||x)); }); return; }
+    if((tt = t.closest("[data-tforever]"))){ var fd = trashed.filter(function(x){ return x.id===tt.dataset.tforever; })[0]; if(!fd) return; if(!confirm("Delete the deal for "+fd.client+" forever?\n\nThis cannot be undone. If you are not sure, press Cancel and download a backup first.")) return; store.remove(fd.id, fd.slug, fd.partner&&fd.partner.key).then(function(){ return refresh2(); }).then(function(){ toast("Deleted forever."); }).catch(function(x){ toast("Could not delete the deal forever: "+(x.message||x)); }); return; }
+    if((tt = t.closest("[data-delrow]"))){ e.stopPropagation(); var dr = find(tt.dataset.delrow); if(!dr) return; if(!confirm("Move the deal for "+dr.client+" to the Trash?\n\nIts customer and partner links stop working. You can restore it from the Trash."+(dr.leadId ? "\nThe lead it came from goes back to New leads." : ""))) return; store.trash(dr).then(function(){ return dr.leadId ? leadSet(dr.leadId, {status:"new", dealId:""}).catch(function(){}) : null; }).then(function(){ return refresh2(); }).then(function(){ toast("Moved to the Trash. You can restore it from the Trash tab."); }).catch(function(x){ toast("Could not move the deal to the Trash: "+(x.message||x)); }); return; }
     if((tt = t.closest("[data-edit]")) && panel.contains(tt)){ editDeal(tt.dataset.edit); return; }
     if((tt = t.closest("[data-open]")) && panel.contains(tt)){
       curId = tt.dataset.open; view = "detail"; var d0 = find(curId); tab = unseenOf(d0) ? "act" : "ov"; dates = false;
@@ -5444,7 +5504,7 @@ var DL = (function(){
       leadAdd({ company:c1, name:n1, mobile:m1, src:$("la_s").value, prio:$("la_p").value, note:$("la_t").value.trim(), status:"new" }).then(function(){ addLead = false; return refresh2(); }).then(function(){ saveBar("Saved. "+c1+" is in New leads."); }).catch(function(e){ saveBar("Not saved. "+(e.message||e)+" Please try again.", true); }); return; }
     if((tt = t.closest("[data-lc]"))){ var lo0 = leads.filter(function(x){ return x.id===tt.dataset.lc; })[0]; try{ sessionStorage.setItem("aicc_fromlead", JSON.stringify(lo0||{})); sessionStorage.setItem("aicc_newdeal","1"); }catch(x){} location.reload(); return; }
     if((tt = t.closest("[data-lskip]"))){ if(!confirm("Mark this lead as not a fit? It moves out of New leads.")) return; leadSet(tt.dataset.lskip, {status:"skipped"}).then(function(){ return refresh2(); }).then(function(){ toast("Lead moved out of New leads."); }).catch(function(e){ toast("Could not update the lead: "+(e.message||e)); }); return; }
-    if(t.closest("[data-deltests]")){ var tl = deals.filter(function(x){ return x.test; }); if(!tl.length) return; if(!confirm("Delete these "+tl.length+" test deals?\n\n"+tl.map(function(x){ return "- "+x.client; }).join("\n")+"\n\nTheir customer links stop working. This cannot be undone.")) return; Promise.all(tl.map(function(x){ return store.remove(x.id, x.slug); })).then(function(){ filt = "all"; return refresh2(); }).then(function(){ toast("Deleted "+tl.length+" test deals."); }); return; }
+    if(t.closest("[data-deltests]")){ var tl = deals.filter(function(x){ return x.test; }); if(!tl.length) return; if(!confirm("Move these "+tl.length+" test deals to the Trash?\n\n"+tl.map(function(x){ return "- "+x.client; }).join("\n")+"\n\nTheir customer links stop working. You can restore them from the Trash.")) return; Promise.all(tl.map(function(x){ return store.trash(x); })).then(function(){ filt = "all"; return refresh2(); }).then(function(){ toast("Moved "+tl.length+" test deals to the Trash."); }).catch(function(x){ toast("Could not move the test deals: "+(x.message||x)); }); return; }
     var d = curId ? find(curId) : null;
     if(t.closest("[data-ebs]")){ doSave("ver"); return; }
     if(t.closest("[data-ebc]")){ doSave("copy"); return; }
@@ -5473,7 +5533,7 @@ var DL = (function(){
     if((tt = t.closest("[data-openv]"))){ editDeal(d.id, +tt.dataset.openv); return; }
     if((tt = t.closest("[data-brief]"))){ openBrief(d, tt.dataset.brief); return; }
     if(t.closest("[data-wsave]")){ store.patch(d.id, { won:{ type:$("act_wtype").value, start:$("act_wstart").value, ref:$("act_wref").value.trim() } }).then(function(){ return refresh2(); }).then(function(){ toast("Won details saved."); }); return; }
-    if(t.closest("[data-del]")){ if(!confirm("Delete the deal for "+d.client+"? This also stops its customer link working. This cannot be undone.")) return; var dlid = d.leadId; store.remove(d.id, d.slug, d.partner&&d.partner.key).then(function(){ return dlid ? leadSet(dlid, {status:"new", dealId:""}).catch(function(){}) : null; }).then(function(){ view = "list"; curId = null; return refresh2(); }).then(function(){ toast("Deleted."+(dlid ? " The lead is back in New leads." : "")); }); return; }
+    if(t.closest("[data-del]")){ if(!confirm("Move the deal for "+d.client+" to the Trash? Its customer link stops working. You can restore it from the Trash.")) return; var dlid = d.leadId; store.trash(d).then(function(){ return dlid ? leadSet(dlid, {status:"new", dealId:""}).catch(function(){}) : null; }).then(function(){ view = "list"; curId = null; return refresh2(); }).then(function(){ toast("Moved to the Trash."+(dlid ? " The lead is back in New leads." : "")); }); return; }
     if(t.closest("[data-pvc]")){ window.open("c.html#"+d.slug+"~p", "_blank"); return; }
     if((tt = t.closest("[data-cp]"))){
       var u = lurl(d);
@@ -5524,6 +5584,100 @@ var DL = (function(){
       var i = +e.target.dataset.sdate, v = e.target.value; if(!v) return; if(v>todayISO()){ toast("A stage date cannot be in the future."); draw(); return; }
       var p = {}; p["stageDates."+i] = v; if(i===0) p.dealDate = v; saveBar("Saving...", false, true); store.patch(d.id, p).then(function(){ return refresh2(); }).then(function(){ saveBar("Saved. "+STAGES[i]+" date is now "+fdate(v)+"."); }).catch(function(x){ saveBar("Not saved. "+(x.message||x)+" Please try again.", true); });
     }
+  });
+  function bkNote(){
+    var n = $("dl_bkn"); if(!n) return; var t = 0; try{ t = +localStorage.getItem("aicc_lastbk")||0; }catch(e){}
+    n.textContent = t ? "Last backup: "+fdt(t) : "No backup yet";
+    n.style.color = (!t || Date.now()-t > 7*DAY) ? "var(--red)" : "";
+  }
+  $("dl_bk").addEventListener("click", function(){
+    if(!canUse()){ toast("Sign in first."); return; }
+    var btn = this, old = btn.textContent; btn.disabled = true; btn.textContent = "Preparing...";
+    var out = { app:"aicc-calculator", exportedAt:new Date().toISOString(), by:(user && user.email) || "this browser", deals:[], leads:[], events:[], partnerReplies:[] };
+    var none = function(){ return null; };
+    store.list().then(function(L){
+      return Promise.all(L.map(function(d){
+        var o = Object.assign({}, d), id = d.id; delete o.id; delete o.ms; delete o.cms;
+        var pk = d.partner && d.partner.key;
+        return Promise.all([
+          store.versions(id).catch(function(){ return []; }),
+          (live && d.slug) ? db.collection("shares").doc(d.slug).get().then(function(x){ return x.exists ? x.data() : null; }).catch(none) : null,
+          (live && d.slug) ? db.collection("shares").doc(d.slug).collection("quote").doc("current").get().then(function(x){ return x.exists ? x.data() : null; }).catch(none) : null,
+          (live && pk) ? db.collection("partnerShares").doc(pk).get().then(function(x){ return x.exists ? x.data() : null; }).catch(none) : null
+        ]).then(function(r){ return { id:id, deal:o, versions:r[0], share:r[1], quote:r[2], partnerShare:r[3] }; });
+      }));
+    }).then(function(D){
+      out.deals = D;
+      return Promise.all([leadsAll().catch(function(){ return []; }), store.responses().catch(function(){ return []; }), store.partnerReplies().catch(function(){ return []; })]);
+    }).then(function(r){
+      out.leads = r[0]; out.events = r[1]; out.partnerReplies = r[2];
+      var blob = new Blob([bkStr(out, 1)], {type:"application/json"}), a = document.createElement("a"), n = new Date(), p2 = function(x){ return (x<10?"0":"")+x; };
+      a.href = URL.createObjectURL(blob);
+      a.download = "aicc-backup-"+n.getFullYear()+"-"+p2(n.getMonth()+1)+"-"+p2(n.getDate())+"-"+p2(n.getHours())+p2(n.getMinutes())+".json";
+      document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      try{ localStorage.setItem("aicc_lastbk", String(Date.now())); }catch(e){}
+      bkNote(); toast("Backup saved: "+out.deals.length+" deals and "+out.leads.length+" leads.");
+    }).catch(function(x){ toast("Could not make the backup: "+(x.message||x)); }).then(function(){ btn.disabled = false; btn.textContent = old; });
+  });
+  bkNote();
+
+  /* Restore from a backup file. It only ADDS what is missing. It never overwrites or deletes anything. */
+  $("dl_rs").addEventListener("click", function(){ if(!canUse()){ toast("Sign in first."); return; } $("dl_rsf").value = ""; $("dl_rsf").click(); });
+  $("dl_rsf").addEventListener("change", function(){
+    var f = this.files && this.files[0]; if(!f) return; this.value = "";
+    var btn = $("dl_rs"), old = btn.textContent, done = function(){ btn.disabled = false; btn.textContent = old; };
+    btn.disabled = true; btn.textContent = "Reading...";
+    var rd = new FileReader();
+    rd.onerror = function(){ toast("Could not read that file."); done(); };
+    rd.onload = function(){
+      var B; try{ B = bkParse(String(rd.result)); }catch(e){ toast("That file is not a valid backup."); done(); return; }
+      if(!B || B.app !== "aicc-calculator" || !Array.isArray(B.deals)){ toast("That file is not an AICC calculator backup."); done(); return; }
+      var exists = function(path){ return live ? db.doc(path).get().then(function(x){ return x.exists ? x : null; }) : Promise.resolve(null); };
+      var lsd = lsAll(), lsl = lsLeads();
+      var dealMissing = function(it){ return live ? exists("deals/"+it.id).then(function(x){ return !x; }) : Promise.resolve(!lsd[it.id]); };
+      var leadMissing = function(l){ return live ? exists("leads/"+l.id).then(function(x){ return !x; }) : Promise.resolve(!lsl.some(function(z){ return z.id===l.id; })); };
+      btn.textContent = "Checking...";
+      Promise.all([Promise.all(B.deals.map(dealMissing)), Promise.all((B.leads||[]).map(leadMissing))]).then(function(r){
+        var md = B.deals.filter(function(x,i){ return r[0][i]; }), ml = (B.leads||[]).filter(function(x,i){ return r[1][i]; });
+        if(!md.length && !ml.length){ toast("Nothing to restore. Everything in this file is already in the system."); done(); return; }
+        var when = B.exportedAt ? fdt(Date.parse(B.exportedAt)) : "an unknown date";
+        var msg = "Restore from the backup made on "+when+(B.by ? " by "+B.by : "")+"?\n\n"+
+          "Deals to add back: "+md.length+(md.length ? "\n"+md.slice(0,12).map(function(x){ return "- "+(x.deal.client||"(no name)")+(x.deal.trashedAt ? " (goes to the Trash)" : ""); }).join("\n")+(md.length>12 ? "\n- and "+(md.length-12)+" more" : "") : "")+
+          "\nLeads to add back: "+ml.length+
+          "\n\nDeals and leads that are already in the system are not touched. Nothing is deleted or overwritten.\nCustomer links come back as they were on the backup date. Customer activity history is not restored.";
+        if(!confirm(msg)){ done(); return; }
+        btn.textContent = "Restoring...";
+        var nd = 0, nl = 0, skipLinks = 0;
+        var doDeal = function(it){
+          var o = Object.assign({}, it.deal); if(!o.updatedAt) o.updatedAt = live ? TS() : Date.now();
+          if(!live){ var a = lsAll(); a[it.id] = Object.assign({}, o, {ms:Date.now(), _vers:(it.versions||[])}); lsPut(a); nd++; return Promise.resolve(); }
+          var b = db.batch(), ref = db.collection("deals").doc(it.id);
+          b.set(ref, o);
+          (it.versions||[]).forEach(function(v){ b.set(ref.collection("versions").doc(String(v.n)), v); });
+          var links = Promise.resolve();
+          if(!o.trashedAt && o.slug && it.share){
+            links = exists("shares/"+o.slug).then(function(x){
+              if(x && (x.data()||{}).dealId !== it.id){ skipLinks++; return; }
+              if(!x) b.set(db.collection("shares").doc(o.slug), it.share);
+              if(it.quote) b.set(db.collection("shares").doc(o.slug).collection("quote").doc("current"), it.quote);
+            });
+          }
+          if(!o.trashedAt && it.partnerShare && o.partner && o.partner.key) b.set(db.collection("partnerShares").doc(o.partner.key), it.partnerShare);
+          return links.then(function(){ return b.commit(); }).then(function(){ nd++; });
+        };
+        var chain = Promise.resolve();
+        md.forEach(function(it){ chain = chain.then(function(){ return doDeal(it); }); });
+        chain = chain.then(function(){
+          if(!ml.length) return;
+          if(!live){ var a = lsLeads(); ml.forEach(function(l){ var o = Object.assign({}, l); a.push(o); nl++; }); lsLeadsPut(a); return; }
+          var p = Promise.resolve();
+          for(var i=0;i<ml.length;i+=400){ (function(part){ p = p.then(function(){ var b = db.batch(); part.forEach(function(l){ var o = Object.assign({}, l); delete o.id; delete o.ms; b.set(db.collection("leads").doc(l.id), o); }); return b.commit().then(function(){ nl += part.length; }); }); })(ml.slice(i,i+400)); }
+          return p;
+        });
+        return chain.then(function(){ return refresh2(); }).then(function(){ toast("Restored "+nd+" deal"+(nd===1?"":"s")+" and "+nl+" lead"+(nl===1?"":"s")+"."+(skipLinks ? " "+skipLinks+" customer link"+(skipLinks===1?"":"s")+" could not be restored because the address is used by another deal." : "")); });
+      }).catch(function(x){ toast("Could not restore: "+(x.message||x)); }).then(done);
+    };
+    rd.readAsText(f);
   });
   $("dl_search").addEventListener("input", function(){ q = this.value.trim().toLowerCase(); if(view==="list") draw(); });
 
