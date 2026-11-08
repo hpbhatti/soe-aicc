@@ -4268,7 +4268,7 @@ var DL = (function(){
         return Promise.all(qs).then(function(r){
           var b = db.batch(); r[0].docs.concat(r[1].docs).concat(r[2].docs).forEach(function(x){ b.delete(x.ref); });
           if(pkey) b.delete(db.collection("partnerShares").doc(pkey));
-          b.delete(db.collection("deals").doc(id)); if(slug) b.delete(db.collection("shares").doc(slug)); return b.commit();
+          b.delete(db.collection("deals").doc(id)); if(slug){ b.delete(db.collection("shares").doc(slug).collection("quote").doc("current")); b.delete(db.collection("shares").doc(slug)); } return b.commit();
         });
       }
       var all = lsAll(); delete all[id]; lsPut(all); return Promise.resolve();
@@ -4278,17 +4278,20 @@ var DL = (function(){
     trash: function(d){
       var id = d.id, slug = d.slug, pkey = d.partner && d.partner.key;
       if(live){
+        /* The security rules allow reading ONE quote record by name, but not listing them. So ask for "current" only. */
+        var nul = function(){ return null; };
         return Promise.all([
-          slug ? db.collection("shares").doc(slug).get() : Promise.resolve(null),
-          slug ? db.collection("shares").doc(slug).collection("quote").get() : Promise.resolve({docs:[]}),
-          pkey ? db.collection("partnerShares").doc(pkey).get() : Promise.resolve(null)
+          slug ? db.collection("shares").doc(slug).get().catch(nul) : Promise.resolve(null),
+          slug ? db.collection("shares").doc(slug).collection("quote").doc("current").get().catch(nul) : Promise.resolve(null),
+          pkey ? db.collection("partnerShares").doc(pkey).get().catch(nul) : Promise.resolve(null)
         ]).then(function(r){
-          var bak = { share:(r[0] && r[0].exists) ? r[0].data() : null, quote:r[1].docs.map(function(x){ return {id:x.id, data:x.data()}; }), partner:(r[2] && r[2].exists) ? r[2].data() : null };
+          var qd = (r[1] && r[1].exists) ? [{id:"current", data:r[1].data()}] : [];
+          var bak = { share:(r[0] && r[0].exists) ? r[0].data() : null, quote:qd, partner:(r[2] && r[2].exists) ? r[2].data() : null };
           var txt = bkStr(bak);
           if(txt.length > 600000) throw new Error("This deal is too large for the Trash. Download a backup first.");
           var b = db.batch();
           b.update(db.collection("deals").doc(id), {trashedAt:Date.now(), trashBak:txt, updatedAt:TS()});
-          if(slug){ r[1].docs.forEach(function(x){ b.delete(x.ref); }); b.delete(db.collection("shares").doc(slug)); }
+          if(slug){ if(qd.length) b.delete(db.collection("shares").doc(slug).collection("quote").doc("current")); b.delete(db.collection("shares").doc(slug)); }
           if(pkey) b.delete(db.collection("partnerShares").doc(pkey));
           return b.commit();
         });
