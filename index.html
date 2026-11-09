@@ -80,6 +80,29 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--ink);font-s
 .big .cap{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 .big .fig{font-size:22px;font-weight:700;color:var(--deep);margin:2px 0;font-variant-numeric:tabular-nums}
 .big .sub{font-size:11px;color:var(--muted)}
+.headline.hl4{grid-template-columns:1fr;gap:8px}
+.sr{display:grid;grid-template-columns:1fr auto;grid-template-areas:"cap fig" "sub fig";align-items:center;text-align:left;border:1px solid #d7e1d4;border-left:6px solid var(--c);border-radius:8px;padding:9px 14px;background:var(--bg)}
+.sr .cap{grid-area:cap;font-size:11.5px;color:var(--c);font-weight:700;letter-spacing:.05em}
+.sr .fig{grid-area:fig;font-size:24px;margin:0;color:#17311c}
+.sr .sub{grid-area:sub;padding:0;margin:2px 0 0;text-align:left}
+.sr.o{--c:#B45309;--bg:#FFF8EC}.sr.m{--c:#1B5E20;--bg:#F1F8F1}.sr.u{--c:#0E7490;--bg:#EEF8FB}.sr.pos{--c:#1E40AF;--bg:#EFF4FF}.sr.neg{--c:#B91C1C;--bg:#FEF2F2}.sr.neg .fig{color:#B91C1C}.sr.pos .fig{color:#1E40AF}
+.qv{display:flex;align-items:center;gap:10px;font-size:13px;color:#5F6F62;margin:0 0 10px;flex-wrap:wrap}.qv .pill{background:#E8F5E9;color:#1B5E20;font-weight:700;border-radius:20px;padding:3px 10px;font-size:12px;text-transform:uppercase}.qv .term{background:#17311c;color:#fff;font-weight:700;border-radius:20px;padding:5px 14px;font-size:14px;text-transform:uppercase;letter-spacing:.04em}.qv .pill.sent{background:#E3EDFB;color:#1E40AF}
+.cc{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:10px}
+.cc>div{background:var(--bg);border:1px solid #d7e1d4;border-top:6px solid var(--c);border-radius:8px;padding:14px 16px}
+.cc small{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--c);text-transform:uppercase}
+.cc b{display:block;font-size:28px;color:#17311c;margin:5px 0 2px;line-height:1.15}
+.cc em{display:block;font-style:normal;font-size:12.5px;color:#5F6F62}
+.cc .m{--c:#1B5E20;--bg:#F1F8F1}.cc .o{--c:#B45309;--bg:#FFF8EC}.cc .u{--c:#0E7490;--bg:#EEF8FB}
+.mg{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:14px}.mg>div{background:#fff;border:1px solid #d7e1d4;border-radius:8px;padding:14px 16px}
+.mg>.pos{border-top:6px solid #1E40AF;background:#EFF4FF}.mg>.neg{border-top:6px solid #B91C1C;background:#FEF2F2}
+.mg small{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5F6F62}.mg .pos small{color:#1E40AF}.mg .neg small{color:#B91C1C}
+.mg b{display:block;font-size:28px;margin:5px 0 2px;color:#17311c}.mg .pos b{color:#1E40AF}.mg .neg b{color:#B91C1C}.mg strong{display:block;font-size:18px;color:#17311c;margin:5px 0 2px}.mg em{display:block;font-style:normal;font-size:12.5px;color:#5F6F62}
+.termchip{background:#17311c;color:#fff;border-radius:6px;padding:8px 12px;font-weight:700;font-size:12.5px;text-transform:uppercase;white-space:nowrap}.tot{margin:0 0 14px;background:#F7F9F6;border:1px dashed #b9c8b5;border-radius:8px;padding:10px 14px;font-size:14px}.tot b{font-size:17px}.tot span{color:#5F6F62;font-size:12px}
+.rowchips{align-items:center;display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{border:1px solid #d7e1d4;border-left:5px solid var(--c);border-radius:6px;padding:4px 9px;background:#fff;line-height:1.2}
+.chip small{display:block;font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--c);text-transform:uppercase}.chip b{font-size:15px;color:#17311c}
+.chip.m{--c:#1B5E20}.chip.o{--c:#B45309}.chip.u{--c:#0E7490}.chip.neg{--c:#B91C1C;background:#FEF2F2}.chip.neg b{color:#B91C1C}
+@media(max-width:820px){.cc,.mg{grid-template-columns:1fr}}
 .disc{padding:0 22px 14px}
 .disc .cap{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px}
 .year{margin:0 22px 16px;padding:14px 16px;background:var(--lime-soft);border-radius:6px;text-align:center}
@@ -242,7 +265,7 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
 }
 @media print{
   .grid{grid-template-columns:1fr;gap:0}
-  .steps,.acts,.internal,.mobar,.seg,.disc .cap,.accent{display:none!important}
+  .steps,.acts,.internal,.nopr,.mobar,.seg,.disc .cap,.accent{display:none!important}
   .quote{border:1px solid #ccc}
   .year{background:#fff;color:var(--ink);border:1px solid var(--deep)}
   .year .cap{color:var(--muted)}.year .save{color:var(--deep)}
@@ -271,7 +294,7 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
 .dl-bar input{font:inherit;font-size:12.5px;padding:7px 10px;border:1px solid var(--rule);border-radius:5px;min-width:200px;margin-left:auto}
 .dl-status{font-size:12.5px;color:var(--deep);font-weight:600}
 .dl-status.err{color:var(--red)}
-.dl-row{display:grid;grid-template-columns:2fr 1.3fr 1fr auto;gap:10px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--rule-2);font-size:13px}
+.dl-row{display:grid;grid-template-columns:2fr 1.8fr 1fr auto;gap:10px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--rule-2);font-size:13px}
 .dl-row:last-child{border-bottom:0}
 .dl-row.cur{background:var(--lime-soft)}
 .dl-name{font-weight:700}
@@ -951,9 +974,11 @@ body.locked{overflow:hidden}
   <div class="panel">
     <div class="quote">
       <div class="qhead"><h3 id="quoteTitle">Estimate<span class="track-tag" id="trackTag"></span></h3></div>
-      <div class="headline">
-        <div class="big"><div class="cap">One-time</div><div class="fig" id="oneTime">—</div><div class="sub" id="oneTimeUsd"></div></div>
-        <div class="big"><div class="cap">Monthly</div><div class="fig" id="monthly">—</div><div class="sub" id="monthlyUsd"></div></div>
+      <div class="headline hl4">
+        <div class="big sr o"><div class="cap">One-time</div><div class="fig" id="oneTime">—</div><div class="sub" id="oneTimeUsd"></div></div>
+        <div class="big sr m"><div class="cap">Monthly</div><div class="fig" id="monthly">—</div><div class="sub" id="monthlyUsd"></div></div>
+        <div class="big sr u"><div class="cap">Usage (estimate)</div><div class="fig" id="usageFig">—</div><div class="sub">billed on actual use, per month</div></div>
+        <div class="big sr pos nopr" id="marginRow"><div class="cap">SOE margin, internal</div><div class="fig" id="marginFig">—</div><div class="sub" id="marginSub"></div></div>
       </div>
       <div class="disc">
         <div class="cap">Commitment term (monthly charges discount: 6 months 5%, 12 months 10%)</div>
@@ -2273,6 +2298,11 @@ function qxRender(m){
   var q = qxCalc(m), t = q.term;
   $("monthly").textContent = sar(q.fixedNet); $("monthlyUsd").textContent = usd(q.fixedNet);
   $("monthly").previousElementSibling.textContent = "Monthly, billed in advance";
+  $("usageFig").textContent = q.usageP>0 ? sar(q.usageP) : "—";
+  var mr = $("marginRow"), neg = q.margin<0, low = !neg && q.below;
+  mr.firstElementChild.textContent = "SOE margin over "+t+" months, internal"; mr.className = "big sr nopr "+((neg||low)?"neg":"pos");
+  $("marginFig").textContent = sar(q.margin);
+  $("marginSub").textContent = neg ? "below cost" : low ? "under the minimum margin of "+q.min+"%" : "earned over the full "+t+" months";
   $("oneTime").previousElementSibling.textContent = "One-time, payable upfront";
   document.querySelector(".year .cap").textContent = "Estimated contract value, "+t+" months (usage at estimate)";
   $("yearTotal").textContent = sar(q.contract + q.vat*t);
@@ -4737,7 +4767,7 @@ var DL = (function(){
       h += '<div class="dl-row act-r" data-open="'+d.id+'"><div><div class="dl-name">'+xesc(d.client)+bdg(d)+'</div>'+
         '<div class="dl-meta">'+xesc(d.industryLabel||"")+(d.side==='lost'&&d.lost?' &middot; <b>Lost: '+xesc(d.lost.why)+'</b>':'')+' &middot; '+(qt.flows||0)+' flows &middot; lead: '+LEADS[leadKey(d.lead)].s+' &middot; last activity: '+ago(la)+' &middot; <span class="'+(warn?'act-warn':'')+'">'+lchip(d)+'</span></div>'+
         '<div class="act-mini">'+STAGES.map(function(s,i){ return '<i class="'+(!d.side&&i<=d.stage?"on":"")+'"></i>'; }).join("")+'<span>'+stName(d)+'</span></div></div>'+
-        '<div><div class="dl-q">SAR '+sar2(qt.recPrice)+' / month</div><div class="dl-meta">+ SAR '+sar2(qt.onePrice)+' one-time &middot; '+(qt.term||12)+' months &middot; v'+(d.version||1)+(d.sentVersion===d.version?" (sent)":" (working draft)")+'</div></div>'+
+        '<div><div class="rowchips"><span class="termchip">'+(qt.term||12)+' months</span><div class="chip o"><small>One-time</small><b>'+sar2(qt.onePrice)+'</b></div><div class="chip m"><small>Monthly, in advance</small><b>'+sar2(qt.recPrice)+'</b></div><div class="chip u"><small>Usage (est.)</small><b>'+(qt.usagePrice!=null?sar2(qt.usagePrice):'&ndash;')+'</b></div>'+(typeof qt.soeMargin==="number" && qt.soeMargin<0 ? '<div class="chip neg"><small>SOE margin, '+(qt.term||12)+' mo: below cost</small><b>'+sar2(qt.soeMargin)+'</b></div>' : '')+'</div><div class="dl-meta" style="margin-top:6px">SAR &middot; v'+(d.version||1)+(d.sentVersion===d.version?" (sent)":" (working draft)")+'</div></div>'+
         '<div class="dl-meta">Deal date '+fdate(d.dealDate)+'<br>Created '+fdt(d.cms)+'</div>'+
         '<div class="dl-acts"><button type="button" class="sm" data-edit="'+d.id+'">Edit in calculator</button><button type="button" class="sm pri" data-open="'+d.id+'">Open deal &rarr;</button><button type="button" class="sm danger" data-delrow="'+d.id+'">Delete</button></div></div>';
     });
@@ -4784,7 +4814,10 @@ var DL = (function(){
     if(tab==="ov"){
       h += lostBox(d);
       var rq = ev.filter(function(e){ return e.type==="request"; })[0], ccv = d.cc || (rq ? { name:rq.p.name, title:rq.p.dg, mobile:rq.p.mobile } : {});
-      h += '<div class="act-cards"><div class="act-k"><small>Current quote (v'+(d.version||1)+(cv.sent?', sent':', working draft')+')</small><b>SAR '+sar2(qt.recPrice)+'</b><em>per month</em></div><div class="act-k"><small>One-time</small><b>SAR '+sar2(qt.onePrice)+'</b></div><div class="act-k"><small>Presales lead</small><b style="font-size:16px">'+ln.s+'</b><em>main contact on customer page</em></div><div class="act-k"><small>SOE margin over the term (internal)</small><b style="font-size:18px">'+(cv.margin?'SAR '+sar2(cv.margin.soeMarginYear1):'-')+'</b><em>'+(cv.margin?cv.margin.mkRec+'% added, '+(cv.margin.eff!=null?cv.margin.eff+'% after discount, ':'')+(cv.margin.term||12)+' months':'')+'</em></div></div>';
+      var mT = (cv.margin&&cv.margin.term)||qt.term||12, mgn = cv.margin ? cv.margin.soeMarginYear1 : null, mneg = mgn!=null && mgn<0, mlow = mgn!=null && !mneg && cv.margin.eff!=null && cv.margin.minMargin!=null && cv.margin.eff<cv.margin.minMargin, mcls = mgn==null ? "" : (mneg||mlow ? "neg" : "pos");
+      h += '<div class="qv"><span class="pill'+(cv.sent?' sent':'')+'">Quote v'+(d.version||1)+' &middot; '+(cv.sent?'Sent':'Working draft')+'</span><span class="term">'+(qt.term||12)+'-month term</span><span>'+(cv.sent?'Sent to the customer.':'Not sent to the customer yet.')+'</span></div>'+
+        '<div class="cc"><div class="o"><small>One-time</small><b>SAR '+sar2(qt.onePrice)+'</b><em>payable upfront</em></div><div class="m"><small>Monthly</small><b>SAR '+sar2(qt.recPrice)+'</b><em>billed in advance</em></div><div class="u"><small>Usage (estimate)</small><b>'+(qt.usagePrice!=null ? 'SAR '+sar2(qt.usagePrice) : '&ndash;')+'</b><em>'+(qt.usagePrice!=null ? 'per month, billed on actual use' : 'not stored on this older deal')+'</em></div></div>'+
+        '<div class="mg"><div class="'+mcls+'"><small>SOE margin over '+mT+' months &middot; internal only</small><b>'+(mgn!=null?'SAR '+sar2(mgn):'&ndash;')+'</b><em>'+(mgn!=null?'Earned over the full '+mT+' months of the contract.'+(mneg?' Below cost: check before sharing.':(mlow?' Under the minimum margin.':'')):'')+'</em></div><div><small>Presales lead</small><strong>'+ln.s+'</strong><em>main contact on customer page</em></div></div>'+(qt.yearTotal!=null ? '<div class="tot">Total contract value over '+(qt.term||12)+' months: <b>SAR '+sar2(qt.yearTotal)+'</b> <span>(one-time + monthly + usage estimate)</span></div>' : '');
       h += '<div class="act-g"><div class="act-box"><div class="act-h">Deal details</div><table class="act-t"><tr><td>Customer</td><td>'+xesc(d.client)+'</td></tr><tr><td>Industry</td><td>'+xesc(d.industryLabel||"")+'</td></tr><tr><td>Deal date</td><td>'+fdate(d.dealDate)+'</td></tr><tr><td>Package and flows</td><td>'+xesc(qt.pkg||"")+' &middot; '+(qt.flows||0)+' flows</td></tr><tr><td>Systems</td><td>'+xesc((cust.systems||[]).join(", ")||"None")+'</td></tr>'+
         '<tr><td>Presales lead</td><td><select id="act_lead"><option value="hp"'+(leadKey(d.lead)==="hp"?" selected":"")+'>'+LEADS.hp.n+'</option><option value="hany"'+(leadKey(d.lead)==="hany"?" selected":"")+'>'+LEADS.hany.n+'</option></select></td></tr><tr><td>Customer contact</td><td><input id="cc_n" type="text" maxlength="80" placeholder="Name" value="'+xesc(ccv.name||"")+'" style="width:100%;margin-bottom:4px"><input id="cc_t" type="text" maxlength="80" placeholder="Job title (optional)" value="'+xesc(ccv.title||"")+'" style="width:100%;margin-bottom:4px"><input id="cc_m" type="text" maxlength="30" placeholder="Mobile number, for example +966 5X XXX XXXX" value="'+xesc(ccv.mobile||"")+'" style="width:100%;margin-bottom:6px"><button type="button" class="sm pri" data-cc="1">Save contact</button> <span class="dl-meta" id="cc_ok">'+(d.cc?'':(rq?'Filled from the customer\'s request. Save to keep it.':'Shown on the quotation.'))+'</span></td></tr></table></div>'+
         '<div class="act-box"><div class="act-h">Customer link</div><div class="act-link">'+xesc(lurl(d))+'</div><div class="dl-meta" style="margin:6px 0">'+lchip(d)+'. No prices on this page. The WhatsApp button goes to '+ln.s+'.</div><button type="button" class="sm pri" data-t2="lk">Manage links</button><div class="act-h" style="margin-top:14px">Your notes (private)</div><textarea id="act_note">'+xesc(d.notes||"")+'</textarea><button type="button" class="sm pri" data-sn="1" style="margin-top:6px">Save note</button> <span class="dl-meta" id="act_ok"></span></div></div>';
@@ -5039,7 +5072,7 @@ var DL = (function(){
     var p = v.split("-"); $("quoteDate").value = (+p[2])+" "+["January","February","March","April","May","June","July","August","September","October","November","December"][(+p[1])-1]+" "+p[0];
     refresh();
   }
-  function banner(){
+  function banner(){ if(!edit && typeof uwReady!=="undefined" && uwReady && typeof uwClear==="function") uwClear();
     var b = $("act_edit");
     if(!b){ b = document.createElement("div"); b.id = "act_edit"; document.body.insertBefore(b, document.body.firstChild); }
     var s2 = $("dl_save"), n2 = $("dl_savenew");
@@ -5047,7 +5080,7 @@ var DL = (function(){
     b.style.display = "block";
     if(edit.mode==="new"){
       b.className = "act-eb new";
-      b.innerHTML = '<b>New deal, not saved yet.</b> Fill in the calculator. The price panel on the right updates as you answer. Then press Save deal. The Deal date can be set to an earlier day if you are logging a deal late. <button type="button" data-ebd="1">Cancel</button>';
+      b.innerHTML = '<b>New deal, not saved yet.</b> Fill in the calculator. The price panel on the right updates as you answer. Then press Save deal. The Deal date can be set to an earlier day if you are logging a deal late. <span class="act-ebb"><button type="button" class="pri" data-ebsn="1">Save deal</button><button type="button" data-ebd="1">Cancel</button></span>';
       s2.textContent = "Save deal"; n2.style.display = "none"; return;
     }
     var d = find(edit.id) || {}, c = lastVer(d) || {}, nx = (d.version||1)+1, locked = !!c.sent;
@@ -5055,8 +5088,8 @@ var DL = (function(){
     b.innerHTML = '<b>Editing '+xesc(d.client||"")+'</b> &middot; '+(edit.fromV ? 'opened from v'+edit.fromV+', ' : '')+(locked ? 'v'+(d.version||1)+' <span class="bdg prog">SENT &middot; LOCKED</span>' : 'working draft v'+(d.version||1))+
       '<br><small>'+(locked ? 'v'+(d.version||1)+' was sent and cannot change. Saving asks why you are revising, then creates v'+nx+'.' : 'Saving updates this working draft. It does not create a new version number. A number is created only when a version is sent.')+'</small>'+
       '<br><small>Date <input type="date" id="act_vdate" value="'+todayISO()+'" max="'+todayISO()+'"> Note <input type="text" id="act_vwhy" placeholder="Note (optional)" style="width:240px"></small>'+
-      '<span class="act-ebb"><button type="button" class="pri" data-ebs="1">'+(locked ? 'Save as v'+nx : 'Save draft')+'</button><button type="button" data-ebc="1">Save as new copy</button><button type="button" data-ebd="1">Discard changes</button></span>';
-    s2.textContent = locked ? "Save as v"+nx : "Save draft"; n2.style.display = ""; n2.textContent = "Save as new copy";
+      '<span class="act-ebb"><button type="button" class="pri" data-ebs="1">'+(locked ? 'Save as v'+nx : 'Save changes')+'</button><button type="button" data-ebc="1">Save as new copy</button><button type="button" data-ebd="1">Discard changes</button></span>';
+    s2.textContent = locked ? "Save as v"+nx : "Save changes"; n2.style.display = ""; n2.textContent = "Save as new copy";
   }
   function setv(id, v){ var e = $(id); if(!e) return; e.value = v; e.dispatchEvent(new Event("input",{bubbles:true})); e.dispatchEvent(new Event("change",{bubbles:true})); }
 
@@ -5509,6 +5542,7 @@ var DL = (function(){
     if((tt = t.closest("[data-lskip]"))){ if(!confirm("Mark this lead as not a fit? It moves out of New leads.")) return; leadSet(tt.dataset.lskip, {status:"skipped"}).then(function(){ return refresh2(); }).then(function(){ toast("Lead moved out of New leads."); }).catch(function(e){ toast("Could not update the lead: "+(e.message||e)); }); return; }
     if(t.closest("[data-deltests]")){ var tl = deals.filter(function(x){ return x.test; }); if(!tl.length) return; if(!confirm("Move these "+tl.length+" test deals to the Trash?\n\n"+tl.map(function(x){ return "- "+x.client; }).join("\n")+"\n\nTheir customer links stop working. You can restore them from the Trash.")) return; Promise.all(tl.map(function(x){ return store.trash(x); })).then(function(){ filt = "all"; return refresh2(); }).then(function(){ toast("Moved "+tl.length+" test deals to the Trash."); }).catch(function(x){ toast("Could not move the test deals: "+(x.message||x)); }); return; }
     var d = curId ? find(curId) : null;
+    if(t.closest("[data-ebsn]")){ doSave("new"); return; }
     if(t.closest("[data-ebs]")){ doSave("ver"); return; }
     if(t.closest("[data-ebc]")){ doSave("copy"); return; }
     if(t.closest("[data-ebd]")){ edit = null; banner(); toast("Discarded. Nothing was saved. Press New deal to start again."); return; }
@@ -5625,6 +5659,14 @@ var DL = (function(){
   bkNote();
 
   /* Restore from a backup file. It only ADDS what is missing. It never overwrites or deletes anything. */
+  /* A real change in the calculator starts an unsaved new deal, so the Save button is on screen at once */
+  ["input","change"].forEach(function(ev){ document.addEventListener(ev, function(e){
+    if(!e.isTrusted || edit || !canUse()) return;
+    var t = e.target; if(!t || !t.closest || !/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+    if(t.closest("#dl_panel, #act_edit, #act_savebar, .act-modal, dialog, [role=dialog]")) return;
+    if(!t.closest(".wrap")) return;
+    edit = { mode:"new" }; banner();
+  }, true); });
   $("dl_rs").addEventListener("click", function(){ if(!canUse()){ toast("Sign in first."); return; } $("dl_rsf").value = ""; $("dl_rsf").click(); });
   $("dl_rsf").addEventListener("change", function(){
     var f = this.files && this.files[0]; if(!f) return; this.value = "";
@@ -5697,10 +5739,36 @@ var DL = (function(){
     }
   });
 
+  /* Unsaved-work safety copy: kept in this browser only, cleared when the deal is saved or discarded */
+  var UW_KEY = "aicc_unsaved_v1", uwReady = false, uwTimer = null, uwFound = null;
+  function uwClear(){ try{ localStorage.removeItem(UW_KEY); }catch(e){} }
+  function uwWrite(){ try{ if(!edit) return; localStorage.setItem(UW_KEY, JSON.stringify({ ts:Date.now(), edit:{ mode:edit.mode, id:edit.id||null, fromV:edit.fromV||0 }, client:(($("clientName")||{}).value||"").trim(), state:JSON.stringify(captureState()) })); }catch(e){} }
+  try{ var uw0 = localStorage.getItem(UW_KEY); if(uw0){ uwFound = JSON.parse(uw0); if(!uwFound || !uwFound.state || Date.now()-uwFound.ts > 7*864e5) { uwFound = null; uwClear(); } } }catch(e){ uwFound = null; }
+  ["input","change"].forEach(function(ev){ document.addEventListener(ev,function(e){ if(!e.isTrusted || !edit || !uwReady) return; clearTimeout(uwTimer); uwTimer = setTimeout(uwWrite, 1200); },true); });
+  window.addEventListener("pagehide", function(){ if(edit && uwReady){ clearTimeout(uwTimer); uwWrite(); } });
+  function uwOffer(){
+    uwReady = true;
+    if(!uwFound || edit) return;
+    var u = uwFound, when = new Date(u.ts), hm = pad(when.getHours())+":"+pad(when.getMinutes()), bar = document.createElement("div");
+    bar.id = "act_restore"; bar.style.cssText = "position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;background:#fff;border:2px solid #E5A100;border-radius:10px;padding:12px 16px;box-shadow:0 6px 24px rgba(0,0,0,.18);display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:92vw;font-size:14px";
+    bar.innerHTML = '<span><b>Unsaved work found</b>'+(u.client?' for <b>'+xesc(u.client)+'</b>':'')+', from '+hm+'. It was not saved to your deals.</span><button type="button" class="pri" data-uwr="1">Restore your unsaved work</button><button type="button" data-uwd="1">Discard it</button>';
+    document.body.appendChild(bar);
+    bar.addEventListener("click", function(e){
+      if(e.target.closest("[data-uwd]")){ uwClear(); uwFound = null; bar.remove(); toast("Discarded the unsaved copy."); return; }
+      if(e.target.closest("[data-uwr]")){
+        try{ applyState(JSON.parse(u.state)); refresh(); }catch(x){ toast("Could not restore this copy."); uwClear(); bar.remove(); return; }
+        edit = { mode:u.edit.mode==="edit" && u.edit.id ? "edit" : "new", id:u.edit.id||undefined, fromV:u.edit.fromV||0 };
+        if(edit.mode==="new") delete edit.id;
+        banner(); bar.remove(); uwFound = null; window.scrollTo({top:0,behavior:"smooth"});
+        toast("Restored. Check the figures, then press Save to keep them in your deals.");
+      }
+    });
+  }
   drawAuth(); showLogo(); banner();
   try{ if(sessionStorage.getItem("aicc_newdeal")){ sessionStorage.removeItem("aicc_newdeal"); edit = { mode:"new" }; var fl = sessionStorage.getItem("aicc_fromlead"); sessionStorage.removeItem("aicc_fromlead");
     if(fl){ var lo = null; try{ lo = JSON.parse(fl); }catch(x){} if(lo && lo.company){ edit.leadId = lo.id; edit.leadObj = lo; $("clientName").value = lo.company; window.__autoLead = true; setTimeout(function(){ toast("Creating the deal for "+lo.company+" from the "+(lo.src?"outbound":"inbound")+" lead..."); }, 200); } }
     banner(); } }catch(x){}
+  uwOffer();
   if(live) auth.onAuthStateChanged(function(u){ user = u; drawAuth(); status(""); refresh2().then(autoLead); });
   else refresh2().then(autoLead);
   return { captureState:captureState, applyState:applyState, store:store, isLive:function(){ return live; }, custData:custData };
