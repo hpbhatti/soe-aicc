@@ -1272,6 +1272,7 @@ function PT_path(){
  var J=PT_J();if(!J)return '';
  var P=J.path||[false,false,false,false];
  var before=["Meeting with your team","Reconfirm your requirements","Confirm the quote","Sign the agreement"];
+ var qb=st.qbase||"none";P=[!!P[0],qb!=="none",qb==="acc"||qb==="sig",qb==="sig"];
  var Q=J.after||[false,false,false];var cur=P.indexOf(false);if(cur<0){var qi=Q.indexOf(false);cur=qi<0?7:4+qi}
  var hs_=J.humanSys||"your phone system";var conn=["Hotline linked through "+hs_+" ("+({sip:"SIP",mobile:"mobile numbers",ourLine:"new number from us"}[D.phone.type]||"SIP")+")"];
  D.systems.forEach(function(x){if(conn.join().indexOf(PT_an(x))<0)conn.push(x+" connected on a test account")});if(D.whatsapp)conn.push("WhatsApp business number registered");if(D.kb)conn.push("Your knowledge loaded");((J.extras||{}).conn||[]).forEach(function(x){conn.push(x)});
