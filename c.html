@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Your AI Contact Center plan is ready</title>
-<meta name="description" content="See your solution, the scope and the quotation in one place.">
+<title>AI Contact Center: solution overview for your review</title>
+<meta name="description" content="See how we understood your needs and how it will work for you.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SOE">
-<meta property="og:title" content="Your AI Contact Center plan is ready">
-<meta property="og:description" content="See your solution, the scope and the quotation in one place.">
+<meta property="og:title" content="AI Contact Center: solution overview for your review">
+<meta property="og:description" content="See how we understood your needs and how it will work for you.">
 <meta property="og:image" content="https://go-aicc.soe.com.sa/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -910,14 +910,14 @@ function rDashCust(){
   h+='<div class="solv">'+(isG?'Your goal':'Solves')+': <i>'+esc(LB[x[1]])+'</i></div>';
   h+='<div class="viz">'+vizFor(x[0],c,d)+'<div class="vtxt">'+(c.tag==="Live Counter"?'<span class="live"><i></i>LIVE</span>':'')+'<div class="bg">'+(c.tag==="Target Gauge"||c.tag==="Efficiency Gauge"?'':d.big)+'</div><div class="bl">'+d.lab+'</div><span class="chp">&#9650; '+d.chip+'</span></div></div>';
   h+='<div class="cs">';d.subs.forEach(function(s){h+=bar(s[0],s[1],s[2])});
-  h+='</div><div class="ccf"><a data-drill="'+x[0]+'">Open full detail &rarr;</a><span>Illustrative</span></div></div>';
+  h+='</div><div class="ccf"><a data-drill="'+x[0]+'">Open full detail &rarr;</a><span>Sample data</span></div></div>';
  });
  return h+'</div>';
 }
 function r5(){
  var h='<div class="kick">What you will see</div><h2 class="t">Your operations dashboard</h2><p class="lead">After go-live, your managers see every call, result and trend in one place. Click any chart, day or call to look deeper.</p>';
  h+='<div class="dvt"><div class="dvi">'+ic("chart")+'<div><b>'+(st.dv==="std"?"Default AI Contact Center admin view":"Your customised dashboard (up to 7 charts)")+'</b><small>'+(st.dv==="std"?"This is the standard view that every customer receives.":"Charts chosen for your goals and challenges, built after onboarding.")+'</small></div></div><div class="seg"><button data-dv="std" class="'+(st.dv==="std"?"on":"")+'">Default admin view</button><button data-dv="cust" class="'+(st.dv==="cust"?"on":"")+'">Customised dashboard (up to 7 charts)</button></div></div>';
- h+='<span class="il">Illustrative example, not a promise of results</span>';
+ h+='<span class="il">Example view with sample data</span><p style="font-size:.84rem;color:var(--mute);margin:0 0 14px">These numbers show how your dashboard will look. Your own figures appear once your AI Voice Agent is live.</p>';
  return h+(st.dv==="std"?rDashStd():rDashCust());
 }
 function showDay(i){
@@ -942,7 +942,7 @@ function openCall(i){
 }
 function openDrill(id){
  var c=CH[id],m=mo(),d=c.f(m),fl=flowsFor(c.fl),n=Math.min(fl.length,6),w=wlist(n);
- var h='<div class="dh"><div><b>'+c.title+'</b><small>Full detail &middot; illustrative</small></div><button data-close="1" aria-label="Close">'+ic("x")+'</button></div><div class="dbd" style="--acc:#1B5E20"><div class="bg">'+d.big+'</div><div class="bl">'+d.lab+'</div><span class="chp">&#9650; '+d.chip+'</span><h4>Last 14 days</h4>';
+ var h='<div class="dh"><div><b>'+c.title+'</b><small>Full detail &middot; sample data</small></div><button data-close="1" aria-label="Close">'+ic("x")+'</button></div><div class="dbd" style="--acc:#1B5E20"><div class="bg">'+d.big+'</div><div class="bl">'+d.lab+'</div><span class="chp">&#9650; '+d.chip+'</span><h4>Last 14 days</h4>';
  var v=[88,92,90,96,94,98,97,100,99,100,98,100,100,100],W=420,H=150,pts=v.map(function(y,k){return [20+k*(W-40)/13,H-20-(y-80)/20*(H-40)]});
  h+='<svg class="agr" viewBox="0 0 '+W+' '+H+'"><line class="gd" x1="20" x2="'+(W-20)+'" y1="'+(H-20)+'" y2="'+(H-20)+'"/><line class="gd" x1="20" x2="'+(W-20)+'" y1="20" y2="20"/><path class="ar" d="M20,'+(H-20)+' L'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' L')+' L'+(W-20)+','+(H-20)+'Z"/><path class="ln" d="M'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' L')+'"/><circle cx="'+pts[13][0]+'" cy="'+pts[13][1].toFixed(1)+'" r="5"/><text x="20" y="'+(H-5)+'">Day 1</text><text x="'+(W-48)+'" y="'+(H-5)+'">Day 14</text></svg>';
  h+='<h4>Breakdown</h4>';d.subs.forEach(function(s){h+=bar(s[0],s[1],s[2])});
