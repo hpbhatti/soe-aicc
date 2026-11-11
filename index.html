@@ -4481,9 +4481,9 @@ var DL = (function(){
   });
 
   /* ---------- customer journey details (optional, shown to the customer when switched on) ---------- */
-  var CJ = { on:false, c:[], s:{}, p:[false,false,false,false], q:[false,false,false], x:[], a:{} };
-  function cjDefaults(){ CJ.on=!!CJ.on; CJ.c=Array.isArray(CJ.c)?CJ.c:[]; CJ.s=(CJ.s&&typeof CJ.s==="object")?CJ.s:{}; CJ.p=Array.isArray(CJ.p)&&CJ.p.length===4?CJ.p:[false,false,false,false]; CJ.q=Array.isArray(CJ.q)&&CJ.q.length===3?CJ.q:[false,false,false]; CJ.x=Array.isArray(CJ.x)?CJ.x:[]; CJ.a=(CJ.a&&typeof CJ.a==="object")?CJ.a:{}; }
-  function cjUsed(){ return CJ.on || CJ.c.length || Object.keys(CJ.s).length || CJ.x.length || Object.keys(CJ.a).some(function(k){ return CJ.a[k]; }) || CJ.p.some(Boolean) || CJ.q.some(Boolean); }
+  var CJ = { on:false, c:[], s:{}, p:[false,false,false,false], q:[false,false,false], x:[], a:{}, u:{} };
+  function cjDefaults(){ CJ.on=!!CJ.on; CJ.c=Array.isArray(CJ.c)?CJ.c:[]; CJ.s=(CJ.s&&typeof CJ.s==="object")?CJ.s:{}; CJ.p=Array.isArray(CJ.p)&&CJ.p.length===4?CJ.p:[false,false,false,false]; CJ.q=Array.isArray(CJ.q)&&CJ.q.length===3?CJ.q:[false,false,false]; CJ.x=Array.isArray(CJ.x)?CJ.x:[]; CJ.a=(CJ.a&&typeof CJ.a==="object")?CJ.a:{}; CJ.u=(CJ.u&&typeof CJ.u==="object")?CJ.u:{}; }
+  function cjUsed(){ return CJ.on || CJ.c.length || Object.keys(CJ.s).length || CJ.x.length || Object.keys(CJ.a).some(function(k){ return CJ.a[k]; }) || Object.keys(CJ.u||{}).some(function(k){ return (CJ.u[k]||"").trim(); }) || CJ.p.some(Boolean) || CJ.q.some(Boolean); }
   function cjSave(){ var el=$("cjData"); if(el) el.value = cjUsed() ? JSON.stringify(CJ) : ""; cjSummary(); }
   function cjLoad(){ var v=(($("cjData")||{}).value)||""; try{ CJ = v ? JSON.parse(v) : {}; }catch(e){ CJ = {}; } cjDefaults(); cjSigV=""; cjRender(); if(window.cjFillI) window.cjFillI(); }
   function cjFlowLabel(a){ var l = a.job.id==="other" ? (((a.f.name||"").trim()) || "Custom flow") : (SHORT[a.job.id] || a.job.label); var ov = ((($("cwf_"+a.dir+"_"+a.idx)||{}).value)||"").trim(); return ov || l; }
@@ -4502,6 +4502,9 @@ var DL = (function(){
     if(sy.length){ h+='<div class="cj-g3">'+sy.map(function(g){ var v=cjAlias(g)||cjCustomName(g); return '<div class="cj-card" style="margin:0"><div style="font-size:11px;color:#5F6F62;font-weight:600">'+esc(g)+'</div><div style="font-size:14px;font-weight:700;color:'+(v?'#1B5E20':'#9AA59B')+'">'+(v?esc(v):'Not named yet')+'</div></div>'; }).join("")+'</div>'; }
     else h+='<div class="cj-hint">No external systems selected yet.</div>';
     if(humanOn()) h+='<div class="cj-hint">The phone system for handovers uses the name in the extension step: <b>'+esc(humanExtName())+'</b>.</div>';
+    h+='<div class="cj-h">1b. Your business as we understood it <span>(optional. Shown as one card on the welcome page only when you fill something in)</span></div>';
+    (function(){ var U=CJ.u||{}; function ta(k,l,ph,r){ return '<label class="cj-f"><span>'+l+'</span><textarea rows="'+(r||2)+'" data-k="u" data-f="'+k+'" placeholder="'+esc(ph)+'">'+esc(U[k]||"")+'</textarea></label>'; }
+      h+='<div class="cj-card"><div class="cj-g2">'+ta("told","What worried you (their concern, in plain words)","e.g. An earlier project stopped because the connection to your phone system was not stable. We will make this the first thing we check in the setup and testing phase.",3)+ta("setup","Your setup today","e.g. Yeastar phone system, the 800 hotline, and Odoo for customers and tickets.",3)+'</div><div class="cj-g2">'+ta("inn","In the first phase (one item per line)","e.g. Branch and store questions",4)+ta("later","Later (one item per line)","e.g. Live order and shipment lookups",4)+'</div></div>'; })();
     h+='<div class="cj-h">2. What the customer told us <span>(their own words, 3 to 5 sentences)</span></div>';
     CJ.c.forEach(function(c,i){
       h+='<div class="cj-card"><div class="cj-g2"><label class="cj-f"><span>Customer\'s own words</span><textarea rows="2" data-k="c" data-i="'+i+'" data-f="w">'+esc(c.w||"")+'</textarea></label><label class="cj-f"><span>Our answer</span><textarea rows="2" data-k="c" data-i="'+i+'" data-f="a">'+esc(c.a||"")+'</textarea></label></div>';
@@ -4537,7 +4540,7 @@ var DL = (function(){
     function onEdit(e){ var t=e.target, k=t.getAttribute&&t.getAttribute("data-k"); if(!k) return; var i=+t.getAttribute("data-i"), f=t.getAttribute("data-f");
       if(k==="on") CJ.on=t.checked; else if(k==="c"&&CJ.c[i]) CJ.c[i][f]=t.value; else if(k==="s"){ var key=t.getAttribute("data-s"); (CJ.s[key]=CJ.s[key]||{})[f]=t.value; if(!t.value){ var o=CJ.s[key]; if(!(o.say||o.asks||o.fields||o.team||o.rule)) delete CJ.s[key]; } }
       else if(k==="a"){ var g=t.getAttribute("data-g"); if(t.value.trim()) CJ.a[g]=t.value; else delete CJ.a[g]; }
-      else if(k==="p") CJ.p[i]=t.checked; else if(k==="q") CJ.q[i]=t.checked; else if(k==="x"&&CJ.x[i]) CJ.x[i][f]=t.value;
+      else if(k==="u"){ CJ.u=CJ.u||{}; CJ.u[f]=t.value; } else if(k==="p") CJ.p[i]=t.checked; else if(k==="q") CJ.q[i]=t.checked; else if(k==="x"&&CJ.x[i]) CJ.x[i][f]=t.value;
       cjSave(); }
     body.addEventListener("input",onEdit); body.addEventListener("change",onEdit);
     body.addEventListener("click",function(e){ var b=e.target.closest&&e.target.closest("[data-act]"); if(!b) return; var a=b.getAttribute("data-act"), i=+b.getAttribute("data-i");
@@ -4558,13 +4561,15 @@ var DL = (function(){
   (function(){ var r=$("systemsBlock"); if(!r) return; r.addEventListener("input",function(e){ var t=e.target; if(!t.classList||!t.classList.contains("sys-alias")) return; var n=t.getAttribute("data-alias"); if(t.value.trim()) CJ.a[n]=t.value; else delete CJ.a[n]; cjSave(); window.cjFillI(); if(window.cjSync) window.cjSync(); refresh(); }); })();
   window.cjRerender = function(){ var b=$("cjBody"); if(!b || b.contains(document.activeElement)) return; cjSigV=""; cjRender(); };
   window.cjSync = function(){ try{ var sig=cjFlows().map(function(f){ return f.key+":"+f.label; }).join("|")+"|"+(humanOn()?1:0)+"|"+cjSystems().map(function(x){return x+"="+cjAlias(x)}).join(","); if(sig!==cjSigV){ cjSigV=sig; if(!document.activeElement || !$("cjBody").contains(document.activeElement)) cjRender(); } }catch(e){} };
+  function cjUnd(){ var U=CJ.u||{}, r={}; function ln(v){ return String(v||"").split(/\n+/).map(function(x){ return x.replace(/^[\s\u2022\-\*]+/,"").trim(); }).filter(Boolean); }
+    if((U.told||"").trim()) r.told=U.told.trim(); if((U.setup||"").trim()) r.setup=U.setup.trim(); var a=ln(U.inn), b=ln(U.later); if(a.length) r.inn=a; if(b.length) r.later=b; return Object.keys(r).length ? r : null; }
   function cjOut(){
     if(!CJ.on) return null;
     var scen={}; Object.keys(CJ.s).forEach(function(k){ var o=CJ.s[k]||{}, r={}; ["say","asks","fields","team","rule"].forEach(function(f){ if((o[f]||"").trim()) r[f]=o[f].trim(); }); if(Object.keys(r).length) scen[k]=r; });
     var ex={conn:[],test:[],need:[]}; CJ.x.forEach(function(x){ var t=(x.x||"").trim(); if(t && ex[x.t]) ex[x.t].push(t); });
     var al={}; Object.keys(CJ.a).forEach(function(g){ var v=(CJ.a[g]||"").trim(); if(v) al[g]=v; }); try{ model().eps.forEach(function(ep){ var d=SYS_DISP[ep.key]; var v=(CJ.a[ep.name]||"").trim(); if(d && v && !al[d]) al[d]=v; }); }catch(e){}
     var hs=""; try{ var m=model(); if(m.hOn && (m.hWhere==="external"||m.hWhere==="both")) hs=humanExtName(); }catch(e){}
-    return { concerns:CJ.c.filter(function(c){ return (c.w||"").trim(); }).map(function(c){ return { w:c.w.trim(), a:(c.a||"").trim(), by:c.by||"" }; }), scen:scen, path:CJ.p.slice(), after:CJ.q.slice(), extras:ex, alias:al, humanSys:hs };
+    return { concerns:CJ.c.filter(function(c){ return (c.w||"").trim(); }).map(function(c){ return { w:c.w.trim(), a:(c.a||"").trim(), by:c.by||"" }; }), scen:scen, path:CJ.p.slice(), after:CJ.q.slice(), extras:ex, alias:al, humanSys:hs, und:cjUnd() };
   }
 
   /* ---------- data for the customer page (no prices, no margins, no private notes) ---------- */
@@ -5354,7 +5359,11 @@ var DL = (function(){
     if(window.__aiccSaving) return;
     if(kind==="new" && !(edit&&edit.leadId)){
       var nm0 = name.toLowerCase(), dup = deals.filter(function(x){ return String(x.client||"").trim().toLowerCase()===nm0; })[0];
-      if(dup && !confirm("A deal for "+name+" already exists (created "+fdt(dup.cms)+").\n\nOK = create another deal.\nCancel = stop, then open the existing deal and use Edit in calculator.")) return;
+      if(dup){
+        dup = deals.filter(function(x){ return String(x.client||"").trim().toLowerCase()===nm0; }).sort(function(a,b){ return (b.cms||0)-(a.cms||0); })[0];
+        if(!confirm("A deal for "+name+" already exists (created "+fdt(dup.cms)+").\n\nOK = save this as a NEW VERSION of that deal (recommended).\nCancel = stop. Nothing is lost and nothing is saved.\n\nTo create a separate deal on purpose, use the \"Save as new deal\" button instead.")) return;
+        edit = { mode:"edit", id:dup.id, fromV:(lastVer(dup)||{n:dup.version||1}).n }; kind = "ver"; banner();
+      }
     }
     if(kind==="ver" && edit && edit.mode==="edit"){
       var d = find(edit.id), cur = lastVer(d) || { n:d.version||1, sent:false };
