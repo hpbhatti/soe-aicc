@@ -4489,6 +4489,7 @@ var DL = (function(){
   function cjFlowLabel(a){ var l = a.job.id==="other" ? (((a.f.name||"").trim()) || "Custom flow") : (SHORT[a.job.id] || a.job.label); var ov = ((($("cwf_"+a.dir+"_"+a.idx)||{}).value)||"").trim(); return ov || l; }
   function cjFlows(){ return activeFlows().map(function(a){ return { key:a.dir+"_"+a.idx, label:cjFlowLabel(a), code:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1) }; }); }
   function cjSystems(){ var out=[]; try{ var m=model(); m.eps.forEach(function(ep){ if(ep.key==="whatsapp") return; if(m.hOn && (m.hWhere==="external"||m.hWhere==="both") && ep.key==="other:"+humanExtName().toLowerCase()) return; if(!ep.charged) return; var nm = SYS_DISP[ep.key] || ep.name; if(out.indexOf(nm)<0) out.push(nm); }); }catch(e){} return out; }
+  function cjCustomName(g){ try{ return model().eps.some(function(ep){ return ep.name===g && String(ep.key).indexOf("other:")===0; }) ? g : ""; }catch(e){ return ""; } }
   function cjSummary(){ var el=$("cjSum"); if(!el) return; var n=CJ.c.filter(function(c){ return (c.w||"").trim(); }).length, sc=Object.keys(CJ.s).filter(function(k){ var o=CJ.s[k]||{}; return o.say||o.asks||o.fields||o.team||o.rule; }).length, pd=CJ.p.filter(Boolean).length;
     el.textContent = (CJ.on ? "ON on the customer page" : "Off") + " · " + n + " concern"+(n===1?"":"s") + " · " + sc + " scenario detail"+(sc===1?"":"s") + " · before signing " + pd + " of 4 done"; }
   var CJ_BY = [["","— not linked —"],["setup","Setup and testing"],["dash","Dashboard"]];
@@ -4498,7 +4499,7 @@ var DL = (function(){
     h+='<div class="cj-hint">Off: the customer page stays exactly as it is today. On: the parts below appear. Everything you type here is shown to the customer, so do not write internal notes here.</div>';
     var sy=cjSystems();
     h+='<div class="cj-h">1. Names the customer uses for their systems <span>(filled in automatically from Step 6, under each endpoint)</span></div>';
-    if(sy.length){ h+='<div class="cj-g3">'+sy.map(function(g){ var v=cjAlias(g); return '<div class="cj-card" style="margin:0"><div style="font-size:11px;color:#5F6F62;font-weight:600">'+esc(g)+'</div><div style="font-size:14px;font-weight:700;color:'+(v?'#1B5E20':'#9AA59B')+'">'+(v?esc(v):'Not named yet')+'</div></div>'; }).join("")+'</div>'; }
+    if(sy.length){ h+='<div class="cj-g3">'+sy.map(function(g){ var v=cjAlias(g)||cjCustomName(g); return '<div class="cj-card" style="margin:0"><div style="font-size:11px;color:#5F6F62;font-weight:600">'+esc(g)+'</div><div style="font-size:14px;font-weight:700;color:'+(v?'#1B5E20':'#9AA59B')+'">'+(v?esc(v):'Not named yet')+'</div></div>'; }).join("")+'</div>'; }
     else h+='<div class="cj-hint">No external systems selected yet.</div>';
     if(humanOn()) h+='<div class="cj-hint">The phone system for handovers uses the name in the extension step: <b>'+esc(humanExtName())+'</b>.</div>';
     h+='<div class="cj-h">2. What the customer told us <span>(their own words, 3 to 5 sentences)</span></div>';
@@ -4545,7 +4546,9 @@ var DL = (function(){
       cjSave(); cjRender(); });
   })();
   var cjSigV = "";
-  window.cjAliasI = function(n){ return ((CJ&&CJ.a&&CJ.a[n])||"").trim(); };
+  window.cjAliasI = function(n){ var a=(CJ&&CJ.a)||{}; var v=(a[n]||"").trim(); if(v) return v;
+    try{ model().eps.forEach(function(ep){ if(v) return; var d=SYS_DISP[ep.key]||ep.name; if((d===n||ep.name===n) && (a[ep.name]||"").trim()) v=a[ep.name].trim(); else if((d===n||ep.name===n) && (a[d]||"").trim()) v=a[d].trim(); }); }catch(e){}
+    return v; };
   window.cjFillI = function(){
     var root=$("systemsBlock"); if(!root) return;
     [].forEach.call(root.querySelectorAll("input.sys-alias"),function(i){ var n=i.getAttribute("data-alias"); if(document.activeElement!==i) i.value=CJ.a[n]||""; });
@@ -4559,7 +4562,7 @@ var DL = (function(){
     if(!CJ.on) return null;
     var scen={}; Object.keys(CJ.s).forEach(function(k){ var o=CJ.s[k]||{}, r={}; ["say","asks","fields","team","rule"].forEach(function(f){ if((o[f]||"").trim()) r[f]=o[f].trim(); }); if(Object.keys(r).length) scen[k]=r; });
     var ex={conn:[],test:[],need:[]}; CJ.x.forEach(function(x){ var t=(x.x||"").trim(); if(t && ex[x.t]) ex[x.t].push(t); });
-    var al={}; Object.keys(CJ.a).forEach(function(g){ var v=(CJ.a[g]||"").trim(); if(v) al[g]=v; });
+    var al={}; Object.keys(CJ.a).forEach(function(g){ var v=(CJ.a[g]||"").trim(); if(v) al[g]=v; }); try{ model().eps.forEach(function(ep){ var d=SYS_DISP[ep.key]; var v=(CJ.a[ep.name]||"").trim(); if(d && v && !al[d]) al[d]=v; }); }catch(e){}
     var hs=""; try{ var m=model(); if(m.hOn && (m.hWhere==="external"||m.hWhere==="both")) hs=humanExtName(); }catch(e){}
     return { concerns:CJ.c.filter(function(c){ return (c.w||"").trim(); }).map(function(c){ return { w:c.w.trim(), a:(c.a||"").trim(), by:c.by||"" }; }), scen:scen, path:CJ.p.slice(), after:CJ.q.slice(), extras:ex, alias:al, humanSys:hs };
   }
