@@ -482,7 +482,7 @@ body.locked{overflow:hidden}
 .dl-bar{flex-wrap:wrap}
 .px-w{display:inline-block;margin-left:8px;border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:700;vertical-align:middle;white-space:nowrap}
 .px-us{background:#E8F5E9;color:#1B5E20}.px-customer{background:#DBEAFE;color:#1D4ED8}.px-partner{background:#EDE9FE;color:#6D28D9}
-.px-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999}.px-modal>div{background:#fff;border-radius:14px;padding:20px 22px;width:min(480px,92vw)}
+.cj-saveonly{display:none;margin-top:14px;padding:12px 14px;border:1.5px solid #9CC58F;border-radius:10px;background:#F2F8EF}body.is-editing .cj-saveonly{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.jst{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:11px 16px;border:1.5px solid #C2CFBC;border-radius:10px;background:#fff}.jst b{color:#0D3B13}.px-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999}.px-modal>div{background:#fff;border-radius:14px;padding:20px 22px;width:min(480px,92vw)}
 #px_ribbon{position:sticky;top:0;z-index:9000;background:#FFF8E1;border-bottom:1px solid #F0D98A;color:#6b5400;padding:7px 16px;font-size:12.5px;text-align:center}
 .px-next{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:12px 0;padding:12px 16px;border:1px solid #BFD8B3;border-left:6px solid #7CB342;border-radius:10px;background:#F4FAF1}
 .px-nx-l small{color:#2E7D32;font-weight:800;letter-spacing:.8px;font-size:10.5px}.px-nx-l b{display:block;font-size:16px;color:#0D3B13;margin:1px 0 2px}.px-nx-l p{margin:0;color:#3d4a3e;font-size:13px;max-width:640px}
@@ -1025,6 +1025,52 @@ body.locked{overflow:hidden}
 </div>
 </div>
 
+<div id="jumpNav" style="position:fixed;left:10px;top:50%;transform:translateY(-50%);z-index:900;background:#fff;border:1.5px solid #C2CFBC;border-radius:12px;padding:8px;box-shadow:0 4px 14px rgba(0,0,0,.12);font:600 12px Cairo,Arial,sans-serif;display:flex;flex-direction:column;gap:4px">
+  <span style="font-size:10px;color:#6B7A6E;letter-spacing:.5px;padding:2px 8px">JUMP TO</span>
+  <a href="#" data-jump="top" style="padding:6px 10px;border-radius:8px;color:#1B3A1F;text-decoration:none">Calculator</a>
+  <a href="#" data-jump="cjd" style="padding:6px 10px;border-radius:8px;color:#1B3A1F;text-decoration:none">Journey details</a>
+  <a href="#" data-jump="demo" style="padding:6px 10px;border-radius:8px;color:#1B3A1F;text-decoration:none">Demo view</a>
+  <a href="#" data-jump="dl_panel" style="padding:6px 10px;border-radius:8px;color:#fff;background:#1B5E20;text-decoration:none">Deal workspace</a>
+</div>
+<style>#jumpNav a:hover{background:#E8F3E6!important;color:#0D3B13!important}@media(max-width:1500px){#jumpNav{display:none}}</style>
+<script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("[data-jump]");if(!a)return;e.preventDefault();var k=a.getAttribute("data-jump"),t=k==="top"?null:(k==="demo"?document.getElementById("btnCustView").closest("div[style*=max-width]"):document.getElementById(k));if(k==="cjd"&&t)t.open=true;if(!t)window.scrollTo({top:0,behavior:"smooth"});else t.scrollIntoView({behavior:"smooth",block:"start"})});</script>
+<div style="max-width:1260px;margin:0 auto;padding:0 20px 14px">
+  <details id="cjd" style="background:#fff;border:1px solid #C2CFBC;border-radius:8px">
+    <summary style="cursor:pointer;padding:14px 18px;font-weight:700;font-size:14px;color:#1B3A1F;display:flex;gap:10px;align-items:center;flex-wrap:wrap;list-style:none">
+      <span style="background:#F59E0B;color:#fff;font-size:10px;padding:2px 8px;border-radius:9px">NEW</span>Customer journey details
+      <span style="font-weight:400;font-size:12px;color:#6B7A6E">optional &middot; shows the customer how we understood their needs</span>
+      <span id="cjSum" style="margin-left:auto;font-weight:400;font-size:12px;color:#6B7A6E">Off</span>
+    </summary>
+    <div id="cjBody" style="padding:4px 18px 18px;border-top:1px solid #E3EADF"></div>
+    <input type="hidden" id="cjData">
+  </details>
+</div>
+<style>
+#cjBody .cj-sw{display:flex;gap:8px;align-items:center;margin:12px 0 4px;font-size:13.5px}
+#cjBody .cj-h{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#1B5E20;margin:18px 0 6px}
+#cjBody .cj-h span{font-weight:400;text-transform:none;letter-spacing:0;color:#6B7A6E}
+#cjBody .cj-card{border:1px solid #D7DDD2;border-radius:6px;padding:8px 10px;margin-bottom:8px;background:#FBFCF9}
+#cjBody .cj-g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#cjBody .cj-g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+#cjBody label.cj-f{display:block;margin-bottom:6px}
+#cjBody label.cj-f>span{display:block;font-size:11px;font-weight:600;color:#5F6F62;margin-bottom:2px}
+#cjBody input[type=text],#cjBody textarea,#cjBody select{width:100%;font:inherit;font-size:13px;padding:6px 9px;border:1px solid #C9D2C4;border-radius:4px;background:#fff}
+#cjBody .cj-add{display:inline-block;border:1.5px dashed #7CB342;color:#1B5E20;font-weight:700;font-size:12px;padding:4px 12px;border-radius:5px;cursor:pointer;background:#fff}
+#cjBody .cj-x{color:#B91C1C;font-size:12px;cursor:pointer;background:none;border:none}
+#cjBody .cj-hint{font-size:11.5px;color:#6B7A6E;margin:3px 0 6px}
+#cjBody .cj-row{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+.cj-nm{display:block;margin-top:8px;font-size:12px;font-weight:600;color:#3d4d40}.cj-nm small{font-weight:400;color:#6B7A6E}.cj-nm input{display:block;width:100%;max-width:420px;margin-top:3px;font:inherit;font-size:13px;padding:6px 9px;border:1px solid #C9D2C4;border-radius:4px}
+</style>
+<div style="max-width:1260px;margin:0 auto;padding:0 20px 32px">
+  <div style="background:#0D3B13;border:2px solid #7CB342;border-radius:8px;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+    <div>
+      <div style="font-size:15px;font-weight:700;color:#fff">Customer Demo View</div>
+      <div style="font-size:12px;color:#C6E2CB;margin-top:2px">Opens the live customer page in a separate window with no pricing — safe for screen-sharing during demos</div>
+    </div>
+    <button id="btnCustView" style="background:#7CB342;color:#fff;border:none;border-radius:6px;padding:12px 28px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap">▶ &nbsp;Open customer view</button>
+  </div>
+</div>
+
 <div class="dl" id="dl_panel">
   <div class="dl-in">
     <div class="dl-head">
@@ -1043,16 +1089,6 @@ body.locked{overflow:hidden}
       <input type="search" id="dl_search" placeholder="Search by client name">
     </div>
     <div id="dl_list"></div>
-  </div>
-</div>
-
-<div style="max-width:1260px;margin:0 auto;padding:0 20px 32px">
-  <div style="background:#0D3B13;border:2px solid #7CB342;border-radius:8px;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
-    <div>
-      <div style="font-size:15px;font-weight:700;color:#fff">Customer Demo View</div>
-      <div style="font-size:12px;color:#C6E2CB;margin-top:2px">Opens the live customer page in a separate window with no pricing — safe for screen-sharing during demos</div>
-    </div>
-    <button id="btnCustView" style="background:#7CB342;color:#fff;border:none;border-radius:6px;padding:12px 28px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap">▶ &nbsp;Open customer view</button>
   </div>
 </div>
 
@@ -1566,7 +1602,7 @@ function flowSummaryHtml(eps){
     else if(seen[k]) st = "already counted";
     else st = nfmt(ENDPOINT_COST)+" SAR";
     seen[k] = true;
-    return esc(e.name)+(e.custom?" (custom)":"")+" <i>"+st+"</i>";
+    var al=cjAlias(e.name);return esc(e.name)+(al?" ("+esc(al)+")":"")+(e.custom?" (custom)":"")+" <i>"+st+"</i>";
   }
   af.forEach(function(a){
     var cells = flowSystems(a.f).map(function(x){ return cell(x.key); }).filter(function(x){ return x; });
@@ -1603,19 +1639,23 @@ function buildSystemQuestions(){
       html += '<option value="none"'+(c==="none"?' selected':'')+'>We don\'t have one yet — need to acquire (250/mo once connected)</option>';
       if(base.native) html += '<option value="native"'+(c==="native"?' selected':'')+'>'+esc(base.native)+'</option>';
       html += '</select>';
+      html += '<label class="cj-nm">Name of their system <small>(shown to the customer, for example Odoo)</small><input type="text" class="sys-alias" data-alias="'+esc(s.name)+'" placeholder="Leave empty to show &quot;'+esc(s.name)+'&quot;"></label><div class="sys-aliasnote" data-aliasnote="'+esc(s.name)+'"></div>';
       if(c==="none") html += '<div class="prereq-flag">Prerequisite: the customer needs to acquire this system before go-live. The 250/month endpoint fee applies once connected.</div>';
       if(c==="native" && (s.key==="crm"||s.key==="ticketing") && !crmIncluded) html += '<div class="prereq-flag">No cost line yet. Add the 700Apps CRM plan in Step 10.</div>';
     } else if(s.key==="whatsapp"){
       html += '<div class="sys-fixed">WhatsApp connection, 250/mo. Message volume is priced separately in Step 8.</div>';
     } else {
       html += '<div class="sys-fixed">Custom system, fixed 250/mo.'+(s.purposes.length?' Purpose: '+s.purposes.map(esc).join("; ")+'.':'')+'</div>';
-      html += '<div class="prereq-flag">Confirm with 700Apps that this integration is possible before the quote is sent.</div>';
+      html += '<div class="prereq-flag">Before the quote is sent, ask 700Apps: can they connect to '+esc(s.name)+' for this purpose, and what do they need from the customer\'s IT team?</div>';
     }
     html += '</div>';
   });
   if(!html) html = '<div style="padding:6px 0;font-size:12px;color:var(--muted)">No external systems needed. Add flows in Step 4, or every flow uses 700Apps native modules.</div>';
   if(html !== lastSysHtml){ $("systemsBlock").innerHTML = html; lastSysHtml = html; }
+  cjFillAliases();
 }
+function cjAlias(n){ return window.cjAliasI ? window.cjAliasI(n) : ""; }
+function cjFillAliases(){ if(window.cjFillI) window.cjFillI(); }
 
 /* ═══════════════════ WHATSAPP ESTIMATE (Step 8) ═══════════════════ */
 function buildWaUses(){
@@ -2408,7 +2448,7 @@ function buildWording(){
   var old = {}; box.querySelectorAll("input").forEach(function(i){ old[i.id] = i.value; });
   box.innerHTML = af.map(function(a){ var id = "cwf_"+a.dir+"_"+a.idx; return '<label class="f"><span class="lbl">'+(a.dir==="in"?"IN-":"OUT-")+(a.idx+1)+' '+esc(a.label)+'</span><input id="'+id+'" type="text" placeholder="Name shown to the customer" value="'+esc(old[id]||"")+'"></label>'; }).join("") || '<div class="hint">Add call flows first.</div>';
 }
-function refresh(){ updateSuggest(); buildSystemQuestions(); render(); buildWording(); sendToCustView(); }
+function refresh(){ updateSuggest(); buildSystemQuestions(); render(); buildWording(); sendToCustView(); if(window.cjSync) window.cjSync(); }
 
 $("flowsIn").addEventListener("change", flowHandler);
 $("flowsIn").addEventListener("input", flowHandler);
@@ -4172,7 +4212,7 @@ var DL = (function(){
 
   /* ---------- helpers ---------- */
   var LEADS = { hp:{n:"Hassan Pervaiz (HP) Bhatty", s:"Hassan", wa:"966591822663"}, hany:{n:"Hany Enam", s:"Hany", wa:"966568986308"} };
-  var STAGES = ["Customer requirements","Link shared","Requirements confirmed","Quote requested","Partner validated","Quote sent","Signed","Go live"];
+  var STAGES = ["Customer requirements","Link shared","Scope confirmed","Quote requested","Partner validated","Quote sent","Signed","Go live"];
   var SIDE = { lost:"Lost", hold:"On hold" };
   var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var DAY = 864e5;
@@ -4381,6 +4421,7 @@ var DL = (function(){
     });
   }
   function applyState(st){
+    var cjEl = $("cjData"); if(cjEl) cjEl.value = "";
     flowN["in"] = st.flowN["in"]; flowN.out = st.flowN.out;
     flows["in"] = st.flows["in"]; flows.out = st.flows.out;
     Object.keys(sysChoice).forEach(function(k){ delete sysChoice[k]; });
@@ -4407,7 +4448,7 @@ var DL = (function(){
       if(w==="bizGoalsWrap") $("goalOtherWrap").style.display = want.indexOf("other")>=0 ? "" : "none";
     });
     lastSysHtml = null;
-    refresh(); setFields(st.fields); refresh();
+    refresh(); setFields(st.fields); cjLoad(); refresh();
     var pn=document.getElementById("pricingNotice");
     if(pn){ var mm=model(); pn.classList.toggle("hide", !(st.pricingRev!==2 && (mm.sentimentOn || mm.hasOutbound))); }
   }
@@ -4439,6 +4480,90 @@ var DL = (function(){
     rd.readAsDataURL(file);
   });
 
+  /* ---------- customer journey details (optional, shown to the customer when switched on) ---------- */
+  var CJ = { on:false, c:[], s:{}, p:[false,false,false,false], q:[false,false,false], x:[], a:{} };
+  function cjDefaults(){ CJ.on=!!CJ.on; CJ.c=Array.isArray(CJ.c)?CJ.c:[]; CJ.s=(CJ.s&&typeof CJ.s==="object")?CJ.s:{}; CJ.p=Array.isArray(CJ.p)&&CJ.p.length===4?CJ.p:[false,false,false,false]; CJ.q=Array.isArray(CJ.q)&&CJ.q.length===3?CJ.q:[false,false,false]; CJ.x=Array.isArray(CJ.x)?CJ.x:[]; CJ.a=(CJ.a&&typeof CJ.a==="object")?CJ.a:{}; }
+  function cjUsed(){ return CJ.on || CJ.c.length || Object.keys(CJ.s).length || CJ.x.length || Object.keys(CJ.a).some(function(k){ return CJ.a[k]; }) || CJ.p.some(Boolean) || CJ.q.some(Boolean); }
+  function cjSave(){ var el=$("cjData"); if(el) el.value = cjUsed() ? JSON.stringify(CJ) : ""; cjSummary(); }
+  function cjLoad(){ var v=(($("cjData")||{}).value)||""; try{ CJ = v ? JSON.parse(v) : {}; }catch(e){ CJ = {}; } cjDefaults(); cjSigV=""; cjRender(); if(window.cjFillI) window.cjFillI(); }
+  function cjFlowLabel(a){ var l = a.job.id==="other" ? (((a.f.name||"").trim()) || "Custom flow") : (SHORT[a.job.id] || a.job.label); var ov = ((($("cwf_"+a.dir+"_"+a.idx)||{}).value)||"").trim(); return ov || l; }
+  function cjFlows(){ return activeFlows().map(function(a){ return { key:a.dir+"_"+a.idx, label:cjFlowLabel(a), code:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1) }; }); }
+  function cjSystems(){ var out=[]; try{ var m=model(); m.eps.forEach(function(ep){ if(ep.key==="whatsapp") return; if(m.hOn && (m.hWhere==="external"||m.hWhere==="both") && ep.key==="other:"+humanExtName().toLowerCase()) return; if(!ep.charged) return; var nm = SYS_DISP[ep.key] || ep.name; if(out.indexOf(nm)<0) out.push(nm); }); }catch(e){} return out; }
+  function cjSummary(){ var el=$("cjSum"); if(!el) return; var n=CJ.c.filter(function(c){ return (c.w||"").trim(); }).length, sc=Object.keys(CJ.s).filter(function(k){ var o=CJ.s[k]||{}; return o.say||o.asks||o.fields||o.team||o.rule; }).length, pd=CJ.p.filter(Boolean).length;
+    el.textContent = (CJ.on ? "ON on the customer page" : "Off") + " · " + n + " concern"+(n===1?"":"s") + " · " + sc + " scenario detail"+(sc===1?"":"s") + " · before signing " + pd + " of 4 done"; }
+  var CJ_BY = [["","— not linked —"],["setup","Setup and testing"],["dash","Dashboard"]];
+  function cjRender(){
+    var body=$("cjBody"); if(!body) return; var F=cjFlows(), h="";
+    h+='<label class="cj-sw"><input type="checkbox" data-k="on"'+(CJ.on?' checked':'')+'> <b>Show the enhanced journey on the customer page</b></label>';
+    h+='<div class="cj-hint">Off: the customer page stays exactly as it is today. On: the parts below appear. Everything you type here is shown to the customer, so do not write internal notes here.</div>';
+    var sy=cjSystems();
+    h+='<div class="cj-h">1. Names the customer uses for their systems <span>(filled in automatically from Step 6, under each endpoint)</span></div>';
+    if(sy.length){ h+='<div class="cj-g3">'+sy.map(function(g){ var v=cjAlias(g); return '<div class="cj-card" style="margin:0"><div style="font-size:11px;color:#5F6F62;font-weight:600">'+esc(g)+'</div><div style="font-size:14px;font-weight:700;color:'+(v?'#1B5E20':'#9AA59B')+'">'+(v?esc(v):'Not named yet')+'</div></div>'; }).join("")+'</div>'; }
+    else h+='<div class="cj-hint">No external systems selected yet.</div>';
+    if(humanOn()) h+='<div class="cj-hint">The phone system for handovers uses the name in the extension step: <b>'+esc(humanExtName())+'</b>.</div>';
+    h+='<div class="cj-h">2. What the customer told us <span>(their own words, 3 to 5 sentences)</span></div>';
+    CJ.c.forEach(function(c,i){
+      h+='<div class="cj-card"><div class="cj-g2"><label class="cj-f"><span>Customer\'s own words</span><textarea rows="2" data-k="c" data-i="'+i+'" data-f="w">'+esc(c.w||"")+'</textarea></label><label class="cj-f"><span>Our answer</span><textarea rows="2" data-k="c" data-i="'+i+'" data-f="a">'+esc(c.a||"")+'</textarea></label></div>';
+      h+='<div style="display:flex;gap:10px;align-items:center"><span style="font-size:11px;font-weight:600;color:#5F6F62">Answered on the journey in</span><select style="max-width:340px" data-k="c" data-i="'+i+'" data-f="by">'+CJ_BY.concat(humanOn()?[["handover","Handover to a person"]]:[]).concat(F.map(function(f){ return [f.key,"Flow: "+f.label]; })).map(function(o){ return '<option value="'+esc(o[0])+'"'+((c.by||"")===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'; }).join("")+'</select><button type="button" class="cj-x" style="margin-left:auto" data-act="delc" data-i="'+i+'">Remove</button></div></div>';
+    });
+    h+='<span class="cj-add" data-act="addc">+ Add concern</span>';
+    h+='<div class="cj-h">3. Scenario details <span>(optional, one per flow. Empty means the standard example is used)</span></div>';
+    var cards=F.map(function(f){ return {key:f.key,title:f.code+" "+f.label,ho:false}; });
+    if(humanOn()) cards.push({key:"handover",title:"Handover to a person",ho:true});
+    if(!cards.length) h+='<div class="cj-hint">Add call flows first.</div>';
+    cards.forEach(function(c){
+      var o=CJ.s[c.key]||{};
+      function fld(f,l,ph){ return '<label class="cj-f"><span>'+l+'</span><input type="text" data-k="s" data-s="'+esc(c.key)+'" data-f="'+f+'" placeholder="'+esc(ph||"")+'" value="'+esc(o[f]||"")+'"></label>'; }
+      h+='<div class="cj-card"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">'+esc(c.title)+'</div>';
+      if(c.ho) h+='<div class="cj-g2">'+fld("say","Customer\'s example sentence","e.g. I want to speak to a manager")+fld("rule","Transfer when","e.g. Asks for a person, is upset, or the AI fails twice")+fld("fields","What the person receives","e.g. Call summary, caller mood")+fld("team","Goes to","e.g. Supervisor")+'</div>';
+      else h+='<div class="cj-g2">'+fld("say","Customer\'s example sentence","e.g. I bought two lamps last week and one does not work")+fld("asks","What the AI asks","e.g. Which branch did you buy from?")+fld("fields","Fields sent to the system","e.g. Name, phone, branch, issue type, brief")+fld("team","Team that gets it","e.g. After-sales")+'</div>';
+      h+='</div>';
+    });
+    var AP = window.cjAutoP ? window.cjAutoP() : [null,false,false,false];
+    h+='<div class="cj-h">4. Where we are before signing</div><div class="cj-row">'+["Meeting with the team","Requirements reconfirmed","Quote confirmed","Agreement signed"].map(function(l,i){ var auto=i>0, on=auto?AP[i]:CJ.p[i]; return '<label'+(auto?' title="Follows the deal stage. Change the stage in the deal to change this."':'')+'><input type="checkbox" data-k="p" data-i="'+i+'"'+(on?' checked':'')+(auto?' disabled':'')+'> '+l+(auto?' <small style="color:#6B7A6E">(follows the deal)</small>':'')+'</label>'; }).join("")+'</div>';
+    h+='<div class="cj-h">4b. Where we are after signing <span>(you tick these as the work finishes; the customer cannot)</span></div><div class="cj-row">'+["Connect your systems","Test with your systems","Confirm and go live"].map(function(l,i){ return '<label><input type="checkbox" data-k="q" data-i="'+i+'"'+(CJ.q[i]?' checked':'')+'> '+l+'</label>'; }).join("")+'</div>';
+    h+='<div class="cj-hint">The customer sees a timeline with "You are here" at the first box that is not ticked. The last three boxes above follow the deal stage by themselves: Requirements reconfirmed when the deal reaches Quote requested, Quote confirmed when you press Acceptance confirmed, and Agreement signed when the deal reaches Signed. Change the stage in the deal to change them. The other boxes are yours to tick.</div>';
+    h+='<div class="cj-h">5. Unique requirements for setup and testing <span>(only if this customer has one)</span></div>';
+    CJ.x.forEach(function(x,i){
+      h+='<div style="display:grid;grid-template-columns:200px 1fr 70px;gap:8px;margin-bottom:6px"><select data-k="x" data-i="'+i+'" data-f="t"><option value="need"'+(x.t==="need"?' selected':'')+'>We need from you</option><option value="conn"'+(x.t==="conn"?' selected':'')+'>Extra connection step</option><option value="test"'+(x.t==="test"?' selected':'')+'>Extra test</option></select><input type="text" data-k="x" data-i="'+i+'" data-f="x" value="'+esc(x.x||"")+'" placeholder="e.g. Odoo version and the apps you use"><button type="button" class="cj-x" data-act="delx" data-i="'+i+'">Remove</button></div>';
+    });
+    h+='<span class="cj-add" data-act="addx">+ Add requirement</span>';
+    h+='<div class="cj-saveonly"><button type="button" class="sm pri" data-act="savej" style="padding:9px 16px;font-weight:700">Save journey only</button><span style="font-size:12.5px;color:#444">Saves these journey details and the ticks. No new quote version. Prices are not touched.</span></div>';
+    body.innerHTML=h; cjSummary();
+  }
+  (function(){
+    var body=$("cjBody"); if(!body) return;
+    function onEdit(e){ var t=e.target, k=t.getAttribute&&t.getAttribute("data-k"); if(!k) return; var i=+t.getAttribute("data-i"), f=t.getAttribute("data-f");
+      if(k==="on") CJ.on=t.checked; else if(k==="c"&&CJ.c[i]) CJ.c[i][f]=t.value; else if(k==="s"){ var key=t.getAttribute("data-s"); (CJ.s[key]=CJ.s[key]||{})[f]=t.value; if(!t.value){ var o=CJ.s[key]; if(!(o.say||o.asks||o.fields||o.team||o.rule)) delete CJ.s[key]; } }
+      else if(k==="a"){ var g=t.getAttribute("data-g"); if(t.value.trim()) CJ.a[g]=t.value; else delete CJ.a[g]; }
+      else if(k==="p") CJ.p[i]=t.checked; else if(k==="q") CJ.q[i]=t.checked; else if(k==="x"&&CJ.x[i]) CJ.x[i][f]=t.value;
+      cjSave(); }
+    body.addEventListener("input",onEdit); body.addEventListener("change",onEdit);
+    body.addEventListener("click",function(e){ var b=e.target.closest&&e.target.closest("[data-act]"); if(!b) return; var a=b.getAttribute("data-act"), i=+b.getAttribute("data-i");
+      if(a==="savej"){ if(window.cjSaveOnly) window.cjSaveOnly(); return; }
+      if(a==="addc") CJ.c.push({w:"",a:"",by:""}); else if(a==="delc") CJ.c.splice(i,1); else if(a==="addx") CJ.x.push({t:"need",x:""}); else if(a==="delx") CJ.x.splice(i,1); else return;
+      cjSave(); cjRender(); });
+  })();
+  var cjSigV = "";
+  window.cjAliasI = function(n){ return ((CJ&&CJ.a&&CJ.a[n])||"").trim(); };
+  window.cjFillI = function(){
+    var root=$("systemsBlock"); if(!root) return;
+    [].forEach.call(root.querySelectorAll("input.sys-alias"),function(i){ var n=i.getAttribute("data-alias"); if(document.activeElement!==i) i.value=CJ.a[n]||""; });
+    [].forEach.call(root.querySelectorAll("[data-aliasnote]"),function(d){ var n=d.getAttribute("data-aliasnote"), v=window.cjAliasI(n), same=Object.keys(CJ.a).filter(function(k){ return v && k!==n && window.cjAliasI(k).toLowerCase()===v.toLowerCase(); });
+      d.innerHTML = same.length ? '<div class="prereq-flag">Same name as '+esc(same.join(", "))+'. Confirm with 700Apps whether this counts as one endpoint or two.</div>' : ""; });
+  };
+  (function(){ var r=$("systemsBlock"); if(!r) return; r.addEventListener("input",function(e){ var t=e.target; if(!t.classList||!t.classList.contains("sys-alias")) return; var n=t.getAttribute("data-alias"); if(t.value.trim()) CJ.a[n]=t.value; else delete CJ.a[n]; cjSave(); window.cjFillI(); if(window.cjSync) window.cjSync(); refresh(); }); })();
+  window.cjRerender = function(){ var b=$("cjBody"); if(!b || b.contains(document.activeElement)) return; cjSigV=""; cjRender(); };
+  window.cjSync = function(){ try{ var sig=cjFlows().map(function(f){ return f.key+":"+f.label; }).join("|")+"|"+(humanOn()?1:0)+"|"+cjSystems().map(function(x){return x+"="+cjAlias(x)}).join(","); if(sig!==cjSigV){ cjSigV=sig; if(!document.activeElement || !$("cjBody").contains(document.activeElement)) cjRender(); } }catch(e){} };
+  function cjOut(){
+    if(!CJ.on) return null;
+    var scen={}; Object.keys(CJ.s).forEach(function(k){ var o=CJ.s[k]||{}, r={}; ["say","asks","fields","team","rule"].forEach(function(f){ if((o[f]||"").trim()) r[f]=o[f].trim(); }); if(Object.keys(r).length) scen[k]=r; });
+    var ex={conn:[],test:[],need:[]}; CJ.x.forEach(function(x){ var t=(x.x||"").trim(); if(t && ex[x.t]) ex[x.t].push(t); });
+    var al={}; Object.keys(CJ.a).forEach(function(g){ var v=(CJ.a[g]||"").trim(); if(v) al[g]=v; });
+    var hs=""; try{ var m=model(); if(m.hOn && (m.hWhere==="external"||m.hWhere==="both")) hs=humanExtName(); }catch(e){}
+    return { concerns:CJ.c.filter(function(c){ return (c.w||"").trim(); }).map(function(c){ return { w:c.w.trim(), a:(c.a||"").trim(), by:c.by||"" }; }), scen:scen, path:CJ.p.slice(), after:CJ.q.slice(), extras:ex, alias:al, humanSys:hs };
+  }
+
   /* ---------- data for the customer page (no prices, no margins, no private notes) ---------- */
   var SYS_DISP = { booking:"Booking system", crm:"CRM", ticketing:"Ticketing system", erp:"ERP", billing:"Billing system", payment:"Payment gateway", core:"Core business system", sms:"SMS gateway", field:"Field service system", esign:"E-signature system", hr:"HR system" };
   function custData(m){
@@ -4446,7 +4571,7 @@ var DL = (function(){
     var inb = [], out = [];
     activeFlows().forEach(function(a){
       var k = (a.job.sys && a.job.sys[0]) || "", sy = (k && SYS_DISP[k]) || "";
-      var o = { id:a.job.id==="other" ? (a.dir==="in"?"other":"other_out") : a.job.id, code:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1),
+      var o = { id:a.job.id==="other" ? (a.dir==="in"?"other":"other_out") : a.job.id, code:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1), key:a.dir+"_"+a.idx,
         label:a.job.id==="other" ? (((a.f.name||"").trim()) || "Custom flow") : (SHORT[a.job.id] || a.job.label), sys:sy };
       var ov = ((($("cwf_"+a.dir+"_"+a.idx)||{}).value)||"").trim(); if(ov) o.label = ov;
       o.mods = docMods(a, m);
@@ -4461,7 +4586,7 @@ var DL = (function(){
     });
     var wording = {};
     [["noun","cwNoun"],["person","cwPerson"],["provider","cwProvider"],["service","cwService"],["facility","cwFacility"],["system","cwSystem"]].forEach(function(p){ var v = (($(p[1])||{}).value||"").trim(); if(v) wording[p[0]] = v; });
-    return {
+    var R0 = {
       client:D.client, industry:ind, noun:wording.noun || IND.noun || "customers", desc:(($("cwDesc")||{}).value||"").trim(), wording:wording, native:nativeNames,
       goals:D.goalIds, goalOther:($("goalOtherText").value||"").trim(), pains:D.painIds,
       inbound:inb, outbound:out, systems:sysNames, whatsapp:D.whatsapp, human:!!(D.human && D.human.on), kb:!!D.kb,
@@ -4469,6 +4594,8 @@ var DL = (function(){
       sz:{ "in":num("inCallsDay",0), share:Math.round(m.aiShare*100), inlen:num("inCallLen",0), out:num("outCallsDay",0), outlen:num("outCallLen",0), days:m.workDays,
         contacts:num("contacts",0), attempts:2, peak:m.peak, lines:D.phone.lines||1, ext:m.extensions||1, wa:D.waMsgs||0, agents:(D.human&&D.human.agents)||0, dash:m.dashUsers||1 }
     };
+    var J0 = cjOut(); if(J0) R0.journey = J0;
+    return R0;
   }
   function marginSnap(m){
     var refFee = num("refFee",0), marginYear = (m.recPrice-m.recList)*m.billed + (m.onePrice-m.oneList) - refFee;
@@ -4695,7 +4822,7 @@ var DL = (function(){
     var seen = d.lastSeenMs||0, sids = {}, n = 0;
     evOf(d).forEach(function(e){
       if(e.ms<=seen) return;
-      if(e.type==="request"||e.type==="timeline"||e.type==="share") n++;
+      if(e.type==="request"||e.type==="timeline"||e.type==="share"||e.type==="review") n++;
       else if(e.type==="open" && !sids[e.sid]){ sids[e.sid] = 1; n++; }
     });
     return n;
@@ -4807,6 +4934,7 @@ var DL = (function(){
     var opens = {}; ev.forEach(function(e){ if(e.type==="open") opens[e.sid] = 1; });
     var h = '<div class="act-top"><button type="button" class="sm" data-back="1">&larr; All deals</button><div style="flex:1"><div class="act-nm">'+xesc(d.client)+bdg(d)+'</div><div class="dl-meta">'+xesc(d.industryLabel||"")+' &middot; presales lead: <b>'+ln.n+'</b> &middot; deal date '+fdate(d.dealDate)+' &middot; customer opened '+Object.keys(opens).length+' times</div></div>'+
       '<div class="dl-acts"><button type="button" class="sm pri" data-ld="1">Edit in calculator</button><button type="button" class="sm" data-brief="int">Internal brief</button><button type="button" class="sm" data-brief="req">Requirements brief</button><button type="button" class="sm" data-pvc="1">Customer view</button></div></div>'+stageBar(d)+pxNext(d);
+    h += jStatusHtml(d);
     h += '<div class="act-tabs">';
     [["ov","Overview"],["act","Customer activity"+(un?" ("+un+" new)":"")],["sz","Requirements review"],["pt","Partner review"],["qt","Quote versions"],["lk","Links"]].forEach(function(t){ h += '<button type="button" data-t="'+t[0]+'" class="'+(tab===t[0]?"on":"")+'">'+t[1]+'</button>'; });
     h += '</div><div class="act-body">';
@@ -4869,6 +4997,62 @@ var DL = (function(){
     h += '<div class="dl-meta" style="margin-top:8px"><b>Never shown to 700Apps:</b> SOE margin, discounts and customer prices.</div>'+pxRoundsHtml(p)+'</div>';
     return h;
   }
+  /* ---------- change log: who asked, what changed, why, and what you decided ---------- */
+  function logAdd(d, rows){
+    var cur = (d.log||[]).slice(), ver = d.version||1;
+    rows.forEach(function(r){ cur.push(Object.assign({ ms:Date.now(), ver:ver }, r)); });
+    return store.patch(d.id, { log:cur }).then(function(){ return refresh2(d.id); });
+  }
+  function askDecisions(title, note, items, cb){
+    var o = document.createElement("div"); o.className = "px-modal";
+    var rows = items.map(function(it,i){
+      return '<tr><td style="padding:6px 8px"><b>'+xesc(it.what)+'</b><br><span class="dl-meta">'+(it.from!=null&&it.from!==""?xesc(it.from)+' &rarr; ':'')+xesc(it.to||"")+'</span></td><td class="dl-meta" style="padding:6px 8px">'+(it.why?xesc(it.why):'No reason given')+'</td><td style="padding:6px 8px;white-space:nowrap"><label><input type="radio" name="dc'+i+'" value="Accepted" checked> Accept</label> <label><input type="radio" name="dc'+i+'" value="Declined"> Decline</label></td><td style="padding:6px 8px"><input type="text" id="dcw'+i+'" maxlength="140" placeholder="Your reason" style="width:100%;padding:6px"></td></tr>';
+    }).join("");
+    o.innerHTML = '<div style="width:min(900px,95vw)"><h3 style="margin:0 0 6px">'+xesc(title)+'</h3><p class="dl-meta" style="margin:0 0 8px">'+xesc(note)+'</p><table class="act-t"><thead><tr><th>Change</th><th>Their reason</th><th>Your decision</th><th>Your reason (required if you decline)</th></tr></thead><tbody>'+rows+'</tbody></table><div id="dc_err" style="color:#B91C1C;font-size:12px;min-height:16px;margin-top:6px"></div><div style="text-align:right;display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><button type="button" id="dc_c">Cancel</button><button type="button" class="sm pri" id="dc_ok">Save decisions</button></div></div>';
+    document.body.appendChild(o);
+    o.querySelector("#dc_c").onclick = function(){ o.remove(); };
+    o.querySelector("#dc_ok").onclick = function(){
+      var out = [], bad = false;
+      items.forEach(function(it,i){
+        var dec = (o.querySelector('input[name="dc'+i+'"]:checked')||{}).value || "Accepted", w = o.querySelector("#dcw"+i).value.trim();
+        if(dec==="Declined" && !w) bad = true;
+        out.push(Object.assign({}, it, { dec:dec, decWhy:w }));
+      });
+      if(bad){ o.querySelector("#dc_err").textContent = "Please write a short reason for each change you decline."; return; }
+      o.remove(); cb(out);
+    };
+  }
+  function rqItems(d){
+    /* the customer's changes that are not in the log yet */
+    var cust = {}; try{ cust = JSON.parse(d.cust||"{}"); }catch(e){}
+    var z = cust.sz || {}, s = szEvents(d), logged = {}; (d.log||[]).forEach(function(r){ if(r.src) logged[r.src] = 1; });
+    var out = [];
+    Object.keys(s).forEach(function(k){
+      var r = s[k]; if(!r || r.ok || r.nv==null || r.nv==="") return;
+      var key = "sz:"+k+":"+r.nv; if(logged[key]) return;
+      out.push({ who:"Customer", src:key, what:SZL[k]||k, from:rqNum(z[k]), to:rqNum(r.nv), why:r.w||"" });
+    });
+    evOf(d).filter(function(e){ return e.type==="review" && e.p && e.p.ok===false; }).forEach(function(e){
+      var key = "rv:"+(e.p.item||"")+":"+e.ms; if(logged[key]) return;
+      out.push({ who:"Customer", src:key, what:'Not quite: "'+(e.p.item||"a point")+'"', from:"", to:"Customer asks for a change", why:e.p.note||"" });
+    });
+    return out;
+  }
+  function logHtml(d){
+    var L = (d.log||[]).slice().reverse();
+    if(!L.length) return '<div class="act-box"><div class="act-h">Change log</div><div class="dl-meta">No changes recorded yet. When the customer or 700Apps replies and you decide, each change and your reason appears here.</div></div>';
+    return '<div class="act-box"><div class="act-h">Change log</div><table class="act-t"><thead><tr><th>Date</th><th>Who</th><th>What changed</th><th>Why</th><th>Decision</th><th>Version</th></tr></thead><tbody>'+L.map(function(r){
+      var dc = r.dec ? '<span class="bdg '+(r.dec==="Declined"?"new":"done")+'">'+xesc(r.dec)+'</span>'+(r.decWhy?'<br><span class="dl-meta">You: '+xesc(r.decWhy)+'</span>':'') : '';
+      return '<tr><td>'+fdt(r.ms)+'</td><td>'+xesc(r.who||"")+'</td><td>'+xesc(r.what||"")+(r.to||r.from?'<br><span class="dl-meta">'+(r.from!=null&&r.from!==""?xesc(r.from)+' &rarr; ':'')+xesc(r.to||"")+'</span>':'')+'</td><td>'+(r.why?xesc(r.why):'<span class="dl-meta">'+(r.who==="You"?'':'No reason given')+'</span>')+'</td><td>'+dc+'</td><td>v'+(r.ver||1)+'</td></tr>';
+    }).join("")+'</tbody></table></div>';
+  }
+  function decideCustomer(d, then){
+    var items = rqItems(d);
+    if(!items.length){ then(); return; }
+    askDecisions("Decide the customer's changes", "Nothing enters the quote until you decide. The calculator recalculates the price from the numbers you accept. Your reasons are saved in the change log.", items, function(res){
+      logAdd(d, res.map(function(r){ return { who:r.who, src:r.src, what:r.what, from:r.from, to:r.to, why:r.why, dec:r.dec, decWhy:r.decWhy }; })).then(then);
+    });
+  }
   function askReason(cb){
     var o = document.createElement("div"); o.className = "px-modal";
     o.innerHTML = '<div><h3 style="margin:0 0 8px">Create the next version</h3><p class="dl-meta">The sent version stays locked. Why are you revising it? The reason is stored with the new version.</p><select id="px_r" style="width:100%;padding:8px"><option value="scope">Customer asked for a scope change</option><option value="price">Customer asked for a price or term change</option><option value="partner">700Apps asked for a change</option><option value="own">Our own correction</option></select><p class="dl-meta">A scope change or a partner request goes back to 700Apps for validation. The other reasons go straight to the quotation.</p><div style="text-align:right;display:flex;gap:8px;justify-content:flex-end"><button type="button" id="px_c">Cancel</button><button type="button" class="pri" id="px_ok">Create next version</button></div></div>';
@@ -4915,6 +5099,7 @@ var DL = (function(){
       }
       else if(e.type==="timeline"){ t = "Said when they plan to decide"; p = e.p.tl; }
       else if(e.type==="share"){ t = "Shared the link with a colleague"; }
+      else if(e.type==="review"){ t = (e.p.ok ? "Confirmed: " : "Wants a change: ") + xesc(e.p.item||"a point"); p = e.p.note || ""; }
       else return;
       items.push('<div class="act-ev '+(hot?"hot":"")+'"><i>'+ago(e.ms)+' &middot; '+fms(e.ms)+'</i><b>'+t+'</b><p>'+(e.type==="request"?p:xesc(p))+'</p>'+(who?'<span class="act-who">'+xesc(who)+'</span>':'')+'</div>');
     });
@@ -4989,6 +5174,9 @@ var DL = (function(){
     var words = []; if(p.chg) words.push(p.chg); if(p.note) words.push("Note: "+p.note); if(p.msg) words.push("Message: "+p.msg);
     if(words.length) side += '<div class="act-box"><div class="act-h">In their words</div><div style="font-size:12.5px">'+words.map(xesc).join('<br>')+'</div></div>';
     h += '<div class="rq-2"><div class="act-box"><div class="act-h">All their numbers</div><table class="act-t rq-t"><thead><tr><th>Number</th><th>You proposed</th><th>Customer says</th><th>Status</th></tr></thead><tbody>'+tr+'</tbody></table></div><div>'+side+'</div></div>';
+    var rvs = {}; evOf(d).filter(function(e){ return e.type==="review"; }).slice().reverse().forEach(function(e){ rvs[e.p.item||""] = e; });
+    var rvk = Object.keys(rvs);
+    if(rvk.length) h += '<div class="act-box"><div class="act-h">What you told us: their answers</div><table class="act-t"><tbody>'+rvk.map(function(k){ var e = rvs[k]; return '<tr><td>'+xesc(k)+'</td><td>'+(e.p.ok ? '<span class="bdg done">Correct</span>' : '<span class="bdg new">Not quite</span>')+'</td><td class="dl-meta">'+fms(e.ms)+'</td></tr>'; }).join("")+'</tbody></table></div>';
     h += '<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">'+(changed.length||imp.length||addS.length?'<button type="button" class="sm pri" data-apply="1">Open in calculator with their numbers</button>':'<button type="button" class="sm pri" data-ld="1">Open in calculator</button>')+((addS.length||addF.length||off.length)?'<button type="button" class="sm" data-psend="1">Send a new round to 700Apps</button>':'')+(nAct && !reviewed?'<button type="button" class="sm" data-rqseen="1">Mark as reviewed</button>':'')+'</div>';
     h += '<div class="dl-meta" style="margin-top:8px">Price effects use the same rules and rates as the calculator, before your margin unless stated.</div>';
     return h;
@@ -5006,6 +5194,7 @@ var DL = (function(){
         '<td><div style="display:flex;gap:4px;flex-wrap:wrap"><button type="button" class="sm pri" data-px="qprev" data-n="'+v.n+'">Preview official quotation</button><button type="button" class="sm" data-openv="'+v.n+'">Open in calculator</button>'+(!v.sent && i>0 && v.n>sentMax ? '<button type="button" class="sm" data-px="vdel" data-n="'+v.n+'">Delete</button>' : '')+(!v.sent&&i===0?'<button type="button" class="sm pri" data-sent="'+v.n+'">Mark v'+v.n+' as sent</button>':'')+'</div></td></tr>';
     });
     h += '</tbody></table>';
+    h = logHtml(d) + h;
     if(cv && !sent) h += '<div class="dl-meta" style="margin-top:8px">Sent on: <input type="date" id="act_sentdate" value="'+todayISO()+'" max="'+todayISO()+'"> (change it if you sent the quote earlier)</div>';
     if(sent && cv && cv.n!==sent.n) h += '<div class="act-diff"><b>Change since the sent version</b><br>Monthly price: SAR '+sar2(sent.rec)+' &rarr; SAR '+sar2(cv.rec)+' ('+(cv.rec>=sent.rec?"+":"")+sar2(cv.rec-sent.rec)+')</div>';
     if(d.stage>=3 && d.stage<5) h += '<div style="margin-top:10px"><button type="button" class="sm" data-prep="1">Show "In preparation" on the customer page</button></div>';
@@ -5072,7 +5261,7 @@ var DL = (function(){
     var p = v.split("-"); $("quoteDate").value = (+p[2])+" "+["January","February","March","April","May","June","July","August","September","October","November","December"][(+p[1])-1]+" "+p[0];
     refresh();
   }
-  function banner(){ if(!edit && typeof uwReady!=="undefined" && uwReady && typeof uwClear==="function") uwClear();
+  function banner(){ document.body.classList.toggle("is-editing", !!(edit && edit.mode==="edit")); if(window.cjRerender) window.cjRerender(); if(!edit && typeof uwReady!=="undefined" && uwReady && typeof uwClear==="function") uwClear();
     var b = $("act_edit");
     if(!b){ b = document.createElement("div"); b.id = "act_edit"; document.body.insertBefore(b, document.body.firstChild); }
     var s2 = $("dl_save"), n2 = $("dl_savenew");
@@ -5115,12 +5304,55 @@ var DL = (function(){
     return { m:m, D:D, ind:ind, indLabel:lab, lead:($("presalesLead").value||"").trim() || LEADS.hp.n, dealDate:$("dealDate").value || todayISO(),
       state:JSON.stringify(captureState()), cust:custData(m), quote:withSoe(quoteSnap(m), marginSnap(m)), margin:marginSnap(m) };
   }
+  /* ---------- customer journey: status line, and "Save journey only" ---------- */
+  var J_P = ["Meeting with the team","Requirements reconfirmed","Quote confirmed","Agreement signed"], J_Q = ["Connect your systems","Test with your systems","Confirm and go live"];
+  function jOf(d){ try{ return (JSON.parse(d.cust||"{}")).journey || null; }catch(e){ return null; } }
+  /* ticks 2 to 4 of "before signing" follow the deal, using the status the customer link already carries */
+  function jAuto(d){ var qs = (d && d.quoteStatus) || "none"; return [null, qs!=="none", qs==="acc"||qs==="sig", qs==="sig"]; }
+  window.cjAutoP = function(){ return jAuto((edit && edit.mode==="edit") ? find(edit.id) : null); };
+  function jStatusHtml(d){
+    var j = jOf(d);
+    if(!j) return '<div class="jst"><b>Customer journey</b><span class="bdg">OFF</span><span class="dl-meta">The customer page shows the standard view. Turn it on in the calculator.</span><button type="button" class="sm" data-jedit="1" style="margin-left:auto">Edit in calculator</button></div>';
+    var A = jAuto(d), P = [!!(j.path&&j.path[0]), A[1], A[2], A[3]], Q = j.after || [false,false,false], np = P.filter(Boolean).length, nq = Q.filter(Boolean).length;
+    var all = J_P.concat(J_Q), flags = P.concat(Q), nx = flags.indexOf(false);
+    return '<div class="jst"><b>Customer journey</b><span class="bdg done">ON on the customer link</span><span>Before signing <b>'+np+' of 4</b></span><span>After signing <b>'+nq+' of 3</b></span><span class="dl-meta">'+(nx<0?"All steps done":"Next: "+all[nx])+'</span><button type="button" class="sm pri" data-jedit="1" style="margin-left:auto">Edit in calculator</button><div style="flex-basis:100%;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="dl-meta" style="margin-right:4px">Customer sees:</span>'+all.map(function(l,i){ var on=flags[i], cur=(i===nx); return '<span style="font-size:11.5px;padding:3px 9px;border-radius:9px;border:1.5px solid '+(on?'#1B5E20':cur?'#7CB342':'#D7E1D4')+';background:'+(on?'#1B5E20':cur?'#EAF5DC':'#fff')+';color:'+(on?'#fff':'#444')+';font-weight:'+(cur?'700':'500')+'">'+(on?'&#10003; ':'')+l+(cur?' &larr; you are here':'')+'</span>'; }).join('')+'</div></div>';
+  }
+  window.cjSaveOnly = function(){
+    if(!(edit && edit.mode==="edit")){ toast("Open a saved deal with Edit in calculator first."); return; }
+    var d = find(edit.id); if(!d) return;
+    if(window.__aiccSaving) return;
+    var c = collect(), jn = (c.cust && c.cust.journey) || null, oc = {}, os = {};
+    try{ oc = JSON.parse(d.cust||"{}"); }catch(e){} try{ os = JSON.parse(d.stateJson||"{}"); }catch(e){}
+    var oldJ = oc.journey || null;
+    if(jn) oc.journey = jn; else delete oc.journey;
+    var ns = typeof c.state==="string" ? JSON.parse(c.state) : c.state;
+    os.fields = os.fields || {}; os.fields.cjData = (ns.fields && ns.fields.cjData) || "";
+    var rows = [], oP = (oldJ&&oldJ.path)||[false,false,false,false], oQ = (oldJ&&oldJ.after)||[false,false,false], nP = (jn&&jn.path)||oP, nQ = (jn&&jn.after)||oQ;
+    J_P.forEach(function(l,i){ if(i===0 && !!oP[i]!==!!nP[i]) rows.push({ ms:Date.now(), ver:d.version||1, who:"You", what:l+(nP[i]?" ticked":" unticked"), why:"", dec:"", decWhy:"" }); });
+    J_Q.forEach(function(l,i){ if(!!oQ[i]!==!!nQ[i]) rows.push({ ms:Date.now(), ver:d.version||1, who:"You", what:l+(nQ[i]?" ticked":" unticked"), why:"", dec:"", decWhy:"" }); });
+    if(!rows.length && JSON.stringify(oldJ)!==JSON.stringify(jn)) rows.push({ ms:Date.now(), ver:d.version||1, who:"You", what:"Journey details updated", why:"", dec:"", decWhy:"" });
+    var json = JSON.stringify(oc), patch = { cust:json, stateJson:JSON.stringify(os) };
+    if(rows.length) patch.log = (d.log||[]).concat(rows);
+    status("Saving..."); window.__aiccSaving = true;
+    store.patch(d.id, patch, { customerJson:json }, d.slug).then(function(){
+      window.__aiccSaving = false; status("");
+      return refresh2(d.id).then(function(){
+        (function(){ var t=document.createElement("div"); t.style.cssText="position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:99998;background:#0D3B13;color:#fff;padding:12px 16px;border-radius:12px;font:600 13px Cairo,Arial,sans-serif;display:flex;gap:14px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:92vw"; t.innerHTML='<span>Journey saved. No new quote version was created. The customer link shows it now.</span><button type="button" style="background:#7CB342;color:#fff;border:none;border-radius:8px;padding:8px 14px;font:700 13px Cairo,Arial,sans-serif;cursor:pointer;white-space:nowrap">Go to deal workspace</button>'; document.body.appendChild(t); t.querySelector("button").onclick=function(){ t.remove(); var p=document.getElementById("dl_panel"); if(p) p.scrollIntoView({behavior:"smooth",block:"start"}); }; setTimeout(function(){ if(t.parentNode) t.remove(); }, 12000); })();
+      });
+    }).catch(function(e){ window.__aiccSaving = false; status("Save failed: "+(e.message||e), true); });
+  };
+
   function doSave(kind){
     if(!canUse()){ status("Please sign in first.", true); return; }
     var name = ($("clientName").value||"").trim();
     if(!name){ toast("Enter the client name first."); $("clientName").focus(); return; }
     var c = collect(), custJson = JSON.stringify(c.cust);
     if(!c.ind){ toast("Choose the customer's industry first. The customer page uses it for its vocabulary."); $("industry").focus(); return; }
+    if(window.__aiccSaving) return;
+    if(kind==="new" && !(edit&&edit.leadId)){
+      var nm0 = name.toLowerCase(), dup = deals.filter(function(x){ return String(x.client||"").trim().toLowerCase()===nm0; })[0];
+      if(dup && !confirm("A deal for "+name+" already exists (created "+fdt(dup.cms)+").\n\nOK = create another deal.\nCancel = stop, then open the existing deal and use Edit in calculator.")) return;
+    }
     if(kind==="ver" && edit && edit.mode==="edit"){
       var d = find(edit.id), cur = lastVer(d) || { n:d.version||1, sent:false };
       var vd = ($("act_vdate")&&$("act_vdate").value) || todayISO(), note = ($("act_vwhy")&&$("act_vwhy").value.trim()) || "";
@@ -5129,6 +5361,7 @@ var DL = (function(){
         var patch = Object.assign({ client:name, industry:c.ind, industryLabel:c.indLabel, lead:c.lead, dealDate:c.dealDate, version:n, quote:c.quote, stateJson:c.state, cust:custJson, logo:CUST_LOGO, "stageDates.0":c.dealDate }, extra||{});
         var sp = Object.assign({ client:name, industry:c.ind, lead:leadKey(c.lead), logo:CUST_LOGO, customerJson:custJson }, extraShare||{});
         status("Saving...");
+        if(n!==cur.n) patch.log = (d.log||[]).concat([{ ms:Date.now(), ver:n, who:"You", what:"Version v"+n+" created", why:why, dec:"", decWhy:"" }]);
         return store.addVersion(d.id, patch, ver, sp, d.slug).then(function(){ edit = null; banner(); return refresh2(d.id).then(function(){ view = "detail"; curId = d.id; tab = "qt"; draw(); $("dl_panel").scrollIntoView({behavior:"smooth"}); toast(msg); status(""); }); })
           .catch(function(e){ status("Save failed: "+(e.message||e), true); });
       };
@@ -5148,11 +5381,12 @@ var DL = (function(){
     var ver = { n:1, date:dd, rec:c.quote.recPrice, one:c.quote.onePrice, why:kind==="copy" ? "Copy of "+((find(edit&&edit.id)||{}).client||"another deal") : "First draft", sent:false, sentDate:"", stateJson:c.state, margin:c.margin };
     var share = { client:name, logo:CUST_LOGO, industry:c.ind, lead:leadKey(c.lead), active:false, expiresAt:0, quoteStatus:"none", customerJson:custJson, slug:slug };
     if(edit&&edit.leadObj){ deal.cc = { name:edit.leadObj.name, title:"", mobile:edit.leadObj.mobile }; }
-    status("Saving...");
+    status("Saving..."); window.__aiccSaving = true;
     store.create(deal, ver, share, slug).then(function(id){
+      window.__aiccSaving = false;
       if(deal.leadId) leadSet(deal.leadId, {status:"converted", dealId:id}).catch(function(){});
-      edit = null; banner(); return refresh2(id).then(function(){ view = "detail"; curId = id; tab = "lk"; draw(); $("dl_panel").scrollIntoView({behavior:"smooth"}); status(""); toast("Saved: "+name+" as v1, stage Customer requirements, monthly SAR "+sar2(c.quote.recPrice)+". The customer link is created but not shared yet."); });
-    }).catch(function(e){ status("Save failed: "+(e.message||e), true); });
+      edit = { mode:"edit", id:id, fromV:1 }; banner(); return refresh2(id).then(function(){ view = "detail"; curId = id; tab = "lk"; draw(); $("dl_panel").scrollIntoView({behavior:"smooth"}); status(""); toast("Saved: "+name+" as v1, stage Customer requirements, monthly SAR "+sar2(c.quote.recPrice)+". The customer link is created but not shared yet."); });
+    }).catch(function(e){ window.__aiccSaving = false; status("Save failed: "+(e.message||e), true); });
   }
 
   /* ---------- loading and drawing ---------- */
@@ -5174,6 +5408,7 @@ var DL = (function(){
     var d = view==="detail" ? find(curId) : null;
     if(view==="detail" && !d){ view = "list"; }
     box.innerHTML = view==="list" ? listV() : detV(d);
+    if(window.cjRerender) window.cjRerender();
   }
 
   /* ---------- actions on a deal ---------- */
@@ -5360,9 +5595,9 @@ var DL = (function(){
     if(!lines.length){ toast("Open the deal in the calculator and save it first, so the pricing lines exist."); return; }
     if(!rsn){ if((p.round||0)>0){ askRound(function(r){ pxPartnerSend(d, r); }); return; } rsn = {why:"First send", note:""}; }
     var rnd = (p.round||0)+1, key = d.slug+"-r"+rnd, z = cust.sz || {}, ln = LEADS[leadKey(d.lead)];
-    var qsText = ((document.getElementById("px_qs")||{}).value || p.qs || "").slice(0,1500), qsArr = qsText.split(/\n/).map(function(x){ return x.trim().slice(0,260); }).filter(function(x){ return x; }).slice(0,8);
+    var qsEl = document.getElementById("px_qs"), qsText = (qsEl ? qsEl.value : (p.qs || "")).slice(0,1500), qsArr = qsText.split(/\n/).map(function(x){ return x.trim().slice(0,260); }).filter(function(x){ return x; }).slice(0,8);
     var sx = q.scopeX || {};
-    var scope = { flows:sx.flows || (cust.inbound||[]).concat(cust.outbound||[]).map(function(f){ return f.label; }), systems:cust.systems||[], native:sx.native||[], ext:sx.ext||[], lad:sx.lad||null, usageCalls:sx.usageCalls||null, qs:qsArr, ph:sx.ph||{ t:"line", n:(cust.sz&&cust.sz.lines)||1 }, eps:sx.eps||[], mob:!!sx.mob, peakN:sx.peakN||0, intro:sx.intro||"", wa:!!cust.whatsapp, sz:{in:z['in'],share:z.share,inlen:z.inlen,out:z.out,outlen:z.outlen,days:z.days,contacts:z.contacts},
+    var scope = { flows:sx.flows || (cust.inbound||[]).concat(cust.outbound||[]).map(function(f){ return f.label; }), systems:cust.systems||[], native:sx.native||[], ext:sx.ext||[], lad:sx.lad||null, usageCalls:sx.usageCalls||null, qs:qsArr, ph:sx.ph||{ t:"line", n:(cust.sz&&cust.sz.lines)||1 }, eps:sx.eps||[], dj:(cust.journey ? { noun:cust.noun, systems:cust.systems||[], inbound:(cust.inbound||[]).map(function(f){ return {id:f.id,key:f.key,label:f.label,sys:f.sys}; }), outbound:(cust.outbound||[]).map(function(f){ return {id:f.id,key:f.key,label:f.label,sys:f.sys}; }), whatsapp:!!cust.whatsapp, human:!!cust.human, kb:!!cust.kb, journey:{ scen:cust.journey.scen||{}, alias:cust.journey.alias||{}, humanSys:cust.journey.humanSys||"" } } : null), mob:!!sx.mob, peakN:sx.peakN||0, intro:sx.intro||"", wa:!!cust.whatsapp, sz:{in:z['in'],share:z.share,inlen:z.inlen,out:z.out,outlen:z.outlen,days:z.days,contacts:z.contacts},
       channels:["Voice"].concat(cust.whatsapp?["WhatsApp"]:[], cust.kb?["Knowledge base"]:[], cust.human?["Handover to staff"]:[]),
       sizing:Object.keys(SZL).filter(function(k){ return z[k]!=null; }).map(function(k){ return SZL[k]+": "+z[k]; }) };
     var doc = { client:d.client, dealId:d.id, round:rnd, active:true, expiresAt:Date.now()+30*DAY, scope:JSON.stringify(scope), lines:lines, lead:ln.n, status:"open", reason:rsn.why, reasonNote:rsn.note||"", createdAt:TS() };
@@ -5401,6 +5636,14 @@ var DL = (function(){
   function pxPartnerAccept(d){
     var p = d.partner||{}, r = d._reply; if(!r) return;
     var pr = r.p||{}, props = (pr.answers||[]).filter(function(a){ return a.v==="chg"; }).map(function(a){ return { name:a.n, from:a.from, to:+a.to, why:a.why||"" }; });
+    if(props.length && !r._decided){
+      askDecisions("Decide the 700Apps rate changes", "700Apps changes rates only. Your reasons are saved in the change log.", props.map(function(x){ return { who:"700Apps", what:x.name, from:rqNum(x.from), to:rqNum(x.to), why:x.why }; }), function(res){
+        r._decided = true;
+        logAdd(d, res.map(function(x){ return { who:x.who, what:x.what, from:x.from, to:x.to, why:x.why, dec:x.dec, decWhy:x.decWhy }; })).then(function(){ pxPartnerAccept(find(d.id)||d); });
+      });
+      return;
+    }
+    if(!props.length && !r._decided){ r._decided = true; logAdd(d, [{ who:"700Apps", what:"Confirmed every rate as shown", why:"", dec:"Accepted", decWhy:"" }]).then(function(){ pxPartnerAccept(find(d.id)||d); }); return; }
     var pt = { partner:{ status:"validated", round:p.round||1, key:p.key, sentAt:p.sentAt||todayISO(), valid:"", prop:props[0]||null, props:props, chg:props, rounds:p.rounds||[], by:pr.by||"", repliedAt:(r.ms ? new Date(r.ms).toISOString().slice(0,10) : todayISO()), note:pr.note||"", qa:(pr.qa||[]).slice(0,8), qs:p.qs||"" } };
     if(d.stage<4){ pt.stage = 4; pt["stageDates.4"] = todayISO(); }
     store.patch(d.id, pt).then(function(){ try{ return db.collection("partnerShares").doc(p.key).update({active:false, status:"validated", result:JSON.stringify(pxResult(pr, r.ms))}); }catch(e){} }).then(function(){ return refresh2(d.id); })
@@ -5567,6 +5810,7 @@ var DL = (function(){
     }
     if(t.closest("[data-sn]")){ store.patch(d.id, { notes:$("act_note").value }).then(function(){ d.notes = $("act_note").value; $("act_ok").textContent = "Note saved."; }); return; }
     if(t.closest("[data-ld]")){ editDeal(d.id); return; }
+    if(t.closest("[data-jedit]")){ editDeal(d.id, null, function(){ var e = $("cjd"); if(e){ e.open = true; e.scrollIntoView({ behavior:"smooth", block:"start" }); } }); return; }
     if((tt = t.closest("[data-openv]"))){ editDeal(d.id, +tt.dataset.openv); return; }
     if((tt = t.closest("[data-brief]"))){ openBrief(d, tt.dataset.brief); return; }
     if(t.closest("[data-wsave]")){ store.patch(d.id, { won:{ type:$("act_wtype").value, start:$("act_wstart").value, ref:$("act_wref").value.trim() } }).then(function(){ return refresh2(); }).then(function(){ toast("Won details saved."); }); return; }
@@ -5588,7 +5832,7 @@ var DL = (function(){
       var ns = slugify(d.client)+"-"+rcode(4), sh = { client:d.client, logo:d.logo||"", industry:d.industry, lead:leadKey(d.lead), active:(d.link.state==="active"), expiresAt:(d.link.expiresAt||0), quoteStatus:d.quoteStatus||"none", customerJson:d.cust, slug:ns };
       store.moveShare(d.id, d.slug, ns, sh, { slug:ns }).then(function(){ return refresh2(d.id); }).then(function(){ var d2 = find(d.id); return d2 && d2.sentVersion ? pxPublishQuote(d2, d2.sentVersion).catch(function(){}) : null; }).then(function(){ toast("New link created. The old link stopped working."); }); return;
     }
-    if(t.closest("[data-rqseen]")){ store.patch(d.id, { rqSeenMs:Date.now() }).then(function(){ return refresh2(d.id); }); return; }
+    if(t.closest("[data-rqseen]")){ decideCustomer(d, function(){ store.patch(d.id, { rqSeenMs:Date.now() }).then(function(){ return refresh2(d.id); }); }); return; }
     if(t.closest("[data-psend]")){ if(pxStale(d)){ toast("This quote was issued with older rules. Edit it in the calculator and save first."); return; } pxPartnerSend(d); return; }
     if(t.closest("[data-pcp]")){ var pq = d.partner||{}; if(!pq.key) return; var plk = pxBase()+"#"+pq.key, bb2 = t.closest("[data-pcp]"); if(bb2.dataset.pcp==="w"){ try{ window.open("https://wa.me/?text="+encodeURIComponent(pxPartnerMsgText(d, pq.round, plk)), "_blank"); }catch(x){} } else pxCopy(plk, bb2); return; }
     if(t.closest("[data-pmsg]")){ var pm = d.partner||{}; if(pm.key) pxPartnerModal(d, pm.round, pxBase()+"#"+pm.key); return; }
@@ -5603,12 +5847,15 @@ var DL = (function(){
       if(mg.disc!=null && mg.disc!==mg.std && !mg.discWhy){ toast("This version has a non-standard discount ("+mg.disc+"%). Open it in the calculator, add the reason and save."); return; }
       if(!mg.mkRec && !mg.mkOne && !confirm("Version v"+vn+" has a 0% margin, so this quote carries no SOE margin. Mark it as sent anyway?")) return;
       var sd = ($("act_sentdate")&&$("act_sentdate").value) || todayISO();
-      var p = { sentVersion:vn, stage:Math.max(d.stage,5), quoteStatus:"sent" }; p["stageDates.5"] = sd;
+      var p = { sentVersion:vn, stage:Math.max(d.stage,5), quoteStatus:"sent", log:(d.log||[]).concat([{ ms:Date.now(), ver:vn, who:"You", what:"v"+vn+" sent to the customer. Locked from now.", why:"", dec:"", decWhy:"" }]) }; p["stageDates.5"] = sd;
       store.patch(d.id, p, { quoteStatus:"sent" }, d.slug, { n:vn, data:{ sent:true, sentDate:sd, ref:pxRef(d,vn), vd:15 } }).then(function(){ return refresh2(d.id); }).then(function(){ return pxPublishQuote(find(d.id), vn).then(function(){ return ""; }, function(er){ return " The quotation could not be published to the customer page: "+(er.message||er)+". Press Mark as sent again after you fix the connection."; }); }).then(function(warn){ toast("v"+vn+" marked as sent and locked. The customer can now read the quotation on their page."+(warn||"")); pxCustMsg(find(d.id), vn); }); return;
     }
     if(t.closest("[data-apply]")){
       var s = szEvents(d);
-      editDeal(d.id, null, null, function(){ Object.keys(s).forEach(function(k){ if(!s[k].ok && s[k].nv && SZMAP[k]) setv(SZMAP[k], s[k].nv); }); toast("Customer's numbers applied. Review them, then press Save as v"+((d.version||1)+1)+"."); });
+      decideCustomer(d, function(){
+        var dd = find(d.id) || d, acc = {}; (dd.log||[]).forEach(function(r){ if(r.src && r.dec==="Declined") acc[r.src] = 1; });
+        editDeal(d.id, null, null, function(){ Object.keys(s).forEach(function(k){ if(!s[k].ok && s[k].nv && SZMAP[k] && !acc["sz:"+k+":"+s[k].nv]) setv(SZMAP[k], s[k].nv); }); toast("Customer's accepted numbers applied. Review them, then press Save."); });
+      });
       return;
     }
   });
