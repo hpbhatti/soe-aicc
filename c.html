@@ -787,11 +787,11 @@ function r1(){
  var h='<div class="hero fade"><div class="kick" style="color:var(--lime)">WELCOME</div><h2>'+esc(D.client)+',<br>here is how we will solve your call challenges.</h2>'+(D.desc?'<p style="font-weight:600;color:#fff">'+esc(D.desc)+'</p>':'')+'<p>This short journey shows what the AI Voice Agent will do for you, how it works, and what happens next. It takes about five minutes.</p></div>';
  h+='<div class="grid2 fade"><div class="card"><div class="kick">What we heard: your goals</div>';
  if(!D.goals.length)h+='<p style="font-size:.88rem;color:var(--mute)">We will add your goals after our discovery call.</p>';
- D.goals.forEach(function(g){h+='<div class="goal" style="margin:12px 0"><div class="ic">'+ic(GI[g]||"flag")+'</div><div class="row"><div><b>'+esc(LB[g])+'</b><span>'+(GD[g]||"")+'</span></div></div></div>'});
+ D.goals.forEach(function(g){var gt=g==="other"?(D.goalOther||""):LB[g];if(!gt)return;h+='<div class="goal" style="margin:12px 0"><div class="ic">'+ic(GI[g]||"flag")+'</div><div class="row"><div><b>'+esc(gt)+'</b><span>'+(GD[g]||"")+'</span></div></div></div>'});
  h+='</div><div class="card"><div class="kick">What we heard: today\'s challenges</div>';
  if(!D.pains.length)h+='<p style="font-size:.88rem;color:var(--mute)">We will add your challenges after our discovery call.</p>';
  D.pains.forEach(function(p){h+='<div class="pain">'+ic("warn")+'<div>'+esc(LB[p])+'</div></div>'});
- return h+'</div></div>'+PT_told();
+ return h+'</div></div>'+PT_und()+PT_told();
 }
 function r2(){
  var h='<div class="kick">What your AI Contact Center does</div><h2 class="t">'+(D.inbound.length+D.outbound.length)+' call flows, built around your business</h2><p class="lead">Each flow is a type of call the AI Voice Agent handles from start to finish, so your team can focus on the people who need them.</p>';
@@ -1213,6 +1213,13 @@ var UNAVAIL=["This link is not available","It may have expired, been switched of
 
 /* ===== customer journey (shown only when the calculator switch is on) ===== */
 function PT_J(){return D&&D.journey||null}
+function PT_und(){var J=PT_J(),u=J&&J.und;if(!u)return '';var h='<div class="card fade" style="margin-top:16px"><div class="kick">Your setup and your first phase</div>';
+ if(u.told)h+='<p style="font-size:.92rem;margin:8px 0"><b>What worried you.</b> '+esc(u.told)+'</p>';
+ if(u.setup)h+='<p style="font-size:.92rem;margin:8px 0"><b>Your setup today.</b> '+esc(u.setup)+'</p>';
+ function col(t,a,c){return a&&a.length?'<div><b style="color:'+c+'">'+t+'</b>'+a.map(function(x){return '<div style="font-size:.9rem;margin:5px 0">'+esc(x)+'</div>'}).join('')+'</div>':''}
+ var i=col('In the first phase',u.inn,'var(--deep)'),l=col('Later',u.later,'#8a6d1d');
+ if(i||l)h+='<div class="grid2" style="margin-top:10px">'+i+l+'</div>';
+ return h+'</div>'}
 function PT_by(f){var J=PT_J();if(!J)return null;return (J.concerns||[]).filter(function(c){return c.by===f.key&&c.w})[0]}
 function PT_sc(f){var J=PT_J();if(!J)return null;var S=J.scen||{};return S[f.key]||(f.id==='other'&&S.handover)||null}
 function PT_strip(f){var c=PT_by(f);return c?'<div class="ptask"><b>You asked for this:</b> <i>"'+esc(c.w)+'"</i><span class="pttag">From your call</span></div>':''}
