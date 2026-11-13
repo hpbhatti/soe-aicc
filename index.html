@@ -309,83 +309,115 @@ table.rc td i{font-style:normal;color:var(--deep);font-weight:600;font-size:11.5
 @media(max-width:820px){.dl-row{grid-template-columns:1fr}.dl-acts{justify-content:flex-start}.dl-bar input{margin-left:0;width:100%}}
 @media print{.dl{display:none!important}}
 
-/* ═══ LOGIN GATE ═══ */
+/* ═══ LOGIN GATE (neutral page: customer view + team sign-in) ═══ */
 #gate{--deep:#1B5E20;--dark:#0D3B13;--lime:#7CB342;--soft:#E8F5E9;--ink:#1A1A1A;--mute:#5F6F62;--rule:#D7E1D4;--card:#fff;--bg:#F7F9F7}
-#gate *{margin:0;padding:0;box-sizing:border-box}
-#gate{font-family:'Cairo',sans-serif;color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;background:#0A0F0A}
-#gate svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-#gate .g_backdrop{position:fixed;inset:0;z-index:0;overflow:hidden}
-#gate .g_backdrop .g_gradient{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 30% 40%,#163D18 0%,#0A1A0B 60%,#060D06 100%)}
-#gate .g_backdrop .g_grid{position:absolute;inset:0;background-image:linear-gradient(rgba(124,179,66,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,179,66,.06) 1px,transparent 1px);background-size:48px 48px}
-#gate .g_orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3}
-#gate .g_orb-1{width:500px;height:500px;background:#1B5E20;top:-100px;left:-100px}
-#gate .g_orb-2{width:400px;height:400px;background:#7CB342;bottom:-100px;right:-80px}
-#gate .g_page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-#gate .g_container{display:flex;width:100%;max-width:1180px;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 0 1px rgba(124,179,66,.1)}
-#gate .g_info{flex:1;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:40px 40px 36px;display:flex;flex-direction:column}
-#gate .g_top-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px}
-#gate .g_logo-mark{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,var(--deep),var(--lime));display:flex;align-items:center;justify-content:center}
-#gate .g_logo-mark svg{width:24px;height:24px}
-#gate .g_top-bar .g_co{font-size:.9rem;font-weight:700;color:#fff;letter-spacing:.03em}
-#gate .g_top-bar .g_co span{display:block;font-size:.6rem;font-weight:400;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
-#gate .g_hero h1{font-size:2.1rem;font-weight:800;color:#fff;line-height:1.15;letter-spacing:-.02em}
-#gate .g_hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--lime),#A5D6A7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-#gate .g_hero p{font-size:.92rem;color:rgba(255,255,255,.6);line-height:1.6;margin-top:10px;max-width:520px}
-#gate /* 3-step strip */
-.g_steps{display:flex;align-items:stretch;gap:0;margin:26px 0 24px}
-#gate .g_step{flex:1;background:rgba(124,179,66,.09);border:1px solid rgba(124,179,66,.2);padding:14px 14px;display:flex;gap:11px;align-items:center;position:relative}
-#gate .g_step:first-child{border-radius:12px 0 0 12px}
-#gate .g_step:last-child{border-radius:0 12px 12px 0}
-#gate .g_step + .g_step{border-left:none}
-#gate .g_step .g_ic{width:38px;height:38px;border-radius:10px;background:rgba(124,179,66,.18);color:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-#gate .g_step .g_n{font-size:.58rem;color:var(--lime);letter-spacing:.1em;font-weight:700}
-#gate .g_step .g_t{font-size:.88rem;font-weight:700;color:#fff;line-height:1.2}
-#gate .g_step .g_d{font-size:.68rem;color:rgba(255,255,255,.5);line-height:1.35;margin-top:2px}
-#gate .g_groups{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-#gate .g_gtitle{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lime);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-#gate .g_gtitle::after{content:'';flex:1;height:1px;background:rgba(124,179,66,.2)}
-#gate .g_tile{display:flex;gap:11px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);margin-bottom:8px;transition:border-color .25s,background .25s}
-#gate .g_tile:hover{border-color:rgba(124,179,66,.35);background:rgba(124,179,66,.08)}
-#gate .g_tile .g_ic{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.08);color:var(--lime);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-#gate .g_tile .g_ic svg{width:19px;height:19px}
-#gate .g_tile .g_t{font-size:.8rem;font-weight:700;color:#fff;line-height:1.25}
-#gate .g_tile .g_d{font-size:.68rem;color:rgba(255,255,255,.5);line-height:1.4;margin-top:1px}
-#gate .g_login{width:380px;background:var(--card);padding:44px 38px;display:flex;flex-direction:column;justify-content:center;flex-shrink:0}
-#gate .g_badge{display:inline-flex;align-items:center;gap:6px;background:var(--soft);color:var(--deep);font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:18px;width:fit-content}
-#gate .g_badge .g_pulse{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:gpulse 2s ease-in-out infinite}
-@keyframes gpulse{0%,100%{opacity:1}50%{opacity:.3}}
-#gate .g_login h2{font-size:1.35rem;font-weight:700;margin-bottom:4px}
-#gate .g_login .g_sub{font-size:.82rem;color:var(--mute);margin-bottom:26px;line-height:1.5}
-#gate .g_field{margin-bottom:16px}
-#gate .g_field label{display:block;font-size:.7rem;font-weight:600;color:var(--mute);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
-#gate .g_field input{width:100%;padding:13px 16px;border:1.5px solid var(--rule);border-radius:10px;font-family:'Cairo',sans-serif;font-size:.88rem;background:var(--bg);transition:all .2s}
-#gate .g_field input:focus{outline:none;border-color:var(--deep);background:#fff;box-shadow:0 0 0 3px rgba(27,94,32,.1)}
-#gate .g_field input::placeholder{color:#B0BDB2}
-#gate .g_btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;margin-top:6px;background:linear-gradient(135deg,var(--deep),#2E7D32);color:#fff;box-shadow:0 4px 16px rgba(27,94,32,.3);transition:all .25s}
-#gate .g_btn:hover{box-shadow:0 6px 24px rgba(27,94,32,.4);transform:translateY(-1px)}
-#gate .g_foot{margin-top:28px;padding-top:18px;border-top:1px solid var(--rule);text-align:center}
-#gate .g_pb{font-size:.78rem;font-weight:700;color:var(--deep);margin-bottom:6px}
-#gate .g_pb span{color:var(--rule);margin:0 8px;font-weight:400}
-#gate .g_foot .g_note{font-size:.68rem;color:var(--mute);display:flex;align-items:center;justify-content:center;gap:6px}
-#gate .g_foot .g_note svg{width:13px;height:13px;stroke-width:1.8}
-@media(max-width:1020px){#gate .g_container{flex-direction:column;max-width:560px}
-#gate .g_login{width:100%;padding:32px 24px}
-#gate .g_info{padding:28px 22px}
-#gate .g_groups{grid-template-columns:1fr}
-#gate .g_steps{flex-direction:column}
-#gate .g_step,#gate .g_step:first-child,#gate .g_step:last-child{border-radius:0;border-left:1px solid rgba(124,179,66,.2)}
-#gate .g_step + .g_step{border-top:none}
-#gate .g_step:first-child{border-radius:12px 12px 0 0}
-#gate .g_step:last-child{border-radius:0 0 12px 12px}
-#gate .g_hero h1{font-size:1.6rem}}
 #gate{position:fixed;inset:0;z-index:99999;overflow:auto;background:#0A0F0A;font-family:'Cairo',sans-serif;color:#1A1A1A;--deep:#1B5E20;--dark:#0D3B13;--lime:#7CB342;--soft:#E8F5E9;--ink:#1A1A1A;--mute:#5F6F62;--rule:#D7E1D4;--card:#fff;--bg:#F7F9F7;min-height:100vh}
-#gate .g_backdrop{position:fixed}
 #gate .g-err{display:none;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:8px;padding:10px 14px;font-size:.78rem;margin-bottom:14px}
-#gate .g_btn:disabled{opacity:.7;cursor:wait;transform:none}
-#gate .g-logo{height:40px;width:auto;display:block}
+#gate *{margin:0;padding:0;box-sizing:border-box}
+#gate .n_bd{position:fixed;inset:0;z-index:0;overflow:hidden}
+#gate .n_bd .n_gr{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 30% 40%,#163D18 0%,#0A1A0B 60%,#060D06 100%)}
+#gate .n_bd .n_gd{position:absolute;inset:0;background-image:linear-gradient(rgba(124,179,66,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,179,66,.06) 1px,transparent 1px);background-size:48px 48px}
+#gate .n_orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3}
+#gate .n_o1{width:500px;height:500px;background:#1B5E20;top:-100px;left:-100px}
+#gate .n_o2{width:420px;height:420px;background:#7CB342;bottom:-120px;right:-80px}
+#gate .n_pg{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+#gate .n_box{width:100%;max-width:1020px;border-radius:20px;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 0 1px rgba(124,179,66,.12);padding:34px 40px 26px}
+#gate .n_top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#gate .n_top img{height:40px;width:auto;display:block}
+#gate .n_top .n_tag{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+#gate .n_hero{text-align:center;margin-top:26px}
+#gate .n_hero h1{font-size:2.5rem;font-weight:800;line-height:1.12;letter-spacing:-.02em}
+#gate .n_hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--lime),#A5D6A7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#gate .n_hero p{font-size:1rem;color:rgba(255,255,255,.62);margin-top:10px}
+#gate .n_ar{direction:rtl;font-family:'Cairo',sans-serif}
+#gate .n_hero .n_ar{font-size:1.05rem;color:rgba(255,255,255,.78);margin-top:4px;font-weight:600}
+#gate .n_route{width:100%;height:96px;display:block;margin-top:14px}
+#gate .n_route .n_dash{stroke-dasharray:6 7;animation:ng_flow 1.4s linear infinite}
+@keyframes ng_flow{to{stroke-dashoffset:-26}}
+#gate .n_route .n_ping{transform-origin:500px 14px;animation:ng_ping 2.2s ease-out infinite}
+@keyframes ng_ping{0%{transform:scale(.6);opacity:.8}100%{transform:scale(2.6);opacity:0}}
+#gate .n_cards{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:-4px}
+#gate .n_card{border-radius:16px;padding:24px 24px 22px;display:flex;flex-direction:column;gap:10px;position:relative}
+#gate .n_card .n_ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+#gate .n_card svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#gate .n_card h2{font-size:1.25rem;font-weight:800;line-height:1.2}
+#gate .n_card .n_t-ar{font-size:1rem;font-weight:700;color:rgba(255,255,255,.8)}
+#gate .n_card p{font-size:.88rem;line-height:1.55;color:rgba(255,255,255,.66)}
+#gate .n_card p.n_ar{font-size:.9rem;color:rgba(255,255,255,.62)}
+#gate .n_c1{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
+#gate .n_c1 .n_ic{background:rgba(255,255,255,.09);color:#cfe3c4}
+#gate .n_chip{margin-top:4px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.72rem;direction:ltr;text-align:left;background:rgba(0,0,0,.28);border:1px dashed rgba(124,179,66,.4);border-radius:8px;padding:8px 10px;color:#bfe0a8;word-break:break-all}
+#gate .n_chip b{color:#fff;background:rgba(124,179,66,.28);border-radius:4px;padding:0 4px;font-weight:700}
+#gate .n_c2{background:linear-gradient(160deg,rgba(124,179,66,.26),rgba(27,94,32,.34));border:1.5px solid rgba(124,179,66,.7);box-shadow:0 0 0 6px rgba(124,179,66,.07),0 18px 50px rgba(27,94,32,.5)}
+#gate .n_c2 .n_ic{background:linear-gradient(135deg,var(--deep),var(--lime));color:#fff}
+#gate .n_c2 .n_badge{position:absolute;top:-11px;right:20px;background:var(--lime);color:#0D3B13;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:20px}
+#gate .n_cta{margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 18px;border-radius:12px;background:linear-gradient(135deg,#fff,#E8F5E9);color:var(--dark);font-weight:800;font-size:1.02rem;text-decoration:none;box-shadow:0 8px 28px rgba(0,0,0,.35);transition:transform .2s,box-shadow .2s}
+#gate .n_cta:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(124,179,66,.45)}
+#gate .n_cta svg{width:20px;height:20px;stroke-width:2.2}
+#gate .n_cta .n_sep{opacity:.35;font-weight:400}
+#gate .n_cta .n_ar{font-weight:800}
+#gate .n_foot{margin-top:24px;padding-top:14px;border-top:1px solid rgba(124,179,66,.18)}
+#gate .n_fbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#gate .n_note{font-size:.7rem;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:6px}
+#gate .n_note svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#gate .n_tbtn{background:none;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.75);font:600 .78rem 'Cairo',sans-serif;border-radius:20px;padding:6px 14px;cursor:pointer;display:flex;gap:8px;align-items:center}
+#gate .n_tbtn:hover{border-color:rgba(124,179,66,.6);color:#fff}
+@media(max-width:820px){#gate .n_cta{flex-wrap:wrap;gap:4px 10px;padding:14px;font-size:.95rem}
+#gate .n_cta .n_sep{display:none}
+#gate .n_chip{font-size:.66rem;word-break:normal;overflow-wrap:anywhere}
+#gate .n_note{font-size:.66rem}
+#gate .n_box{padding:24px 20px 20px}
+#gate .n_hero h1{font-size:1.85rem}
+#gate .n_cards{grid-template-columns:1fr;gap:26px}
+#gate .n_route{display:none}
+#gate .n_c2{order:-1;margin-top:18px}
+#gate .n_cards{margin-top:0}
+#gate .n_top .n_tag{display:none}}
+#gate [hidden]{display:none!important}
+#gate .n_login{width:100%;max-width:440px;background:#fff;color:var(--ink);border-radius:18px;padding:34px 34px 24px;box-shadow:0 24px 70px rgba(0,0,0,.5),0 0 0 7px rgba(124,179,66,.14)}
+#gate .n_login .n_badge{display:inline-flex;align-items:center;gap:6px;background:var(--soft);color:var(--deep);font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:16px}
+#gate .n_pulse{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:ng_pl 2s ease-in-out infinite}
+@keyframes ng_pl{0%,100%{opacity:1}50%{opacity:.35}}
+#gate .n_login h2{font-size:1.5rem;font-weight:800;margin-bottom:4px}
+#gate .n_lsub{font-size:.84rem;color:var(--mute);margin-bottom:22px;line-height:1.5}
+#gate .n_login label{display:block;font-size:.68rem;font-weight:600;color:var(--mute);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+#gate .n_login input{width:100%;padding:13px 16px;border:1.5px solid var(--rule);border-radius:10px;font:.9rem 'Cairo',sans-serif;background:#F7F9F7;margin-bottom:14px}
+#gate .n_login input:focus{outline:none;border-color:var(--deep);background:#fff;box-shadow:0 0 0 3px rgba(27,94,32,.1)}
+#gate .n_lbtn{width:100%;padding:14px;border:none;border-radius:10px;font:700 .95rem 'Cairo',sans-serif;color:#fff;background:linear-gradient(135deg,var(--deep),#2E7D32);margin-top:4px;cursor:pointer}
+#gate .n_lnote{margin-top:18px;padding-top:14px;border-top:1px solid var(--rule);font-size:.7rem;color:var(--mute);display:flex;gap:6px;align-items:center;justify-content:center}
+#gate .n_lnote svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#gate .n_other{margin-top:20px;font-size:.78rem;color:rgba(255,255,255,.45);display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+#gate .n_lk{background:none;border:none;font:inherit;color:rgba(255,255,255,.7);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#gate .n_lk:hover{color:#fff}
+#gate #team .n_other{margin-top:26px}
+@media(max-width:900px){#gate .n_login{order:-1;max-width:none}}
+#gate .n_tw2{display:flex;flex-direction:column;align-items:center;text-align:center;margin:22px 0 4px}
+#gate .n_tmark{width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--deep),var(--lime));display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(27,94,32,.5)}
+#gate .n_tmark svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#gate .n_th{font-size:2rem;font-weight:800;line-height:1.15;letter-spacing:-.02em;margin-top:16px}
+#gate .n_th em{font-style:normal;background:linear-gradient(90deg,var(--lime),#A5D6A7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#gate .n_tp{font-size:.95rem;color:rgba(255,255,255,.6);margin:6px 0 22px}
+#gate .n_tw2 .n_login{text-align:left}
+@media(max-width:900px){#gate .n_th{font-size:1.55rem}}
+#gate .n_brand2{display:flex;align-items:center;gap:10px;padding-left:16px;border-left:1px solid rgba(255,255,255,.2);font-size:.8rem;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.85)}
+#gate .n_top{justify-content:flex-start;gap:16px}
+#gate .n_top .n_brand2{margin-right:auto}
+#gate .n_top img.n_aic{height:34px;width:34px;border-radius:9px}
+#gate .n_card .n_ic.n_lg{background:none;width:56px;height:56px}
+#gate .n_card .n_ic.n_lg img{width:56px;height:56px;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#gate .n_tmark{width:76px;height:76px;background:none;box-shadow:none}
+#gate .n_tmark img{width:76px;height:76px;border-radius:19px;box-shadow:0 12px 34px rgba(0,0,0,.5),0 0 0 6px rgba(124,179,66,.12)}
+@media(max-width:820px){#gate .n_brand2 span{display:none}
+#gate .n_brand2{padding-left:12px}}
+#gate .n_c1 .n_ic{width:56px;height:56px;border-radius:14px}
+#gate .n_top.n_tm .n_brand2{display:none}
+#gate{color:#fff;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+#gate .n_lbtn:disabled{opacity:.7;cursor:wait}
+#gate .n_login .g-err{margin-bottom:14px}
+#gate .n_top img.g-logo{height:40px;width:auto;display:block}
+
 body.locked > *:not(#gate):not(script):not(style){display:none!important}
 body.locked{overflow:hidden}
-@media(max-width:1020px){#gate .g_login{order:-1}}
 .act-ld{font-size:10.5px;font-weight:800;background:#EEF3EC;color:#4B5E4E;padding:2px 8px;border-radius:20px;margin-left:6px}
 .act-mini{display:flex;gap:3px;align-items:center;margin-top:5px}.act-mini i{width:20px;height:5px;border-radius:3px;background:#DDE5DA}.act-mini i.on{background:var(--lime)}.act-mini span{font-size:11px;font-weight:700;color:var(--deep);margin-left:6px}
 .act-fl select{font:inherit;font-size:12px;border:1px solid var(--rule);border-radius:6px;padding:4px 8px}
@@ -492,67 +524,69 @@ body.locked{overflow:hidden}
 </style>
 </head>
 <body class="locked">
-<div id="gate"><div class="g_backdrop"><div class="g_gradient"></div><div class="g_grid"></div><div class="g_orb g_orb-1"></div><div class="g_orb g_orb-2"></div></div>
+<div id="gate"><div class="n_bd"><div class="n_gr"></div><div class="n_gd"></div><div class="n_orb n_o1"></div><div class="n_orb n_o2"></div></div>
+<div class="n_pg"><div class="n_box">
+  <div class="n_top"><img class="g-logo" id="gateLogo" alt="SOE"><span class="n_brand2"><img class="n_aic" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxQjVFMjAiLz48cGF0aCBkPSJNMTIgMzFhMjAgMjAgMCAwIDEgNDAgMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjN0NCMzQyIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxyZWN0IHg9IjciIHk9IjI4IiB3aWR0aD0iMTAiIGhlaWdodD0iMTUiIHJ4PSI1IiBmaWxsPSIjN0NCMzQyIi8+PHJlY3QgeD0iNDciIHk9IjI4IiB3aWR0aD0iMTAiIGhlaWdodD0iMTUiIHJ4PSI1IiBmaWxsPSIjN0NCMzQyIi8+PHBhdGggZD0iTTIzIDIxaDE4YTYgNiAwIDAgMSA2IDZ2MTBhNiA2IDAgMCAxLTYgNkgzNmwtNiA3di03aC03YTYgNiAwIDAgMS02LTZWMjdhNiA2IDAgMCAxIDYtNnoiIGZpbGw9IiNmZmYiLz48dGV4dCB4PSIzMiIgeT0iMzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjgwMCIgZm9udC1zaXplPSIxOSIgZmlsbD0iIzFCNUUyMCIgbGV0dGVyLXNwYWNpbmc9Ii0wLjUiPkFJPC90ZXh0PjxwYXRoIGQ9Ik01MiA1IFE1My4yNiAxMC43NCA1OSAxMiBRNTMuMjYgMTMuMjYgNTIgMTkgUTUwLjc0IDEzLjI2IDQ1IDEyIFE1MC43NCAxMC43NCA1MiA1WiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==" alt="AI Contact Center"><span>AI Contact Center</span></span></div>
 
-<div class="g_page"><div class="g_container">
-
-<div class="g_info">
-  <div class="g_top-bar">
-    <img class="g-logo" id="gateLogo" alt="SOE">
+  <div id="gVisitor"><div class="n_hero">
+    <h1>Looks like you took a <em>wrong turn.</em></h1>
+    <p>This area is for authorized SOE team members. Here are two ways to get where you need to be.</p>
+    <p class="n_ar">يبدو أنك وصلت إلى هذه الصفحة عن طريق الخطأ، وإليك طريقان للوصول إلى وجهتك.</p>
   </div>
 
-  <div class="g_hero">
-    <h1>AI Contact Center <em>Pricing Hub</em></h1>
-    <p>From customer requirement to quote and proposal in one meeting.</p>
+  <svg class="n_route" viewBox="0 0 1000 96" preserveAspectRatio="none" aria-hidden="true">
+    <circle class="n_ping" cx="500" cy="14" r="8" fill="none" stroke="#7CB342" stroke-width="2"/>
+    <circle cx="500" cy="14" r="6" fill="#7CB342"/>
+    <path class="n_dash" d="M500 20 V44 Q500 56 480 56 H270 Q250 56 250 72 V90" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round"/>
+    <path class="n_dash" d="M500 20 V44 Q500 56 520 56 H730 Q750 56 750 72 V90" fill="none" stroke="#7CB342" stroke-width="3" stroke-linecap="round"/>
+    <path d="M244 84 L250 94 L256 84" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M744 84 L750 94 L756 84" fill="none" stroke="#7CB342" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+
+  <div class="n_cards">
+    <div class="n_card n_c1">
+      <div class="n_ic"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg></div>
+      <h2>I am an SOE customer</h2><div class="n_t-ar n_ar">أنا عميل لدى شركة التوجه الذكي (SOE)</div>
+      <p>Please open the personal link your SOE representative sent you by email or WhatsApp.</p>
+      <p class="n_ar">يرجى فتح الرابط الخاص بك الذي أرسله لك ممثل شركة التوجه الذكي (SOE) عبر البريد الإلكتروني أو واتساب.</p>
+      <div class="n_chip">go-aicc.soe.com.sa/c.html#<b>your-company</b>-xxxx</div>
+      <p style="font-size:.74rem;color:rgba(255,255,255,.45)">Your company name is in the link. / اسم شركتك موجود في الرابط.</p>
+    </div>
+
+    <div class="n_card n_c2">
+      <span class="n_badge">Start here</span>
+      <div class="n_ic n_lg"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxQjVFMjAiLz48cGF0aCBkPSJNMTIgMzFhMjAgMjAgMCAwIDEgNDAgMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjN0NCMzQyIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxyZWN0IHg9IjciIHk9IjI4IiB3aWR0aD0iMTAiIGhlaWdodD0iMTUiIHJ4PSI1IiBmaWxsPSIjN0NCMzQyIi8+PHJlY3QgeD0iNDciIHk9IjI4IiB3aWR0aD0iMTAiIGhlaWdodD0iMTUiIHJ4PSI1IiBmaWxsPSIjN0NCMzQyIi8+PHBhdGggZD0iTTIzIDIxaDE4YTYgNiAwIDAgMSA2IDZ2MTBhNiA2IDAgMCAxLTYgNkgzNmwtNiA3di03aC03YTYgNiAwIDAgMS02LTZWMjdhNiA2IDAgMCAxIDYtNnoiIGZpbGw9IiNmZmYiLz48dGV4dCB4PSIzMiIgeT0iMzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjgwMCIgZm9udC1zaXplPSIxOSIgZmlsbD0iIzFCNUUyMCIgbGV0dGVyLXNwYWNpbmc9Ii0wLjUiPkFJPC90ZXh0PjxwYXRoIGQ9Ik01MiA1IFE1My4yNiAxMC43NCA1OSAxMiBRNTMuMjYgMTMuMjYgNTIgMTkgUTUwLjc0IDEzLjI2IDQ1IDEyIFE1MC43NCAxMC43NCA1MiA1WiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==" alt="AI Contact Center"></div>
+      <h2>I want to learn more</h2><div class="n_t-ar n_ar">أرغب في معرفة المزيد</div>
+      <p>Meet the AI Voice Agents that answer your customers 24/7, in Arabic and English.</p>
+      <p class="n_ar">تعرّف على وكلاء الذكاء الاصطناعي الصوتيين الذين يردّون على عملائك على مدار الساعة، بالعربية والإنجليزية.</p>
+      <a class="n_cta" href="https://aicc.soe.com.sa"><span>Visit our website</span><span class="n_sep">|</span><span class="n_ar">زيارة موقعنا</span>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
   </div>
 
-  <div class="g_steps">
-    <div class="g_step">
-      <div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="16" r="3"/><path d="M20.2 18.2L22 20"/></svg></div>
-      <div><div class="g_n">STEP 1</div><div class="g_t">Scope</div><div class="g_d">Pick flows, volumes and systems</div></div>
-    </div>
-    <div class="g_step">
-      <div class="g_ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div>
-      <div><div class="g_n">STEP 2</div><div class="g_t">Quote</div><div class="g_d">Instant SAR price</div></div>
-    </div>
-    <div class="g_step">
-      <div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg></div>
-      <div><div class="g_n">STEP 3</div><div class="g_t">Share</div><div class="g_d">Branded view, no pricing shown</div></div>
-    </div>
-  </div>
+  <div class="n_foot"><div class="n_fbar">
+    <span class="n_note"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>Authorized SOE team only &nbsp;/&nbsp; <span class="n_ar">مخصص لفريق شركة التوجه الذكي (SOE) المصرّح له فقط</span></span>
+    <button class="n_tbtn" id="gTg" type="button">SOE team member? Sign in &nbsp;<span class="n_ar">تسجيل الدخول</span></button>
+  </div></div></div>
 
-  <div class="g_groups">
-    <div>
-      <div class="g_gtitle">Value for Presales</div>
-      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><div><div class="g_t">Quote in minutes</div><div class="g_d">Scope a deal live in the customer meeting, not days later</div></div></div>
-      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div><div><div class="g_t">One approved price book</div><div class="g_d">No spreadsheet errors, discounts stay controlled</div></div></div>
-      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M12 11v3l2 1"/></svg></div><div><div class="g_t">Every deal saved</div><div class="g_d">Reload, adjust and compare deals at any time</div></div></div>
-      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg></div><div><div class="g_t">Proposal in one click</div><div class="g_d">A short link with the customer's company name</div></div></div>
+  <div id="gTeam" hidden>
+    <div class="n_tw2">
+      <div class="n_tmark"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxQjVFMjAiLz48cGF0aCBkPSJNMTIgMzFhMjAgMjAgMCAwIDEgNDAgMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjN0NCMzQyIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxyZWN0IHg9IjciIHk9IjI4IiB3aWR0aD0iMTAiIGhlaWdodD0iMTUiIHJ4PSI1IiBmaWxsPSIjN0NCMzQyIi8+PHJlY3QgeD0iNDciIHk9IjI4IiB3aWR0aD0iMTAiIGhlaWdodD0iMTUiIHJ4PSI1IiBmaWxsPSIjN0NCMzQyIi8+PHBhdGggZD0iTTIzIDIxaDE4YTYgNiAwIDAgMSA2IDZ2MTBhNiA2IDAgMCAxLTYgNkgzNmwtNiA3di03aC03YTYgNiAwIDAgMS02LTZWMjdhNiA2IDAgMCAxIDYtNnoiIGZpbGw9IiNmZmYiLz48dGV4dCB4PSIzMiIgeT0iMzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjgwMCIgZm9udC1zaXplPSIxOSIgZmlsbD0iIzFCNUUyMCIgbGV0dGVyLXNwYWNpbmc9Ii0wLjUiPkFJPC90ZXh0PjxwYXRoIGQ9Ik01MiA1IFE1My4yNiAxMC43NCA1OSAxMiBRNTMuMjYgMTMuMjYgNTIgMTkgUTUwLjc0IDEzLjI2IDQ1IDEyIFE1MC43NCAxMC43NCA1MiA1WiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==" alt="AI Contact Center"></div>
+      <h1 class="n_th">AI Contact Center <em>Team Area</em></h1>
+      <p class="n_tp">Our team, working for our customers.</p>
+      <div class="n_login">
+        <div class="n_badge"><span class="n_pulse"></span> Secure Access</div>
+        <h2>Welcome back</h2>
+        <div class="n_lsub">Sign in with your SOE credentials.</div>
+        <div class="g-err" id="gErr"></div>
+        <label for="gEmail">Email</label><input type="email" id="gEmail" placeholder="name@soe.com.sa" autocomplete="username">
+        <label for="gPass">Password</label><input type="password" id="gPass" placeholder="Enter your password" autocomplete="current-password">
+        <button class="n_lbtn" id="gBtn" type="button">Sign In</button>
+        <div class="n_lnote"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>Authorized SOE team only</div>
+      </div>
     </div>
-    <div>
-      <div class="g_gtitle">Value for the Customer</div>
-      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5M3 17.5l9 5 9-5"/></svg></div><div><div class="g_t">Solution architecture</div><div class="g_d">How the AI Contact Center connects to their systems</div></div></div>
-      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="5" rx="1"/><rect x="15" y="4" width="6" height="5" rx="1"/><rect x="9" y="15" width="6" height="5" rx="1"/><path d="M6 9v3h12V9M12 12v3"/></svg></div><div><div class="g_t">Call flow simulation</div><div class="g_d">Their own inbound and outbound flows, step by step</div></div></div>
-      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><div><div class="g_t">Operations dashboard</div><div class="g_d">What management will see after go-live</div></div></div>
-      <div class="g_tile"><div class="g_ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></div><div><div class="g_t">Built around their goals</div><div class="g_d">The view adapts to each customer's business goals</div></div></div>
-    </div>
+    <div class="n_other"><span>Not on the SOE team?</span><button class="n_lk" id="gBk" type="button">See your options</button><span>&middot;</span><a class="n_lk" href="https://aicc.soe.com.sa">Visit our website &rarr;</a></div>
   </div>
-</div>
-
-<div class="g_login">
-  <div class="g_badge"><span class="g_pulse"></span> Secure Access</div>
-  <h2>Welcome back</h2>
-  <div class="g_sub">Sign in with your SOE credentials to open the pricing calculator and your saved deals.</div>
-  <div class="g-err" id="gErr"></div>
-  <div class="g_field"><label for="gEmail">Email</label><input type="email" id="gEmail" placeholder="name@soe.com.sa" autocomplete="username"></div>
-  <div class="g_field"><label for="gPass">Password</label><input type="password" id="gPass" placeholder="Enter your password" autocomplete="current-password"></div>
-  <button class="g_btn" id="gBtn" type="button">Sign In</button>
-  <div class="g_foot">
-    <div class="g_pb">SOE<span>×</span>700Apps</div>
-    <div class="g_note"><svg class="i" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>Authorized SOE team only</div>
-  </div>
-</div>
-
 </div></div></div>
 
 <header class="top">
@@ -6041,9 +6075,22 @@ var DL = (function(){
 (function(){
   var gate=document.getElementById("gate");
   function open(){ document.body.classList.remove("locked"); gate.style.display="none"; }
-  function lock(){ document.body.classList.add("locked"); gate.style.display="block"; }
+  function lock(){ document.body.classList.add("locked"); gate.style.display="block"; if(typeof viewFromHash==="function") viewFromHash(); }
   var lg=document.querySelector("img.logo"), gl=document.getElementById("gateLogo");
   if(lg&&gl) gl.src=lg.getAttribute("src");
+  /* two views: "wrong turn" page for visitors, team sign-in (also opened by #team in the address) */
+  var gV=document.getElementById("gVisitor"), gT=document.getElementById("gTeam"), gTop=gate.querySelector(".n_top");
+  function view(m,focus){
+    var t=(m==="team");
+    gV.hidden=t; gT.hidden=!t;
+    if(gTop) gTop.classList.toggle("n_tm",t);
+    if(t&&focus){ var f=document.getElementById("gEmail"); if(f) setTimeout(function(){ try{f.focus()}catch(e){} },50); }
+  }
+  function viewFromHash(){ view(location.hash==="#team"?"team":"visitor", location.hash==="#team"); }
+  document.getElementById("gTg").addEventListener("click",function(){ view("team",true); });
+  document.getElementById("gBk").addEventListener("click",function(){ view("visitor"); });
+  window.addEventListener("hashchange",function(){ if(gate.style.display!=="none") viewFromHash(); });
+  viewFromHash();
   var auth=null;
   try{ if(window.firebase && firebase.apps.length) auth=firebase.auth(); }catch(e){}
   if(!auth){ open(); return; }   /* test mode (no Firebase): no gate */
