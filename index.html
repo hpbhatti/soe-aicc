@@ -524,6 +524,7 @@ body.locked{overflow:hidden}
 
 .ar-sw{display:flex;gap:8px;align-items:center;font-size:13.5px}
 .ar-count{font-size:12px;color:var(--muted);margin-left:10px}
+.ar-tw{display:none;margin-top:4px;gap:6px;align-items:flex-start}body.ar-on .ar-tw{display:flex}.ar-tw>b{font:700 10px sans-serif;background:#e6f0e8;color:#14532d;border-radius:4px;padding:4px 7px;margin-top:5px;white-space:nowrap}.ar-tw .ar-in{flex:1;min-width:0;font-size:14px;background:#f1f8f3;border-color:#8fbb9d}.ar-tw textarea.ar-in{min-height:50px;resize:vertical}
 .ar-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid #E7EDE3}
 .ar-en{font-size:12.5px;color:var(--ink);word-break:break-word}
 .ar-in{font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink);direction:rtl;text-align:right;width:100%;box-sizing:border-box}
@@ -632,6 +633,7 @@ body.locked{overflow:hidden}
         <div id="arCtl" style="display:none;margin-top:8px;align-items:center;gap:10px;flex-wrap:wrap">
           <label class="f" style="margin:0"><span class="lbl">The customer link opens in</span><select id="arFirst"><option value="en">English first</option><option value="ar">Arabic first</option></select></label>
           <span id="arCount" class="ar-count"></span>
+          <div id="arClientHost" style="flex-basis:100%"></div>
         </div>
       </div>
       <div class="fields">
@@ -667,8 +669,8 @@ body.locked{overflow:hidden}
           <div class="act-h" style="margin-top:12px">Rename flows for this customer (optional)</div>
           <div class="fields" id="cwFlows"></div>
           <div id="arPanel" style="display:none;margin-top:14px;border-top:1px dashed #C2CFBC;padding-top:12px">
-            <div class="act-h">Arabic version (optional)</div>
-            <div class="hint" style="padding:2px 0 8px 0">Each row is a text you typed in English: the customer name, wording, flow names, journey details and custom systems. Write the Arabic beside it. An empty box shows the English text to the customer. Fixed texts and built-in choices are already translated.</div>
+            <div class="act-h">Other texts in Arabic (optional)</div>
+            <div class="hint" style="padding:2px 0 8px 0">Most Arabic boxes are right under the English field they belong to. This list only holds the other texts that have no box of their own, such as custom system names and extra requirements. An empty box shows the English text to the customer. An empty box shows the English text to the customer. Fixed texts and built-in choices are already translated.</div>
             <div id="arRows"></div>
           </div>
         </div>
@@ -4657,18 +4659,45 @@ var DL = (function(){
     arStrings(R).forEach(function(t){ var v = (st[t]||"").trim(); if(v) map[t] = v; });
     return { on:true, first:(($("arFirst")||{}).value==="ar" ? "ar" : "en"), map:map };
   }
+
+  var AR_SEL = '#cwDesc,#cwNoun,#cwPerson,#cwProvider,#cwService,#cwFacility,#cwSystem,#goalOtherText,[id^="cwf_"],#cjBody textarea[data-k="u"],#cjBody textarea[data-k="c"],#cjBody input[data-k="s"],#clientName';
+  function arMode(el){ var k = el.getAttribute("data-k"), f = el.getAttribute("data-f"); if(k==="u" && (f==="inn"||f==="later")) return "lines"; if(k==="s" && f==="fields") return "comma"; return "whole"; }
+  function arPieces(el){ var v = (el.value||"").trim(); if(!v || /[؀-ۿ]/.test(v) || (el.id!=="clientName" && el.id.indexOf("cw")===0 && v.indexOf(" / ")>=0 && el.id.indexOf("cwf_")!==0 && el.id!=="cwDesc")) return []; var m = arMode(el); var p = m==="lines" ? v.split(/\n/) : m==="comma" ? v.split(",") : [v]; return p.map(function(x){ return x.trim(); }).filter(Boolean); }
+  function arTwinVal(el, st){ var P = arPieces(el), m = arMode(el); if(!P.length) return ""; if(m==="whole") return st[P[0]]||""; var a = P.map(function(x){ return st[x]||""; }); if(m==="comma"){ var w = (el.value||"").trim(); if(a.every(Boolean)) return a.join("، "); return st[w] || (a.some(Boolean) ? a.join("، ") : ""); } return a.some(Boolean) ? a.join("\n") : ""; }
+  function arTwins(){
+    var st = arStoreGet(), covered = {};
+    document.querySelectorAll(AR_SEL).forEach(function(el){
+      if(el.closest("#arPanel")) return;
+      var tw = el._arTw;
+      if(!tw || !tw.isConnected){
+        var box = document.createElement("div"), ta = el.tagName==="TEXTAREA";
+        box.className = "ar-tw"; box.innerHTML = '<b>عربي</b>';
+        var inp = document.createElement(ta ? "textarea" : "input"); if(!ta) inp.type = "text"; if(ta) inp.rows = Math.min(3, el.rows||2);
+        inp.className = "ar-in ar-tw-in"; inp.placeholder = "Arabic (optional)"; inp.setAttribute("dir","rtl"); inp._src = el; box.appendChild(inp);
+        if(el.id==="clientName"){ var h = $("arClientHost"); if(!h) return; box.insertAdjacentHTML("afterbegin",""); var lab = document.createElement("span"); lab.className = "lbl"; lab.textContent = "Client name in Arabic"; lab.style.cssText = "font-size:12px;margin-right:6px"; box.insertBefore(lab, box.firstChild); box.style.marginTop = "0"; box.style.alignItems = "center"; h.appendChild(box); }
+        else el.insertAdjacentElement("afterend", box);
+        el._arTw = box; tw = box;
+      }
+      var inp2 = tw.querySelector(".ar-tw-in");
+      arPieces(el).forEach(function(p){ covered[p] = 1; }); var w = (el.value||"").trim(); if(arMode(el)==="comma" && w) covered[w] = 1;
+      if(document.activeElement !== inp2) inp2.value = arTwinVal(el, st);
+    });
+    return covered;
+  }
   function arRender(){
     var sw = $("arOn"), on = !!(sw && sw.checked), ctl = $("arCtl"), pn = $("arPanel");
-    if(ctl) ctl.style.display = on ? "flex" : "none"; if(pn) pn.style.display = on ? "" : "none";
-    if(!on) return;
+    document.body.classList.toggle("ar-on", on);
+    if(ctl) ctl.style.display = on ? "flex" : "none";
+    if(!on){ if(pn) pn.style.display = "none"; return; }
+    var cov = arTwins();
     var R; try{ R = custData(model()); }catch(e){ return; }
-    var list = arStrings(R), st = arStoreGet(), sig = list.join("\u0001");
+    var all = arStrings(R), list = all.filter(function(t){ return !cov[t]; }), st = arStoreGet(), sig = list.join("\u0001"); if(pn) pn.style.display = list.length ? "" : "none";
     if(sig !== arSig){
       arSig = sig; arRowsList = list;
-      $("arRows").innerHTML = list.length ? list.map(function(t,i){ return '<div class="ar-row"><div class="ar-en">'+esc(t)+'</div><input type="text" class="ar-in" data-i="'+i+'" value="'+esc(st[t]||"")+'" placeholder="Arabic (optional)"></div>'; }).join("") : '<div class="hint">Nothing typed yet. Type the customer wording, flow names and journey details in English first.</div>';
+      $("arRows").innerHTML = list.length ? list.map(function(t,i){ return '<div class="ar-row"><div class="ar-en">'+esc(t)+'</div><input type="text" class="ar-in" data-i="'+i+'" value="'+esc(st[t]||"")+'" placeholder="Arabic (optional)"></div>'; }).join("") : '';
     }
-    var n = list.filter(function(t){ return (st[t]||"").trim(); }).length;
-    $("arCount").textContent = "Arabic: "+n+" of "+list.length+" filled";
+    var n = all.filter(function(t){ return (st[t]||"").trim(); }).length;
+    $("arCount").textContent = "Arabic: "+n+" of "+all.length+" filled";
   }
   function arSync(){ clearTimeout(arTimer); arTimer = setTimeout(arRender, 350); }
   window.arSync = arSync;
@@ -4680,6 +4709,15 @@ var DL = (function(){
       var st = arStoreGet(); if(t.value.trim()) st[en] = t.value; else delete st[en]; arStoreSet(st);
       var n = arRowsList.filter(function(x){ return (st[x]||"").trim(); }).length; $("arCount").textContent = "Arabic: "+n+" of "+arRowsList.length+" filled";
     });
+    document.addEventListener("input", function(e){
+      var t = e.target; if(!t.classList || !t.classList.contains("ar-tw-in")) return; var el = t._src; if(!el) return;
+      var P = arPieces(el), m = arMode(el), st = arStoreGet(), v = t.value;
+      var A = m==="lines" ? v.split(/\n/) : m==="comma" ? v.split(/[,،]/) : [v];
+      P.forEach(function(p,i){ var a = (A[i]||"").trim(); if(a) st[p] = (m==="whole" ? v : a); else delete st[p]; });
+      if(m==="comma"){ var w = (el.value||"").trim(); if(v.trim()) st[w] = v; else delete st[w]; }
+      arStoreSet(st); arSync();
+    });
+    ["cjBody","cwFlows"].forEach(function(id){ var h = $(id); if(h && window.MutationObserver) new MutationObserver(function(){ arSync(); }).observe(h, {childList:true}); });
     $("arOn").addEventListener("change", function(){ arSig = ""; arRender(); });
   })();
 
