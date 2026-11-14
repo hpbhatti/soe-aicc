@@ -521,6 +521,13 @@ body.locked{overflow:hidden}
 .px-nx-r{display:flex;gap:6px;flex-wrap:wrap}
 .pxq-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;background:#EEF2EE;border-bottom:1px solid #D7E1D4;position:sticky;top:0}.pxq-f{width:100%;height:72vh;border:0;background:#ddd}.pxq-n{padding:10px 16px;font-size:13px;color:#3d4a3e}
 .px-m2>div{padding:18px 20px}.px-m2>div:has(.pxq-h){padding:0}
+
+.ar-sw{display:flex;gap:8px;align-items:center;font-size:13.5px}
+.ar-count{font-size:12px;color:var(--muted);margin-left:10px}
+.ar-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid #E7EDE3}
+.ar-en{font-size:12.5px;color:var(--ink);word-break:break-word}
+.ar-in{font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink);direction:rtl;text-align:right;width:100%;box-sizing:border-box}
+@media (max-width:640px){.ar-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body class="locked">
@@ -619,6 +626,14 @@ body.locked{overflow:hidden}
     <section class="step">
       <div class="step-head"><div class="step-num">&bull;</div><h2>Customer profile</h2></div>
       <div class="note">Select the customer's industry, current pain points (up to 3) and business goals (up to 3). These shape the executive summary, KPIs and chart suggestions in the internal brief.</div>
+      <div id="arBox" style="margin:0 0 12px;border:1px solid #C2CFBC;border-radius:6px;padding:10px 14px;background:#F6FAF3">
+        <label class="ar-sw"><input type="checkbox" id="arOn"> <b>Offer this customer an Arabic version</b></label>
+        <div class="hint" style="padding:4px 0 0 0">Off by default. When it is on, the customer page shows an English | عربي switch in the top bar. The calculator and the partner side stay in English.</div>
+        <div id="arCtl" style="display:none;margin-top:8px;align-items:center;gap:10px;flex-wrap:wrap">
+          <label class="f" style="margin:0"><span class="lbl">The customer link opens in</span><select id="arFirst"><option value="en">English first</option><option value="ar">Arabic first</option></select></label>
+          <span id="arCount" class="ar-count"></span>
+        </div>
+      </div>
       <div class="fields">
         <label class="f"><span class="lbl">Industry</span>
           <select id="industry"><option value="">— Select industry —</option></select>
@@ -651,6 +666,11 @@ body.locked{overflow:hidden}
           <div class="hint">Leave a box empty to use the standard words for the industry. To choose the Arabic word too, write it like this: technician / فني</div>
           <div class="act-h" style="margin-top:12px">Rename flows for this customer (optional)</div>
           <div class="fields" id="cwFlows"></div>
+          <div id="arPanel" style="display:none;margin-top:14px;border-top:1px dashed #C2CFBC;padding-top:12px">
+            <div class="act-h">Arabic version (optional)</div>
+            <div class="hint" style="padding:2px 0 8px 0">Each row is a text you typed in English: the customer name, wording, flow names, journey details and custom systems. Write the Arabic beside it. An empty box shows the English text to the customer. Fixed texts and built-in choices are already translated.</div>
+            <div id="arRows"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -1077,6 +1097,7 @@ body.locked{overflow:hidden}
     </summary>
     <div id="cjBody" style="padding:4px 18px 18px;border-top:1px solid #E3EADF"></div>
     <input type="hidden" id="cjData">
+    <input type="hidden" id="arData">
   </details>
 </div>
 <style>
@@ -2482,7 +2503,7 @@ function buildWording(){
   var old = {}; box.querySelectorAll("input").forEach(function(i){ old[i.id] = i.value; });
   box.innerHTML = af.map(function(a){ var id = "cwf_"+a.dir+"_"+a.idx; return '<label class="f"><span class="lbl">'+(a.dir==="in"?"IN-":"OUT-")+(a.idx+1)+' '+esc(a.label)+'</span><input id="'+id+'" type="text" placeholder="Name shown to the customer" value="'+esc(old[id]||"")+'"></label>'; }).join("") || '<div class="hint">Add call flows first.</div>';
 }
-function refresh(){ updateSuggest(); buildSystemQuestions(); render(); buildWording(); sendToCustView(); if(window.cjSync) window.cjSync(); }
+function refresh(){ updateSuggest(); buildSystemQuestions(); render(); buildWording(); sendToCustView(); if(window.cjSync) window.cjSync(); if(window.arSync) window.arSync(); }
 
 $("flowsIn").addEventListener("change", flowHandler);
 $("flowsIn").addEventListener("input", flowHandler);
@@ -4608,6 +4629,60 @@ var DL = (function(){
 
   /* ---------- data for the customer page (no prices, no margins, no private notes) ---------- */
   var SYS_DISP = { booking:"Booking system", crm:"CRM", ticketing:"Ticketing system", erp:"ERP", billing:"Billing system", payment:"Payment gateway", core:"Core business system", sms:"SMS gateway", field:"Field service system", esign:"E-signature system", hr:"HR system" };
+
+  /* ---------- optional Arabic version (off by default; the Arabic text travels in the data package as ar.map) ---------- */
+  var arRowsList = [], arSig = "", arTimer = 0;
+  function arStoreGet(){ var v = (($("arData")||{}).value)||""; var o = {}; try{ o = v ? JSON.parse(v) : {}; }catch(e){ o = {}; } return (o && typeof o==="object") ? o : {}; }
+  function arStoreSet(o){ var el = $("arData"); if(el) el.value = Object.keys(o).length ? JSON.stringify(o) : ""; }
+  function arStrings(R){
+    var seen = {}, out = [];
+    function add(t){ t = (t==null ? "" : String(t)).trim(); if(!t || seen[t.toLowerCase()] || /[؀-ۿ]/.test(t)) return; seen[t.toLowerCase()] = 1; out.push(t); }
+    add(R.client); add(R.desc); add(R.goalOther);
+    Object.keys(R.wording||{}).forEach(function(k){ var w = String(R.wording[k]); if(w.indexOf(" / ")<0) add(w); });
+    (R.inbound||[]).concat(R.outbound||[]).forEach(function(o){ if(o.id==="other" || o.id==="other_out") add(o.label); });
+    document.querySelectorAll('[id^="cwf_"]').forEach(function(el){ add(el.value); });
+    var std = []; Object.keys(SYS_DISP).forEach(function(k){ std.push(SYS_DISP[k]); });
+    (R.systems||[]).forEach(function(s){ if(std.indexOf(s)<0) add(s); });
+    var J = R.journey; if(J){
+      (J.concerns||[]).forEach(function(c){ add(c.w); add(c.a); });
+      Object.keys(J.scen||{}).forEach(function(k){ var s = J.scen[k]; add(s.say); add(s.asks); add(s.team); add(s.rule); if(s.fields){ add(s.fields); s.fields.split(",").forEach(add); } });
+      var ex = J.extras||{}; ["conn","test","need"].forEach(function(k){ (ex[k]||[]).forEach(add); });
+      var u = J.und||{}; add(u.told); add(u.setup); (u.inn||[]).forEach(add); (u.later||[]).forEach(add);
+    }
+    return out;
+  }
+  function arOut(R){
+    var sw = $("arOn"); if(!sw || !sw.checked) return null;
+    var st = arStoreGet(), map = {};
+    arStrings(R).forEach(function(t){ var v = (st[t]||"").trim(); if(v) map[t] = v; });
+    return { on:true, first:(($("arFirst")||{}).value==="ar" ? "ar" : "en"), map:map };
+  }
+  function arRender(){
+    var sw = $("arOn"), on = !!(sw && sw.checked), ctl = $("arCtl"), pn = $("arPanel");
+    if(ctl) ctl.style.display = on ? "flex" : "none"; if(pn) pn.style.display = on ? "" : "none";
+    if(!on) return;
+    var R; try{ R = custData(model()); }catch(e){ return; }
+    var list = arStrings(R), st = arStoreGet(), sig = list.join("\u0001");
+    if(sig !== arSig){
+      arSig = sig; arRowsList = list;
+      $("arRows").innerHTML = list.length ? list.map(function(t,i){ return '<div class="ar-row"><div class="ar-en">'+esc(t)+'</div><input type="text" class="ar-in" data-i="'+i+'" value="'+esc(st[t]||"")+'" placeholder="Arabic (optional)"></div>'; }).join("") : '<div class="hint">Nothing typed yet. Type the customer wording, flow names and journey details in English first.</div>';
+    }
+    var n = list.filter(function(t){ return (st[t]||"").trim(); }).length;
+    $("arCount").textContent = "Arabic: "+n+" of "+list.length+" filled";
+  }
+  function arSync(){ clearTimeout(arTimer); arTimer = setTimeout(arRender, 350); }
+  window.arSync = arSync;
+  (function(){
+    var rows = $("arRows"); if(!rows) return;
+    rows.addEventListener("input", function(e){
+      var t = e.target; if(!t.classList || !t.classList.contains("ar-in")) return;
+      var en = arRowsList[+t.getAttribute("data-i")]; if(!en) return;
+      var st = arStoreGet(); if(t.value.trim()) st[en] = t.value; else delete st[en]; arStoreSet(st);
+      var n = arRowsList.filter(function(x){ return (st[x]||"").trim(); }).length; $("arCount").textContent = "Arabic: "+n+" of "+arRowsList.length+" filled";
+    });
+    $("arOn").addEventListener("change", function(){ arSig = ""; arRender(); });
+  })();
+
   function custData(m){
     var D = docData(m), ind = ($("industry").value || "other"), IND = (typeof INDUSTRY_DATA!=="undefined" && INDUSTRY_DATA[ind]) || {};
     var inb = [], out = [];
@@ -4637,6 +4712,7 @@ var DL = (function(){
         contacts:num("contacts",0), attempts:2, peak:m.peak, lines:D.phone.lines||1, ext:m.extensions||1, wa:D.waMsgs||0, agents:(D.human&&D.human.agents)||0, dash:m.dashUsers||1 }
     };
     var J0 = cjOut(); if(J0) R0.journey = J0;
+    var AR0 = arOut(R0); if(AR0) R0.ar = AR0;
     return R0;
   }
   function marginSnap(m){
