@@ -764,7 +764,7 @@ function r3(){
  if(!st.flow)st.flow=defaultFlow();
  var f=st.flow,h='<div class="kick">See it in action</div><h2 class="t">See your AI Contact Center at work</h2><p class="lead">Choose any of your flows and press start. You will see the call, and you will see which of your systems the Voice Agent uses at each moment.</p>';
  h+='<div class="pick">';
- allFlows().forEach(function(x){h+='<button class="pk '+(x.out?'o ':'')+(x.id===f.id?'on':'')+'" data-flow="'+x.id+'">'+esc(x.label)+'</button>'});
+ allFlows().forEach(function(x){h+='<button class="pk '+(x.out?'o ':'')+((x.key||x.id)===(f.key||f.id)?'on':'')+'" data-flow="'+(x.key||x.id)+'">'+esc(x.label)+'</button>'});
  var w='';for(var i=0;i<24;i++)w+='<i></i>';
  h+='</div>'+PT_strip(f)+'<div class="lcgrid"><div>';
  h+='<div class="card" style="margin-bottom:14px"><div class="kick">Connected modules</div><div class="chips" style="margin-top:6px">';
@@ -1219,7 +1219,7 @@ document.addEventListener("click",function(e){
  if(t.dataset.lang){st.lang=t.dataset.lang;draw();return}
  if(t.dataset.sz){var k=t.dataset.sz;st.sz[k]=st.sz[k]||{};st.sz[k].ok=t.dataset.v==="ok";rec("sizing",{k:k,ok:st.sz[k].ok,nv:st.sz[k].nv||""});var y=window.scrollY;draw();window.scrollTo({top:y});return}
  if(t.dataset.s!==undefined){go(+t.dataset.s);return}
- if(t.dataset.flow){st.flow=allFlows().filter(function(f){return f.id===t.dataset.flow})[0];clearInterval(st.timer);draw();return}
+ if(t.dataset.flow){st.flow=allFlows().filter(function(f){return (f.key||f.id)===t.dataset.flow})[0]||st.flow;clearInterval(st.timer);draw();return}
  if(t.id==="play"){rec("call",{flow:st.flow.id,lang:st.lang});play();return}
  if(t.dataset.go){s6.v=t.dataset.go;draw();return}
  if(t.dataset.tl){s6.tl=t.dataset.tl;rec("timeline",{tl:s6.tl});draw();return}
