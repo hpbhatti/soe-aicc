@@ -4647,7 +4647,8 @@ var DL = (function(){
   function cjCtx(){ var c={ kb:false, wa:false, hoWa:false, hoSys:"" }; try{ var m=model(); c.kb=!!m.kbOn; c.wa=m.waMode!=="none"; c.hoWa=!!m.hMsg; if(m.hOn && (m.hWhere==="external"||m.hWhere==="both")) c.hoSys=humanExtName(); }catch(e){} return c; }
   function cjDraft(f){
     var C=cjCtx(), S=[], sys=f.sys.filter(function(x){ return x!=="WhatsApp"; }), first=sys[0]||"", last=sys[sys.length-1]||"";
-    var wantWa = C.wa && (ST_WA[f.jid] || f.sys.indexOf("WhatsApp")>-1);
+    var wantWa = C.wa && (ST_WA[f.jid] || f.sys.indexOf("WhatsApp")>-1 || /whats\s?app|واتساب|\blink\b/i.test(f.label));
+    var waKind = (C.wa && /escalat|hand\s?-?\s?over|hand\s?-?\s?off|to (the )?team|human|person|agent/i.test(f.label) && /whats\s?app|واتساب/i.test(f.label)) ? "how" : "wa";
     var custom = f.jid==="other";
     var ro = ST_RO[f.jid] || (custom && /track|status|check|inquir|enquir|lookup|where|find|view|know/i.test(f.label));
     if(f.dir==="in"){
@@ -4663,7 +4664,7 @@ var DL = (function(){
         if(first) S.push(stMk("read",first));
         if(!ro && last) S.push(stMk("write",last));
         else if(ro) S.push(stMk("say","","Tells the customer what it found","يخبر المتصل بما وجده"));
-        if(wantWa) S.push(stMk("wa","WhatsApp"));
+        if(wantWa) S.push(stMk(waKind,"WhatsApp"));
       }
     } else {
       S.push(stMk("say","",ST_OUT.greet[0],ST_OUT.greet[1]));
