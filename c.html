@@ -745,12 +745,12 @@ function maMk(t,x){var A_=AR.ar;
  L.forEach(function(l,k){s+='<tspan x="'+x+'" dy="'+(k?10:0)+'">'+esc(l)+'</tspan>'});return s}
 function setMa(i,t){var el=$("ma"+i);if(!el)return;el.innerHTML=maMk(t,el.getAttribute("x"))}
 function mapSvg(){
- var A=AR.ar,M=window.innerWidth<=560,VW=M?Math.max(236,Math.min(330,window.innerWidth-84)):400,BX=M?Math.round(VW*.36):218,CX=M?Math.round(BX*.4):66,CR=M?Math.min(32,CX-3):46,BW=M?VW-BX-4:170,PS=CX+CR,PT=M?66:60,BH=M?54:50,T1=M?21:19,T2=M?37:33,MX=(PS+BX)/2+(M?6:10);
+ var A=AR.ar,M=window.innerWidth<=560,VW=M?Math.max(236,Math.min(330,window.innerWidth-84)):400,BX=M?Math.round(VW*.36):218,CX=M?Math.round(BX*.4):(A?74:66),CR=M?Math.min(32,CX-3):(A?60:46),BW=M?VW-BX-4:170,PS=CX+CR,PT=M?66:60,BH=M?54:50,T1=M?21:19,T2=M?37:33,MX=(PS+BX)/2+(M?6:10);
  var X=function(x){return A?VW-x:x},N=sysNodes(),H=Math.max(M?200:220,N.length*PT+24),cy=H/2,u=usesOf(st.flow),ac=X(CX),h='<svg class="map" viewBox="0 0 '+VW+' '+H+'" id="map" style="direction:ltr">';
  N.forEach(function(s,i){var y=24+i*PT+BH/2;h+='<path class="mp" id="mp'+i+'" d="M'+X(PS)+','+cy+' C'+X(MX)+','+cy+' '+X(MX)+','+y+' '+X(BX)+','+y+'"/>'});
  h+='<g><circle cx="'+ac+'" cy="'+cy+'" r="'+CR+'" fill="#12401A"/><circle cx="'+ac+'" cy="'+cy+'" r="'+CR+'" fill="none" stroke="#7CB342" stroke-width="2" opacity=".5"/>';
- var ln=A?(M?["الوكيل الصوتي","بالذكاء","الاصطناعي"]:["الوكيل الصوتي","بالذكاء الاصطناعي"]):["AI Voice","Agent"],fs=A?(M?9:10):(M?12:11),y0;
- if(!M){h+='<svg class="mi w" x="'+(ac-10)+'" y="'+(cy-CR+12)+'" width="20" height="20" viewBox="0 0 24 24">'+I.s_agent+'</svg>';y0=cy+7}
+ var ln=A?(M?["الوكيل الصوتي","بالذكاء","الاصطناعي"]:["الوكيل الصوتي","بالذكاء","الاصطناعي"]):["AI Voice","Agent"],fs=A?(M?9:11):(M?12:11),y0;
+ if(!M){h+='<svg class="mi w" x="'+(ac-10)+'" y="'+(cy-CR+12)+'" width="20" height="20" viewBox="0 0 24 24">'+I.s_agent+'</svg>';y0=A?cy-2:cy+7}
  else y0=A?cy-8:cy-2;
  ln.forEach(function(t,k){h+='<text x="'+ac+'" y="'+(y0+k*(M?12:14))+'" text-anchor="middle" fill="#fff" font-size="'+fs+'" font-weight="800" data-noar="1">'+t+'</text>'});
  h+='</g>';
