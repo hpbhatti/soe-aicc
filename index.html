@@ -1121,6 +1121,17 @@ body.locked{overflow:hidden}
 #cjBody input[type=text],#cjBody textarea,#cjBody select{width:100%;font:inherit;font-size:13px;padding:6px 9px;border:1px solid #C9D2C4;border-radius:4px;background:#fff}
 #cjBody .cj-add{display:inline-block;border:1.5px dashed #7CB342;color:#1B5E20;font-weight:700;font-size:12px;padding:4px 12px;border-radius:5px;cursor:pointer;background:#fff}
 #cjBody .cj-x{color:#B91C1C;font-size:12px;cursor:pointer;background:none;border:none}
+#cjBody .st-h,#cjBody .st-r{display:grid;grid-template-columns:24px 190px 190px 1fr 78px;gap:6px;align-items:start}
+#cjBody .st-h{font-size:10.5px;font-weight:700;text-transform:uppercase;color:#5F6F62;padding:0 6px 3px}
+#cjBody .st-r{padding:6px;border-radius:6px;background:#F4F7F1;margin-bottom:4px}
+#cjBody .st-r.hi{background:#E8F3E6}
+#cjBody .st-r>b{padding-top:6px}
+#cjBody .st-c{display:flex;flex-direction:column;gap:3px}
+#cjBody .st-x{display:flex;gap:3px;padding-top:3px}
+#cjBody .st-x button{border:1px solid #C9D2C4;background:#fff;border-radius:4px;cursor:pointer;font-size:11px;padding:4px 6px}
+#cjBody .st-w{font-size:12px;background:#FFF7E6;border:1px solid #F0D49A;border-radius:6px;padding:6px 10px;margin-bottom:4px}
+#cjBody .st-ok{font-size:12px;background:#E8F3E6;border:1px solid #B7D8B0;border-radius:6px;padding:6px 10px}
+@media(max-width:900px){#cjBody .st-h{display:none}#cjBody .st-r{grid-template-columns:24px 1fr}}
 #cjBody .cj-hint{font-size:11.5px;color:#6B7A6E;margin:3px 0 6px}
 #cjBody .cj-row{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
 .cj-nm{display:block;margin-top:8px;font-size:12px;font-weight:600;color:#3d4d40}.cj-nm small{font-weight:400;color:#6B7A6E}.cj-nm input{display:block;width:100%;max-width:420px;margin-top:3px;font:inherit;font-size:13px;padding:6px 9px;border:1px solid #C9D2C4;border-radius:4px}
@@ -1631,7 +1642,10 @@ function getRequiredSystems(){
     flowSystems(a.f).forEach(function(x){ add(x.key, x.name, a.label, x.purpose); });
   });
   if($("waMode").value !== "none") add("whatsapp", "WhatsApp", "WhatsApp messaging (Step 8)");
-  if(humanExternal()) add("other:"+humanExtName().toLowerCase(), humanExtName(), "Human escalation", "Human agents work in this system");
+  if(humanExternal()){
+    if(/^\s*whats\s?app(\s+business)?\s*$/i.test(humanExtName())) add("whatsapp", "WhatsApp", "Human escalation", "Human agents work in WhatsApp");
+    else add("other:"+humanExtName().toLowerCase(), humanExtName(), "Human escalation", "Human agents work in this system");
+  }
   // stable order: known systems first (in list order), then custom systems
   var sorted = [];
   SYS_ORDER.forEach(function(k){ if(map[k]) sorted.push(k); });
@@ -1648,6 +1662,8 @@ function endpointInfo(){
     if(base && !base.special){
       var c = sysChoice[k] || "own";
       s.mode = c==="same" ? "waived" : (c==="native" && base.native) ? "native" : c==="none" ? "acquire" : "own";
+    } else if((sysChoice[k]||"")==="same"){
+      s.mode = "waived";
     }
     s.charged = s.mode !== "native" && s.mode !== "waived";
     s.waived = s.mode === "waived";
@@ -1697,6 +1713,17 @@ function confirmListHtml(eps){
   return '<div class="warnbox"><b>To confirm with 700Apps before quoting</b><ul style="margin:6px 0 0;padding-inline-start:18px">'+li+'</ul></div>';
 }
 var lastSysHtml = null;
+function waiveBox(s){
+  return '<div class="waive-box"><b>Endpoint charge waived.</b> One API connection covers this system and the other system in this list, so the second 250/mo is not charged. Subject to 700Apps approval.'+(s.waiveInvalid?' <span style="color:var(--red)">At least one system must stay charged, so this one is charged.</span>':'')+
+    '<label class="cj-nm">Customer note <small>(shown on the quote, in the waived items and the assumptions)</small><textarea class="sys-wnote" data-wkey="'+s.key+'" rows="2" placeholder="Example: Both use the same Salla API, so one connection covers orders and tickets."></textarea></label></div>';
+}
+function waiverSel(s, list){
+  var c = sysChoice[s.key]==="same" ? "same" : "charged";
+  if(list.length<2 && c!=="same") return "";
+  var h = '<select class="sys-select" data-syskey="'+s.key+'" aria-label="Endpoint charge for '+esc(s.name)+'"><option value="charged"'+(c==="charged"?' selected':'')+'>Charged separately (250/mo)</option><option value="same"'+(c==="same"?' selected':'')+'>Same API as our other system here — one connection, no extra charge (waived)</option></select>';
+  if(c==="same") h += waiveBox(s);
+  return h;
+}
 function buildSystemQuestions(){
   var list = endpointInfo(), html = "";
   var crmIncluded = $("crmOn").value==="1";
@@ -1713,16 +1740,15 @@ function buildSystemQuestions(){
       if(base.native) html += '<option value="native"'+(c==="native"?' selected':'')+'>'+esc(base.native)+'</option>';
       html += '</select>';
       html += '<label class="cj-nm">Name of their system <small>(shown to the customer, for example Odoo)</small><input type="text" class="sys-alias" data-alias="'+esc(s.name)+'" placeholder="Leave empty to show &quot;'+esc(s.name)+'&quot;"></label><div class="sys-aliasnote" data-aliasnote="'+esc(s.name)+'"></div>';
-      if(c==="same"){
-        html += '<div class="waive-box"><b>Endpoint charge waived.</b> One API connection covers this system and the other system in this list, so the second 250/mo is not charged. Subject to 700Apps approval.'+(s.waiveInvalid?' <span style="color:var(--red)">At least one system must stay charged, so this one is charged.</span>':'')+
-          '<label class="cj-nm">Customer note <small>(shown on the quote, in the waived items and the assumptions)</small><textarea class="sys-wnote" data-wkey="'+s.key+'" rows="2" placeholder="Example: Both use the same Salla API, so one connection covers orders and tickets."></textarea></label></div>';
-      }
+      if(c==="same") html += waiveBox(s);
       if(c==="none") html += '<div class="prereq-flag">Prerequisite: the customer needs to acquire this system before go-live. The 250/month endpoint fee applies once connected.</div>';
       if(c==="native" && (s.key==="crm"||s.key==="ticketing") && !crmIncluded) html += '<div class="prereq-flag">No cost line yet. Add the 700Apps CRM plan in Step 10.</div>';
     } else if(s.key==="whatsapp"){
       html += '<div class="sys-fixed">WhatsApp connection, 250/mo. Message volume is priced separately in Step 8.</div>';
+      html += waiverSel(s, list);
     } else {
       html += '<div class="sys-fixed">Custom system, fixed 250/mo.'+(s.purposes.length?' Purpose: '+s.purposes.map(esc).join("; ")+'.':'')+'</div>';
+      html += waiverSel(s, list);
       html += '<div class="prereq-flag">Before the quote is sent, ask 700Apps: can they connect to '+esc(s.name)+' for this purpose, and what do they need from the customer\'s IT team?</div>';
     }
     html += '</div>';
@@ -4574,9 +4600,9 @@ var DL = (function(){
   });
 
   /* ---------- customer journey details (optional, shown to the customer when switched on) ---------- */
-  var CJ = { on:false, c:[], s:{}, p:[false,false,false,false], q:[false,false,false], x:[], a:{}, u:{} };
-  function cjDefaults(){ CJ.on=!!CJ.on; CJ.c=Array.isArray(CJ.c)?CJ.c:[]; CJ.s=(CJ.s&&typeof CJ.s==="object")?CJ.s:{}; CJ.p=Array.isArray(CJ.p)&&CJ.p.length===4?CJ.p:[false,false,false,false]; CJ.q=Array.isArray(CJ.q)&&CJ.q.length===3?CJ.q:[false,false,false]; CJ.x=Array.isArray(CJ.x)?CJ.x:[]; CJ.a=(CJ.a&&typeof CJ.a==="object")?CJ.a:{}; CJ.u=(CJ.u&&typeof CJ.u==="object")?CJ.u:{}; }
-  function cjUsed(){ return CJ.on || CJ.c.length || Object.keys(CJ.s).length || CJ.x.length || Object.keys(CJ.a).some(function(k){ return CJ.a[k]; }) || Object.keys(CJ.u||{}).some(function(k){ return (CJ.u[k]||"").trim(); }) || CJ.p.some(Boolean) || CJ.q.some(Boolean); }
+  var CJ = { on:false, c:[], s:{}, p:[false,false,false,false], q:[false,false,false], x:[], a:{}, u:{}, st:{} };
+  function cjDefaults(){ CJ.on=!!CJ.on; CJ.c=Array.isArray(CJ.c)?CJ.c:[]; CJ.s=(CJ.s&&typeof CJ.s==="object")?CJ.s:{}; CJ.p=Array.isArray(CJ.p)&&CJ.p.length===4?CJ.p:[false,false,false,false]; CJ.q=Array.isArray(CJ.q)&&CJ.q.length===3?CJ.q:[false,false,false]; CJ.x=Array.isArray(CJ.x)?CJ.x:[]; CJ.a=(CJ.a&&typeof CJ.a==="object")?CJ.a:{}; CJ.u=(CJ.u&&typeof CJ.u==="object")?CJ.u:{}; CJ.st=(CJ.st&&typeof CJ.st==="object")?CJ.st:{}; }
+  function cjUsed(){ return CJ.on || Object.keys(CJ.st||{}).length || CJ.c.length || Object.keys(CJ.s).length || CJ.x.length || Object.keys(CJ.a).some(function(k){ return CJ.a[k]; }) || Object.keys(CJ.u||{}).some(function(k){ return (CJ.u[k]||"").trim(); }) || CJ.p.some(Boolean) || CJ.q.some(Boolean); }
   function cjSave(){ var el=$("cjData"); if(el) el.value = cjUsed() ? JSON.stringify(CJ) : ""; cjSummary(); }
   function cjLoad(){ var v=(($("cjData")||{}).value)||""; try{ CJ = v ? JSON.parse(v) : {}; }catch(e){ CJ = {}; } cjDefaults(); cjSigV=""; cjRender(); if(window.cjFillI) window.cjFillI(); }
   function cjFlowLabel(a){ var l = a.job.id==="other" ? (((a.f.name||"").trim()) || "Custom flow") : (SHORT[a.job.id] || a.job.label); var ov = ((($("cwf_"+a.dir+"_"+a.idx)||{}).value)||"").trim(); return ov || l; }
@@ -4585,6 +4611,103 @@ var DL = (function(){
   function cjCustomName(g){ try{ return model().eps.some(function(ep){ return ep.name===g && String(ep.key).indexOf("other:")===0; }) ? g : ""; }catch(e){ return ""; } }
   function cjSummary(){ var el=$("cjSum"); if(!el) return; var n=CJ.c.filter(function(c){ return (c.w||"").trim(); }).length, sc=Object.keys(CJ.s).filter(function(k){ var o=CJ.s[k]||{}; return o.say||o.asks||o.fields||o.team||o.rule; }).length, pd=CJ.p.filter(Boolean).length;
     el.textContent = (CJ.on ? "ON on the customer page" : "Off") + " · " + n + " concern"+(n===1?"":"s") + " · " + sc + " scenario detail"+(sc===1?"":"s") + " · before signing " + pd + " of 4 done"; }
+
+  /* ---------- call steps per flow (v5): drafted from the answers, editable, played exactly on the customer page ---------- */
+  var ST_KIND = [["cu","Customer speaks"],["ask","AI asks the customer"],["say","AI speaks or confirms"],["read","AI reads from a system"],["write","AI writes to a system"],["wa","AI sends a WhatsApp message"],["how","Hand-off on WhatsApp"],["hov","Hand-off by voice"],["end","AI ends the call"]];
+  var ST_NEEDSYS = { read:1, write:1, wa:1, how:1, hov:1 };
+  var ST_DEF = {
+    ask:["Asks for the details it needs","يسأل عن التفاصيل المطلوبة"],
+    say:["Confirms to the customer","يؤكد للمتصل"],
+    read:["Checks the information in {s}","يتحقق من المعلومات في {s}"],
+    write:["Records the result in {s}","يسجل النتيجة في {s}"],
+    wa:["Sends a WhatsApp message","يرسل رسالة واتساب"],
+    how:["Sends the hand-off message on WhatsApp. The team continues in the same chat","يرسل رسالة التحويل عبر واتساب ويكمل الفريق في نفس المحادثة"],
+    hov:["Passes the call to a person ({s})","يحول المكالمة إلى موظف ({s})"],
+    end:["Ends the call politely","ينهي المكالمة بلطف"],
+    cu:["The customer asks for help","المتصل يطلب المساعدة"]
+  };
+  var ST_RO = { apptstat:1, ticketst:1, status:1, order:1, stock:1, invoice:1, hrdesk:1, policy:1 };
+  var ST_WA = { book:1, resched:1, remind:1, payremind:1, quote:1, wasend:1, wafollow:1, paylink:1, sign:1, signout:1 };
+  var ST_CU = {
+    book:["I want to book an appointment","أبغى أحجز موعد"], resched:["I need to change my appointment","أبغى أغير موعدي"], apptstat:["When is my appointment?","متى موعدي؟"],
+    faq:["I have a question","عندي سؤال"], ticket:["I have a problem and need help","عندي مشكلة وأحتاج مساعدة"], ticketst:["What is the status of my ticket?","وش حالة بلاغي؟"],
+    complaint:["I want to make a complaint","أبغى أقدم شكوى"], status:["What is the status of my request?","وش وضع طلبي؟"], order:["Where is my order?","وين طلبي؟"],
+    orderplc:["I want to place an order","أبغى أسوي طلب"], stock:["Is this product available?","هل المنتج متوفر؟"], "return":["I want to return an item","أبغى أرجع منتج"],
+    invoice:["What is my balance?","كم المبلغ المطلوب علي؟"], payment:["I want to pay","أبغى أدفع"], lead:["I am interested in your service","أنا مهتم بخدمتكم"],
+    callback:["Please call me back","أبغى أحد يتصل علي"], collect:["I want to leave my details","أبغى أترك بياناتي"]
+  };
+  var ST_OUT = {
+    greet:["Greets the customer and introduces the company","يرحب بالعميل ويعرّف بالشركة"],
+    msg:["Delivers one clear message","يوصل رسالة واضحة"],
+    reply:["The customer confirms, changes or declines","العميل يؤكد أو يغير أو يعتذر"]
+  };
+  function stDefault(k, s){ var d=ST_DEF[k]||["",""]; return { en:d[0].replace(/\{s\}/g,s||"the system"), ar:d[1].replace(/\{s\}/g,s||"النظام") }; }
+  function stMk(k, s, en, ar){ var o={ k:k, s:ST_NEEDSYS[k]?(s||""):"", en:en, ar:ar }; if(en==null){ var d=stDefault(k,s); o.en=d.en; o.ar=d.ar; } else if(ar==null) o.ar=""; return o; }
+  function cjFlowsX(){ return activeFlows().map(function(a){ var sy=[]; try{ flowSystems(a.f).forEach(function(x){ var nm=SYS_DISP[x.key]||x.name; if(sy.indexOf(nm)<0) sy.push(nm); }); }catch(e){} return { key:a.dir+"_"+a.idx, label:cjFlowLabel(a), code:(a.dir==="in"?"IN-":"OUT-")+(a.idx+1), jid:a.job.id, dir:a.dir, sys:sy, kb:!!a.job.kb }; }); }
+  function cjCtx(){ var c={ kb:false, wa:false, hoWa:false, hoSys:"" }; try{ var m=model(); c.kb=!!m.kbOn; c.wa=m.waMode!=="none"; c.hoWa=!!m.hMsg; if(m.hOn && (m.hWhere==="external"||m.hWhere==="both")) c.hoSys=humanExtName(); }catch(e){} return c; }
+  function cjDraft(f){
+    var C=cjCtx(), S=[], sys=f.sys.filter(function(x){ return x!=="WhatsApp"; }), first=sys[0]||"", last=sys[sys.length-1]||"";
+    var wantWa = C.wa && (ST_WA[f.jid] || f.sys.indexOf("WhatsApp")>-1);
+    var custom = f.jid==="other";
+    var ro = ST_RO[f.jid] || (custom && /track|status|check|inquir|enquir|lookup|where|find|view|know/i.test(f.label));
+    if(f.dir==="in"){
+      var cu = ST_CU[f.jid];
+      if(f.kb || f.jid==="faq"){
+        S.push(stMk("cu",""  ,cu?cu[0]:"I have a question",cu?cu[1]:"عندي سؤال"));
+        if(C.kb) S.push(stMk("read","Knowledge base"));
+        S.push(stMk("say","","Answers from the approved answers","يجيب من الإجابات المعتمدة"));
+        if(wantWa) S.push(stMk("wa","WhatsApp"));
+      } else {
+        S.push(stMk("cu","",cu?cu[0]:("I need help: "+f.label), cu?cu[1]:"أحتاج مساعدة"));
+        S.push(stMk("ask",""));
+        if(first) S.push(stMk("read",first));
+        if(!ro && last) S.push(stMk("write",last));
+        else if(ro) S.push(stMk("say","","Tells the customer what it found","يخبر المتصل بما وجده"));
+        if(wantWa) S.push(stMk("wa","WhatsApp"));
+      }
+    } else {
+      S.push(stMk("say","",ST_OUT.greet[0],ST_OUT.greet[1]));
+      S.push(stMk("say","",ST_OUT.msg[0],ST_OUT.msg[1]));
+      S.push(stMk("cu","",ST_OUT.reply[0],ST_OUT.reply[1]));
+      if(last) S.push(stMk("write",last));
+      if(wantWa) S.push(stMk("wa","WhatsApp"));
+    }
+    S.push(stMk("end",""));
+    return S;
+  }
+  function cjStepsOf(key){ if(CJ.st[key] && CJ.st[key].length) return CJ.st[key]; var f=cjFlowsX().filter(function(x){ return x.key===key; })[0]; return f?cjDraft(f):[]; }
+  function cjStEnsure(key){ if(!(CJ.st[key] && CJ.st[key].length)) CJ.st[key]=JSON.parse(JSON.stringify(cjStepsOf(key))); return CJ.st[key]; }
+  function cjStOptions(){ var C=cjCtx(), o=cjSystems().slice(); if(C.kb) o.push("Knowledge base"); o.push("WhatsApp"); if(C.hoSys && o.indexOf(C.hoSys)<0) o.push(C.hoSys); return o; }
+  function cjStChecks(F){
+    var C=cjCtx(), opt=cjStOptions(), used={}, out=[];
+    F.forEach(function(f){ var S=cjStepsOf(f.key), w=[], endOk=false, usedHere={};
+      S.forEach(function(s,i){ if(s.k==="end") endOk=true;
+        if(ST_NEEDSYS[s.k]){ if(!s.s) w.push("Step "+(i+1)+" needs a system."); else { used[s.s]=1; usedHere[s.s]=s.k; if(opt.indexOf(s.s)<0) w.push("Step "+(i+1)+": "+s.s+" is not connected."); }
+          if((s.k==="wa"||s.k==="how") && !C.wa && !C.hoWa) w.push("Step "+(i+1)+" uses WhatsApp, but WhatsApp is not switched on in the calculator."); } });
+      if(!endOk) w.push("The flow has no ending step.");
+      out.push({ key:f.key, warn:w, used:usedHere });
+    });
+    var unused=opt.filter(function(x){ return !used[x] && x!=="WhatsApp"; });
+    return { flows:out, unused:unused };
+  }
+  function cjStHtml(f, chk){
+    var S=cjStepsOf(f.key), saved=!!(CJ.st[f.key]&&CJ.st[f.key].length), opt=cjStOptions(), K=ST_KIND, h="";
+    h+='<div style="margin-top:12px;border-top:1px dashed #C9D2C4;padding-top:10px"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px"><b style="font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:#1B5E20">Call steps</b><span style="font-size:11.5px;color:#6B7A6E">'+(saved?'Edited by you. The customer page plays exactly this list.':'Draft built from your answers. The customer page plays this list. Change anything that is different for this customer.')+'</span></div>';
+    h+='<div class="st-h"><span>#</span><span>What happens</span><span>System</span><span>Caption (English / Arabic)</span><span></span></div>';
+    S.forEach(function(s,i){
+      var needs=!!ST_NEEDSYS[s.k], hi=(s.k==="read"||s.k==="write"||s.k==="wa"||s.k==="how"||s.k==="hov");
+      h+='<div class="st-r'+(hi?' hi':'')+'"><b>'+(i+1)+'</b><select data-k="st" data-s="'+esc(f.key)+'" data-i="'+i+'" data-f="k">'+K.map(function(o){ return '<option value="'+o[0]+'"'+(s.k===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join("")+'</select>';
+      h+='<select data-k="st" data-s="'+esc(f.key)+'" data-i="'+i+'" data-f="s"'+(needs?'':' disabled')+'><option value="">'+(needs?'Choose a system':'None')+'</option>'+opt.concat(s.s&&opt.indexOf(s.s)<0?[s.s]:[]).map(function(o){ return '<option value="'+esc(o)+'"'+(s.s===o?' selected':'')+'>'+esc(o)+'</option>'; }).join("")+'</select>';
+      h+='<div class="st-c"><input type="text" data-k="st" data-s="'+esc(f.key)+'" data-i="'+i+'" data-f="en" value="'+esc(s.en||"")+'"><input type="text" dir="rtl" data-k="st" data-s="'+esc(f.key)+'" data-i="'+i+'" data-f="ar" value="'+esc(s.ar||"")+'" placeholder="Arabic (optional)"></div>';
+      h+='<div class="st-x"><button type="button" data-act="stup" data-s="'+esc(f.key)+'" data-i="'+i+'" title="Move up">&#9650;</button><button type="button" data-act="stdn" data-s="'+esc(f.key)+'" data-i="'+i+'" title="Move down">&#9660;</button><button type="button" data-act="stdel" data-s="'+esc(f.key)+'" data-i="'+i+'" title="Remove" style="color:#B91C1C">&#10005;</button></div></div>';
+    });
+    h+='<div style="display:flex;gap:8px;margin:6px 0"><span class="cj-add" data-act="stadd" data-s="'+esc(f.key)+'">+ Add step</span>'+(saved?'<button type="button" class="cj-x" style="color:#5F6F62" data-act="strst" data-s="'+esc(f.key)+'">Reset to draft</button>':'')+'</div>';
+    var c=chk.flows.filter(function(x){ return x.key===f.key; })[0]||{warn:[],used:{}};
+    c.warn.forEach(function(w){ h+='<div class="st-w">Warning: '+esc(w)+'</div>'; });
+    var u=Object.keys(c.used).map(function(k){ return k+' ('+(c.used[k]==="read"?'reads':c.used[k]==="write"?'writes':c.used[k]==="wa"?'sends':c.used[k]==="how"?'hand-off':'hand-off')+')'; });
+    h+='<div class="st-ok"><b>Systems this flow uses (from the steps):</b> '+(u.length?esc(u.join(", ")):"none")+'</div></div>';
+    return h;
+  }
   var CJ_BY = [["","— not linked —"],["setup","Setup and testing"],["dash","Dashboard"]];
   function cjRender(){
     var body=$("cjBody"); if(!body) return; var F=cjFlows(), h="";
@@ -4605,6 +4728,8 @@ var DL = (function(){
     });
     h+='<span class="cj-add" data-act="addc">+ Add concern</span>';
     h+='<div class="cj-h">3. Scenario details <span>(optional, one per flow. Empty means the standard example is used)</span></div>';
+    var FX=cjFlowsX(), CHK=cjStChecks(FX);
+    if(CHK.unused.length && FX.length) h+='<div class="st-w" style="margin-bottom:8px">Warning: connected but used in no flow: '+esc(CHK.unused.join(", "))+'.</div>';
     var cards=F.map(function(f){ return {key:f.key,title:f.code+" "+f.label,ho:false}; });
     if(humanOn()) cards.push({key:"handover",title:"Handover to a person",ho:true});
     if(!cards.length) h+='<div class="cj-hint">Add call flows first.</div>';
@@ -4614,6 +4739,7 @@ var DL = (function(){
       h+='<div class="cj-card"><div style="font-size:12.5px;font-weight:700;margin-bottom:6px">'+esc(c.title)+'</div>';
       if(c.ho) h+='<div class="cj-g2">'+fld("say","Customer\'s example sentence","e.g. I want to speak to a manager")+fld("rule","Transfer when","e.g. Asks for a person, is upset, or the AI fails twice")+fld("fields","What the person receives","e.g. Call summary, caller mood")+fld("team","Goes to","e.g. Supervisor")+'</div>';
       else h+='<div class="cj-g2">'+fld("say","Customer\'s example sentence","e.g. I bought two lamps last week and one does not work")+fld("asks","What the AI asks","e.g. Which branch did you buy from?")+fld("fields","Fields sent to the system","e.g. Name, phone, branch, issue type, brief")+fld("team","Team that gets it","e.g. After-sales")+'</div>';
+      if(!c.ho){ var fx=FX.filter(function(z){ return z.key===c.key; })[0]; if(fx) h+=cjStHtml(fx, CHK); }
       h+='</div>';
     });
     var AP = window.cjAutoP ? window.cjAutoP() : [null,false,false,false];
@@ -4631,6 +4757,12 @@ var DL = (function(){
   (function(){
     var body=$("cjBody"); if(!body) return;
     function onEdit(e){ var t=e.target, k=t.getAttribute&&t.getAttribute("data-k"); if(!k) return; var i=+t.getAttribute("data-i"), f=t.getAttribute("data-f");
+      if(k==="st"){ var key=t.getAttribute("data-s"), arr=cjStEnsure(key), r=arr[i]; if(!r) return;
+        if(f==="k"){ var old=r.k, od=stDefault(old,r.s); r.k=t.value; if(!ST_NEEDSYS[r.k]) r.s=""; else if(!r.s){ var C0=cjCtx(); r.s=(r.k==="wa"||r.k==="how")?"WhatsApp":(r.k==="hov"?(C0.hoSys||""):(r.k==="read"||r.k==="write")?((cjFlowsX().filter(function(z){return z.key===key;})[0]||{sys:[]}).sys[0]||""):""); }
+          if(!r.en || r.en===od.en){ var nd=stDefault(r.k,r.s); r.en=nd.en; r.ar=nd.ar; } }
+        else if(f==="s"){ var od2=stDefault(r.k,r.s); r.s=t.value; if(!r.en || r.en===od2.en){ var nd2=stDefault(r.k,r.s); r.en=nd2.en; r.ar=nd2.ar; } }
+        else r[f]=t.value;
+        cjSave(); if(t.tagName==="SELECT" && e.type==="change") cjRender(); return; }
       if(k==="on") CJ.on=t.checked; else if(k==="c"&&CJ.c[i]) CJ.c[i][f]=t.value; else if(k==="s"){ var key=t.getAttribute("data-s"); (CJ.s[key]=CJ.s[key]||{})[f]=t.value; if(!t.value){ var o=CJ.s[key]; if(!(o.say||o.asks||o.fields||o.team||o.rule)) delete CJ.s[key]; } }
       else if(k==="a"){ var g=t.getAttribute("data-g"); if(t.value.trim()) CJ.a[g]=t.value; else delete CJ.a[g]; }
       else if(k==="u"){ CJ.u=CJ.u||{}; CJ.u[f]=t.value; } else if(k==="p") CJ.p[i]=t.checked; else if(k==="q") CJ.q[i]=t.checked; else if(k==="x"&&CJ.x[i]) CJ.x[i][f]=t.value;
@@ -4638,6 +4770,10 @@ var DL = (function(){
     body.addEventListener("input",onEdit); body.addEventListener("change",onEdit);
     body.addEventListener("click",function(e){ var b=e.target.closest&&e.target.closest("[data-act]"); if(!b) return; var a=b.getAttribute("data-act"), i=+b.getAttribute("data-i");
       if(a==="savej"){ if(window.cjSaveOnly) window.cjSaveOnly(); return; }
+      if(a==="stadd"||a==="stdel"||a==="stup"||a==="stdn"||a==="strst"){ var key=b.getAttribute("data-s");
+        if(a==="strst"){ delete CJ.st[key]; }
+        else { var arr=cjStEnsure(key); if(a==="stadd"){ var e0=arr.length&&arr[arr.length-1].k==="end"?arr.length-1:arr.length; arr.splice(e0,0,stMk("say","")); } else if(a==="stdel"){ arr.splice(i,1); } else if(a==="stup"&&i>0){ var tmp=arr[i-1]; arr[i-1]=arr[i]; arr[i]=tmp; } else if(a==="stdn"&&i<arr.length-1){ var tmp2=arr[i+1]; arr[i+1]=arr[i]; arr[i]=tmp2; } }
+        cjSave(); cjRender(); return; }
       if(a==="addc") CJ.c.push({w:"",a:"",by:""}); else if(a==="delc") CJ.c.splice(i,1); else if(a==="addx") CJ.x.push({t:"need",x:""}); else if(a==="delx") CJ.x.splice(i,1); else return;
       cjSave(); cjRender(); });
   })();
@@ -4653,7 +4789,7 @@ var DL = (function(){
   };
   (function(){ var r=$("systemsBlock"); if(!r) return; r.addEventListener("input",function(e){ var t=e.target; if(!t.classList||!t.classList.contains("sys-alias")) return; var n=t.getAttribute("data-alias"); if(t.value.trim()) CJ.a[n]=t.value; else delete CJ.a[n]; cjSave(); window.cjFillI(); if(window.cjSync) window.cjSync(); refresh(); }); })();
   window.cjRerender = function(){ var b=$("cjBody"); if(!b || b.contains(document.activeElement)) return; cjSigV=""; cjRender(); };
-  window.cjSync = function(){ try{ var sig=cjFlows().map(function(f){ return f.key+":"+f.label; }).join("|")+"|"+(humanOn()?1:0)+"|"+cjSystems().map(function(x){return x+"="+cjAlias(x)}).join(","); if(sig!==cjSigV){ cjSigV=sig; if(!document.activeElement || !$("cjBody").contains(document.activeElement)) cjRender(); } }catch(e){} };
+  window.cjSync = function(){ try{ var sig=cjFlows().map(function(f){ return f.key+":"+f.label; }).join("|")+"|"+(humanOn()?1:0)+"|"+(function(){var c=cjCtx();return [c.kb,c.wa,c.hoWa,c.hoSys].join(",")})()+"|"+cjSystems().map(function(x){return x+"="+cjAlias(x)}).join(","); if(sig!==cjSigV){ cjSigV=sig; if(!document.activeElement || !$("cjBody").contains(document.activeElement)) cjRender(); } }catch(e){} };
   function cjUnd(){ var U=CJ.u||{}, r={}; function ln(v){ return String(v||"").split(/\n+/).map(function(x){ return x.replace(/^[\s\u2022\-\*]+/,"").trim(); }).filter(Boolean); }
     if((U.told||"").trim()) r.told=U.told.trim(); if((U.setup||"").trim()) r.setup=U.setup.trim(); var a=ln(U.inn), b=ln(U.later); if(a.length) r.inn=a; if(b.length) r.later=b; return Object.keys(r).length ? r : null; }
   function cjOut(){
@@ -4662,7 +4798,8 @@ var DL = (function(){
     var ex={conn:[],test:[],need:[]}; CJ.x.forEach(function(x){ var t=(x.x||"").trim(); if(t && ex[x.t]) ex[x.t].push(t); });
     var al={}; Object.keys(CJ.a).forEach(function(g){ var v=(CJ.a[g]||"").trim(); if(v) al[g]=v; }); try{ model().eps.forEach(function(ep){ var d=SYS_DISP[ep.key]; var v=(CJ.a[ep.name]||"").trim(); if(d && v && !al[d]) al[d]=v; }); }catch(e){}
     var hs=""; try{ var m=model(); if(m.hOn && (m.hWhere==="external"||m.hWhere==="both")) hs=humanExtName(); }catch(e){}
-    return { concerns:CJ.c.filter(function(c){ return (c.w||"").trim(); }).map(function(c){ return { w:c.w.trim(), a:(c.a||"").trim(), by:c.by||"" }; }), scen:scen, path:CJ.p.slice(), after:CJ.q.slice(), extras:ex, alias:al, humanSys:hs, und:cjUnd() };
+    var stp={}; cjFlowsX().forEach(function(fx){ var S=cjStepsOf(fx.key).map(function(s){ return { k:s.k, s:s.s||"", en:(s.en||"").trim(), ar:(s.ar||"").trim() }; }); if(S.length) stp[fx.key]=S; });
+    return { steps:stp, concerns:CJ.c.filter(function(c){ return (c.w||"").trim(); }).map(function(c){ return { w:c.w.trim(), a:(c.a||"").trim(), by:c.by||"" }; }), scen:scen, path:CJ.p.slice(), after:CJ.q.slice(), extras:ex, alias:al, humanSys:hs, und:cjUnd() };
   }
 
   /* ---------- data for the customer page (no prices, no margins, no private notes) ---------- */
