@@ -653,7 +653,7 @@ function fillT(t,ar){
 
 /* ═════ per-flow call steps (v5): the call plays exactly the list set in the calculator ═════ */
 function STP(f){var J=PT_J();var a=J&&J.steps&&f&&J.steps[f.key];return (a&&a.length)?a:null}
-function canon2(n){var N=sysNodes(),d=sysDisp(n);for(var i=0;i<N.length;i++)if(sysDisp(N[i])===d)return N[i];return n}
+function canon2(n){var N=sysNodes(),d=sysDisp(n).toLowerCase();for(var i=0;i<N.length;i++)if(sysDisp(N[i]).toLowerCase()===d)return N[i];return n}
 function allStepSys(){var J=PT_J(),o=[];if(!J||!J.steps)return o;Object.keys(J.steps).forEach(function(k){(J.steps[k]||[]).forEach(function(s){if(s.s&&o.indexOf(s.s)<0)o.push(s.s)})});return o}
 function stTxt(s,ar){return ar?(s.ar||T_(s.en||"")):(s.en||"")}
 var STK={cu:["Customer speaks","المتصل يتحدث"],ask:["AI asks the customer","الوكيل يسأل المتصل"],say:["AI speaks","الوكيل يتحدث"],read:["Reads only. Changes nothing","قراءة فقط، دون أي تعديل"],write:["Writes the result","يسجل النتيجة"],wa:["Sends a message","يرسل رسالة"],how:["Hands over on WhatsApp","تحويل عبر واتساب"],hov:["Hands over by phone","تحويل عبر الهاتف"],end:["Call ends","انتهاء المكالمة"]};
@@ -737,8 +737,8 @@ var ACT={"Booking system":["Reads free appointment slots","Writes the booking"],
 function disp(s){return (D.native||[]).indexOf(s)>-1?"SOE "+s:s}
 function WA(){return !!(D.whatsapp||D.hoWa)}
 function hoName(){var J=PT_J();return D.human?((J&&J.humanSys)||"Your phone system"):""}
-function isHo(x){var h=hoName();return !!((h&&sysDisp(x)===sysDisp(h))||(D.hoWa&&x==="WhatsApp"))}
-function sysNodes(){var n=D.systems.slice();if(D.kb)n.push("Knowledge base");if(D.whatsapp||D.hoWa)n.push("WhatsApp");var hn=hoName();if(hn)n.push(hn);allStepSys().forEach(function(x){n.push(x)});var s={};return n.filter(function(x){var d=sysDisp(x);if(s[d])return false;s[d]=1;return true})}
+function isHo(x){if(STP(st.flow))return false;var h=hoName();return !!((h&&sysDisp(x).toLowerCase()===sysDisp(h).toLowerCase())||(D.hoWa&&x==="WhatsApp"))}
+function sysNodes(){var n=D.systems.slice();if(D.kb)n.push("Knowledge base");if(D.whatsapp||D.hoWa)n.push("WhatsApp");var hn=hoName();if(hn)n.push(hn);allStepSys().forEach(function(x){n.push(x)});var s={};return n.filter(function(x){var d=sysDisp(x).toLowerCase();if(s[d])return false;s[d]=1;return true})}
 function usesOf(f){var S0=STP(f);if(S0){var u0={};S0.forEach(function(s){if(s.s)u0[canon2(s.s)]=1});return u0}var u={};scriptFor(f).forEach(function(s){if(s[3])u[s[3]]=1});if(f.sys)u[canon(f.sys)]=1;var sc1=scenOn(f);if(WA()&&((["book","resched","remind","payremind"].indexOf(f.id)>-1)||(sc1&&scenWa(f,sc1))))u["WhatsApp"]=1;return u}
 function maMk(t,x){var A_=AR.ar;
  var L=wrapTxt(AR.ar?T_(t):t,A_?22:26),s='';
