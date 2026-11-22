@@ -1108,53 +1108,7 @@ body.locked{overflow:hidden}
   <a href="#" data-jump="dl_panel" style="padding:6px 10px;border-radius:8px;color:#fff;background:#1B5E20;text-decoration:none">Deal workspace</a>
 </div>
 <style>#jumpNav a:hover{background:#E8F3E6!important;color:#0D3B13!important}@media(max-width:1500px){#jumpNav{display:none}}</style>
-<script>/* PROTOTYPE v5: mock deals, local only */
-(function(){
- var KEY="aicc_deals_v2",VER="v5a";
- function L(n,v,note){return {n:n,v:v,note:note||""}}
- function S(n,v){return {s:1,n:n,v:v}}
- var lf=[S("A. One-time charges, payable upfront",3800),
-  L("Grandstream device",2300,"2 devices × 1,150 SAR"),L("Dashboard customisation",1500,"Up to 7 custom charts, one-time"),L("Implementation & setup",0,"Waived by SOE"),
-  S("B. Monthly charges, billed in advance",10197),
-  L("Voice AI — Business package",6900,"3,000 AI minutes included"),L("4 extensions",480,"4 × 120 per extension per month"),L("Mobile service",250,"Per deployment, charged once"),
-  L("Dashboard — 3 users",450,"3 users × 150 per user per month"),L("WhatsApp — Growth tier",1200,"2,000 messages included"),L("2 concurrent calls",600,"2 × 300 per month"),
-  L("3 endpoint connections",750,"3 × 250 per month"),L("Knowledge base",300,""),L("CRM — Growth plan",400,"5 users × 80 per user per month"),
-  {n:"Commitment discount, 10% (12 months)",note:"",v:-1133},
-  S("C. Usage charges, billed on actual usage",2010),
-  L("Additional usage minutes",360,"300 min × 1.20 SAR per minute"),L("Outbound calls",1250,"500 calls a month × 2.50 SAR per call. Sentiment analysis is included. Carrier charges not included."),L("Inbound sentiment analysis",400,"Optional add-on, AI-handled calls only. 400 calls a month × 1.00 SAR per call")];
- var kr=[S("A. One-time charges, payable upfront",3500),
-  L("Implementation & setup",3500,"Per deployment, charged once"),
-  S("B. Monthly charges, billed in advance",4978),
-  L("Voice AI — Starter package",2400,"1,000 AI minutes included"),L("2 extensions",240,"2 × 120 per extension per month"),L("Dashboard — 2 users",300,"2 users × 150 per user per month"),
-  L("WhatsApp — Starter tier",900,"1,000 messages included"),L("2 concurrent calls",600,"2 × 300 per month"),L("2 endpoint connections",500,"2 × 250 per month"),L("Knowledge base",300,""),
-  {n:"Commitment discount, 5% (6 months)",note:"",v:-262},
-  S("C. Usage charges, billed on actual usage",0)];
- var an=lf.map(function(r){return r}); 
- function deal(id,client,slug,dd,stage,sentDate,term,lines,pkg,extra){
-  var one=lines.filter(function(r){return r.s})[0].v,rec=lines.filter(function(r){return r.s})[1].v,usg=lines.filter(function(r){return r.s})[2].v;
-  var sd={0:dd,1:dd,2:dd,3:dd,4:dd,5:sentDate};if(stage>=6)sd[6]=extra.cdate;
-  var o={source:"outbound",leadId:"",client:client,industry:"gym",industryLabel:"Fitness and wellness",lead:"hp",dealDate:dd,schemaRev:3,stage:stage,side:"",
-   partner:{status:"validated",round:1,sentAt:dd,valid:dd,prop:null,props:[]},stageDates:sd,link:{state:"active",days:20,sharedAt:Date.now(),expiresAt:Date.now()+9e8},slug:slug,
-   version:1,sentVersion:1,quoteStatus:"sent",quote:{rev:10,onePrice:one,recPrice:rec,usagePrice:usg,xRate:155,term:term,yearTotal:one+(rec+usg)*term,pkg:pkg,flows:3,vatOn:true,qlines:lines},
-   stateJson:"{}",cust:"{}",logo:"",notes:"",leadAtMs:0,cms:Date.now(),contact:"",lastSeenMs:0,won:{type:"",start:"",ref:""},
-   cc:{name:extra.cc,title:"",mobile:"+966 55 000 0000"},ms:Date.now()+(extra.o||0),
-   _vers:[{n:1,date:dd,rec:rec,one:one,why:"First draft",sent:true,sentDate:sentDate,vd:30,ref:extra.ref,stateJson:"{}"}]};
-  if(extra.contract)o.contract=extra.contract;return o;
- }
- var all={};
- all.mock_life=deal("mock_life","Lifetime Fitness","lifetime-fitness-x7","2026-10-29",5,"2026-11-04",12,lf,"Business",{ref:"SOE-AICC-LIFE-261029-V1",cc:"Faisal Al-Harbi",o:3});
- all.mock_karam=deal("mock_karam","Karam Al-Nakhil","karam-alnakhil-k4","2026-11-05",5,"2026-11-11",6,kr,"Starter",{ref:"SOE-AICC-KARA-261105-V1",cc:"Karam Al-Nakhil",o:2});
- all.mock_noor=deal("mock_noor","Al Noor Dental Group","al-noor-dental-n2","2026-10-20",6,"2026-10-27",12,lf.map(function(r){return r}),"Business",{ref:"SOE-AICC-ALNO-261020-V1",cc:"Dr. Huda Al-Qahtani",cdate:"2026-11-09",o:1,
-  contract:{term:12,disc:10,agdate:"2026-10-27",cust:{en:"Al Noor Dental Group",ar:"مجموعة النور لطب الأسنان",cr:"1010456789",vat:"300123456700003",addr:"King Fahd Road, Riyadh",signerEn:"Dr. Huda Al-Qahtani, Chief Executive",signerAr:"د. هدى القحطاني، الرئيس التنفيذي"},log:[{n:1,date:"2026-11-09",ref:"SOE-AICC-ALNO-261020-V1",term:12,disc:10,total:150284}]}});
- function put(force){try{
-  var cur={};try{cur=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){cur={}}
-  var has=Object.keys(cur).length>0;
-  if(force||(!has&&localStorage.getItem("aicc_v5_seed")!==VER)){Object.keys(all).forEach(function(k){cur[k]=all[k]});localStorage.setItem(KEY,JSON.stringify(cur));localStorage.setItem("aicc_v5_seed",VER)}
- }catch(e){}}
- put(false);
- window.PX_RESET_MOCK=function(){put(true);location.reload()};
-})();
-</script>
+
 <script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("[data-jump]");if(!a)return;e.preventDefault();var k=a.getAttribute("data-jump"),t=k==="top"?null:(k==="demo"?document.getElementById("btnCustView").closest("div[style*=max-width]"):document.getElementById(k));if(k==="cjd"&&t)t.open=true;if(!t)window.scrollTo({top:0,behavior:"smooth"});else t.scrollIntoView({behavior:"smooth",block:"start"})});</script>
 <div style="max-width:1260px;margin:0 auto;padding:0 20px 14px">
   <details id="cjd" style="background:#fff;border:1px solid #C2CFBC;border-radius:8px">
@@ -4418,7 +4372,7 @@ var DL = (function(){
   try{
     if(window.firebase && FIREBASE_CONFIG.apiKey.indexOf("PASTE")!==0 && FIREBASE_CONFIG.projectId.indexOf("PASTE")!==0){
       firebase.initializeApp(FIREBASE_CONFIG);
-      db = null; auth = null; live = false; /* PROTOTYPE v5: local only */
+      db = firebase.firestore(); auth = firebase.auth(); live = true;
     }
   }catch(e){ console.warn("Firebase start failed", e); live = false; }
 
@@ -7431,8 +7385,6 @@ async function load(){
  for(var s in S)setv(q('#cjBody input[data-k="s"][data-s="in_0"][data-f="'+s+'"]'),S[s]);
  await wait(200);var AK={"Karam Al-Nakhil": "كرم النخيل", "Karam Al-Nakhil is an online dates store based in Madinah selling through Salla.": "كرم النخيل متجر إلكتروني للتمور في المدينة المنورة يبيع عبر منصة سلة.", "customers": "العملاء", "customer": "العميل", "Support Team (via WhatsApp)": "فريق الدعم (عبر واتساب)", "dates order": "طلب التمور", "online store": "متجر إلكتروني", "Salla store & Preboot WhatsApp": "متجر سلة وواتساب Preboot", "Answer product questions & send store link": "الإجابة عن أسئلة المنتجات وإرسال رابط المتجر", "Check Salla order status & send tracking link": "التحقق من حالة طلب سلة وإرسال رابط التتبع", "Log complaint/return & request photos on WhatsApp": "تسجيل الشكوى أو الإرجاع وطلب الصور عبر واتساب", "You receive 30 to 50 calls a day on your 920008341 line, but your 3-person team works on WhatsApp and does not take live calls, leaving callers without 24/7 voice support or an easy way to share complaint photos by phone.": "تستقبلون من 30 إلى 50 مكالمة يوميا على خطكم 920008341، لكن فريقكم المكون من 3 أشخاص يعمل عبر واتساب ولا يستقبل المكالمات المباشرة، فيبقى المتصلون بلا دعم صوتي على مدار الساعة وبلا وسيلة سهلة لإرسال صور الشكاوى عبر الهاتف.", "An online store on Salla, an STC 920008341 hotline, and an existing WhatsApp assistant on Preboot managed by 3 staff members.": "متجر إلكتروني على سلة، وخط STC 920008341، ومساعد واتساب قائم على Preboot يديره 3 موظفين.", "To be agreed upon later": "يتم الاتفاق عليه لاحقا", "24/7 Arabic inbound voice agent on 920008341": "وكيل صوتي عربي للمكالمات الواردة على 920008341 على مدار الساعة", "Order status and tracking link lookups from Salla": "الاستعلام عن حالة الطلب ورابط التتبع من سلة", "Complaint and return intake with automatic WhatsApp photo request": "استقبال الشكاوى والإرجاع مع طلب الصور تلقائيا عبر واتساب", "Seamless call summary hand-off to your 3 staff members via Preboot WhatsApp": "تسليم ملخص المكالمة بسلاسة إلى موظفيكم الثلاثة عبر واتساب Preboot", "Dedicated wholesale and bulk lead number routing": "توجيه مخصص لرقم الجملة والطلبات الكبيرة", "You receive 30 to 50 calls a day on 920008341, but your 3-person team works on WhatsApp and does not take live calls.": "تستقبلون من 30 إلى 50 مكالمة يوميا على 920008341، لكن فريقكم المكون من 3 أشخاص يعمل عبر واتساب ولا يستقبل المكالمات المباشرة.", "A 24/7 Arabic voice agent answers every call on 920008341 and passes each case to your team on WhatsApp.": "يرد وكيل صوتي عربي على كل مكالمة على 920008341 على مدار الساعة، ويحيل كل حالة إلى فريقكم عبر واتساب.", "We already have a WhatsApp assistant on Preboot that handles our chats well, and our 3 staff members follow up from there.": "لدينا مساعد واتساب على Preboot يتعامل جيدا مع محادثاتنا، ويتابع موظفونا الثلاثة من هناك.", "We will deploy a 24/7 Arabic AI voice agent on your STC 920008341 line that mirrors your WhatsApp assistant's logic.": "سننشر وكيلا صوتيا عربيا بالذكاء الاصطناعي على خط STC 920008341 يعمل على مدار الساعة ويتبع منطق مساعد واتساب لديكم.", "Callers cannot easily send complaint photos by phone.": "لا يستطيع المتصلون إرسال صور الشكاوى بسهولة عبر الهاتف.", "The AI sends a WhatsApp message that asks for the photos in the same chat your team uses.": "يرسل الذكاء الاصطناعي رسالة واتساب تطلب الصور في المحادثة نفسها التي يستخدمها فريقكم.", "The WhatsApp message is sent from the same number as your Preboot assistant.": "تُرسل رسالة واتساب من الرقم نفسه الذي يستخدمه مساعد Preboot.", "We need your confirmation before we build the hand-off.": "نحتاج إلى تأكيدكم قبل أن نبني آلية التسليم.", "What varieties of Ajwa dates do you have and how can I order?": "ما أنواع تمر العجوة لديكم وكيف أطلب؟", "Answers from the knowledge base and asks if the caller wants the online store link sent to their mobile.": "يجيب من قاعدة المعرفة ويسأل المتصل إن كان يريد إرسال رابط المتجر الإلكتروني إلى جواله.", "Caller mobile number, store link template (via Preboot API)": "رقم جوال المتصل، قالب رابط المتجر (عبر واجهة Preboot البرمجية)", "Caller mobile number": "رقم جوال المتصل", "store link template (via Preboot API)": "قالب رابط المتجر (عبر واجهة Preboot البرمجية)", "Handled automatically by AI (self-service)": "يعالجها الذكاء الاصطناعي تلقائيا (خدمة ذاتية)"};var ad=$('arData');if(ad){ad.value=JSON.stringify(AK);var ao=$('arOn');if(ao&&!ao.checked){ao.checked=true;fire(ao,'change')}await wait(300)}
  A();$('cjd').scrollIntoView();}
-var tb=document.createElement('div');tb.id='pxtool';tb.innerHTML='PROTOTYPE v28 &middot; built 19 Nov 2026 22:02 &middot; local only &nbsp;<button class="m on" data-m="1">Proposed form</button><button class="m" data-m="0">Today\'s form</button><button id="pxload">Karam example</button><button onclick="PX_RESET_MOCK()">Add mock deals</button>';document.body.appendChild(tb);
-tb.querySelectorAll('.m').forEach(function(b){b.onclick=function(){mode(b.dataset.m==='1')}});$('pxload').onclick=load;
 window.PX={load:load,mode:mode,state:px};
 setTimeout(A,800);
 })();
